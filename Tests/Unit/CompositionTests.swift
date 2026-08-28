@@ -16,6 +16,14 @@ final class CompositionTests: XCTestCase {
         XCTAssertTrue(environment.updater === updater)
     }
 
+    func testFooterLayoutLeavesNilPanelWidthUnconstrainedForViewThatFits() {
+        XCTAssertEqual(FooterLayoutMetrics.panelMaximumWidth(panelWidth: nil), 420)
+        XCTAssertEqual(FooterLayoutMetrics.panelMaximumWidth(panelWidth: 280), 280)
+        XCTAssertNil(FooterLayoutMetrics.footerMaximumWidth(panelWidth: nil))
+        XCTAssertEqual(FooterLayoutMetrics.footerMaximumWidth(panelWidth: 280), 280)
+        XCTAssertEqual(FooterLayoutMetrics.gridMinimumWidth, 388)
+    }
+
     private func makeEnvironment(updater: UpdaterProviding?) -> AppEnvironment {
         AppEnvironment(
             powerAssertions: FakePowerAssertionManager(),

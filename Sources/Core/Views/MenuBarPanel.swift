@@ -86,7 +86,7 @@ public struct MenuBarPanel: View {
         .frame(
             minWidth: panelWidth ?? 0,
             idealWidth: panelWidth ?? 420,
-            maxWidth: panelWidth ?? 420
+            maxWidth: FooterLayoutMetrics.panelMaximumWidth(panelWidth: panelWidth)
         )
     }
 
@@ -135,17 +135,16 @@ public struct MenuBarPanel: View {
     private var footer: some View {
         ViewThatFits(in: .horizontal) {
             actionGrid
-                .frame(width: 388)
+                .frame(minWidth: FooterLayoutMetrics.gridMinimumWidth)
             actionList
         }
-        .frame(width: footerWidth, alignment: .leading)
+        .frame(
+            maxWidth: FooterLayoutMetrics.footerMaximumWidth(panelWidth: panelWidth),
+            alignment: .leading
+        )
         .font(.caption)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("maccoffee.footer")
-    }
-
-    private var footerWidth: CGFloat {
-        max((panelWidth ?? 420) - 32, 0)
     }
 
     private var actionGrid: some View {
@@ -183,6 +182,7 @@ public struct MenuBarPanel: View {
             }
             quitAction
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("maccoffee.footer.list")
         .background(footerLayoutMarker("maccoffee.footer.list.marker"))
@@ -294,6 +294,20 @@ public struct MenuBarPanel: View {
     private func openLegacySettings() {
         NSApplication.shared.activate(ignoringOtherApps: true)
         NSApplication.shared.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+    }
+}
+
+enum FooterLayoutMetrics {
+    static let gridMinimumWidth: CGFloat = 388
+
+    static func panelMaximumWidth(panelWidth: CGFloat?) -> CGFloat {
+        panelWidth ?? 420
+    }
+
+    /// `nil` preserves the parent proposal so ViewThatFits can select the list
+    /// candidate when a production menu-bar panel is constrained by the screen.
+    static func footerMaximumWidth(panelWidth: CGFloat?) -> CGFloat? {
+        panelWidth
     }
 }
 

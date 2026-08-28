@@ -1,4 +1,4 @@
-name: Release
+name: Verified Direct Release
 
 on:
   push:
@@ -6,23 +6,48 @@ on:
       - "v*"
 
 jobs:
-  build-release:
-    name: Build DMG
-    runs-on: macos-14
+  release:
+    name: Sign, notarize, and publish DMG
+    runs-on: macos-15
     permissions:
       contents: write
+    env:
+      DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+      MACCOFFEE_DEVELOPER_ID: ${{ secrets.MACCOFFEE_DEVELOPER_ID }}
+      MACCOFFEE_NOTARY_PROFILE: ${{ secrets.MACCOFFEE_NOTARY_PROFILE }}
+      MACCOFFEE_APPCAST_URL: ${{ secrets.MACCOFFEE_APPCAST_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build app
-        run: zsh ./build.sh
+      - name: Require release credentials
+        env:
+          SPARKLE_KEY: ${{ secrets.MACCOFFEE_SPARKLE_PRIVATE_KEY }}
+        run: |
+          test -n "$MACCOFFEE_DEVELOPER_ID"
+          test -n "$MACCOFFEE_NOTARY_PROFILE"
+          test -n "$MACCOFFEE_APPCAST_URL"
+          test -n "$SPARKLE_KEY"
 
-      - name: Package DMG
-        run: zsh ./package_dmg.sh
+      - name: Install pinned tools
+        run: brew bundle
+
+      - name: Materialize Sparkle key
+        env:
+          SPARKLE_KEY: ${{ secrets.MACCOFFEE_SPARKLE_PRIVATE_KEY }}
+        run: |
+          umask 077
+          printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/maccoffee-sparkle-key"
+
+      - name: Build verified release
+        env:
+          MACCOFFEE_SPARKLE_PRIVATE_KEY_FILE: ${{ runner.temp }}/maccoffee-sparkle-key
+        run: ./scripts/release-direct.sh
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/MacCoffee.dmg
+          files: |
+            dist/release/MacCoffee-2.0.0.dmg
+            dist/release/MacCoffee-2.0.0.sparkle-signature.txt
           generate_release_notes: true

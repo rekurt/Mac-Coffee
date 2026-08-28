@@ -1,125 +1,57 @@
-<h1 align="center">
-  <a href="https://github.com/Elliotwu-7/Mac-Coffee">
-    <img src="docs/images/logo.png" alt="Mac Coffee 图标" width="100" height="100">
-  </a>
-</h1>
+# Mac Coffee 2.0
 
-<div align="center">
-  Mac Coffee
-  <br />
-  一个原生 macOS 菜单栏工具，用来保持 Mac 唤醒、按计划恢复正常休眠，并在切到电池供电时自动安全回退。
-  <br />
-  <br />
-  <div align="center">
-<p align="center">
-  <a href="https://linux.do" alt="LINUX DO">
-    <img src="https://shorturl.at/ggSqS" alt="LINUX DO">
-  </a>
-</p>
-    
-  <a href="README.md">English</a>
-  ·
-  <a href="https://github.com/Elliotwu-7/Mac-Coffee/releases">下载 DMG</a>
-  ·
-  <a href="https://github.com/Elliotwu-7/Mac-Coffee/issues/new?assignees=&labels=bug&template=01_BUG_REPORT.md&title=bug%3A+">报告问题</a>
-  ·
-  <a href="https://github.com/Elliotwu-7/Mac-Coffee/issues/new?assignees=&labels=enhancement&template=02_FEATURE_REQUEST.md&title=feat%3A+">功能建议</a>
-</div>
+[English](README.md)
 
-<div align="center">
-<br />
+Mac Coffee 是一款轻量级原生 macOS 菜单栏应用，可在你需要时阻止空闲休眠。2.0 版移除了旧版的特权 helper 和持久化 `pmset` 修改，改用由应用进程持有的公开 IOKit 电源断言。
 
-[![项目许可证](https://img.shields.io/github/license/Elliotwu-7/Mac-Coffee.svg?style=flat-square)](LICENSE)
-[![版本](https://img.shields.io/github/v/release/Elliotwu-7/Mac-Coffee?style=flat-square)](https://github.com/Elliotwu-7/Mac-Coffee/releases)
-[![欢迎 PR](https://img.shields.io/badge/PRs-welcome-ff69b4.svg?style=flat-square)](https://github.com/Elliotwu-7/Mac-Coffee/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+## 功能
 
-</div>
+- 关闭、保持 Mac 唤醒、保持屏幕唤醒三种明确状态
+- 30 分钟、1/2/4/8 小时以及无限时长
+- 10%–30% 可调的低电量保护，默认 15%
+- 事件驱动的电池与系统生命周期监听，无空闲轮询
+- 使用 `SMAppService` 的登录启动
+- 英语和俄语本地化及 VoiceOver 标识
+- 无 root helper、守护进程、分析、账号或后台服务
+- Direct 与 Mac App Store 独立目标；Sparkle 仅存在于 Direct 版本
+- 通用 `arm64` + `x86_64` 构建
 
-## 项目简介
+Mac Coffee 只阻止因空闲导致的休眠，不会绕过手动休眠、合盖、温控保护、关机或其他 macOS 安全机制。
 
-Mac Coffee 是一个轻量的原生 macOS 菜单栏应用，让你不用打开终端，也能快速切换“保持唤醒”和“恢复正常休眠”。它面向日常使用场景：操作简单，同时保留定时恢复、电池供电自动恢复休眠、登录时启动等安全保护能力。
+## 从源码构建
 
-## 运行截图
-
-![Mac Coffee 截图](docs/images/screenshot.png)
-
-## 功能特性
-
-- 原生菜单栏体验，状态区更紧凑，右键菜单更清爽
-- 一键切换保持唤醒 / 恢复正常休眠
-- 支持预设时长后恢复休眠，也支持指定日期与时间恢复
-- 支持“切到电池供电后立即恢复休眠”
-- 支持登录时启动
-- helper 首次安装授权后，后续切换通常无需重复输入密码
-
-## 安装
-
-### 下载发行版
-
-1. 从最新的 [GitHub Release](https://github.com/Elliotwu-7/Mac-Coffee/releases) 下载 `MacCoffee.dmg`
-2. 打开 DMG
-3. 将 `Mac Coffee.app` 拖入 `Applications`
-4. 从 `Applications` 启动应用
-
-如果 macOS 提示“App 已损坏”或“无法打开”，通常是因为当前发行版还没有签名，被 Gatekeeper 拦截了。可以先移除隔离属性，再重新打开：
+需要 macOS 13+、完整 Xcode、Homebrew 和 XcodeGen 2.46.0。
 
 ```sh
-sudo xattr -rd com.apple.quarantine /Applications/"Mac Coffee.app"
+brew bundle
+./scripts/build-local.sh direct
+open "dist/local/Mac Coffee.app"
 ```
 
-也可以前往 `系统设置 > 隐私与安全性`，在底部允许这个被拦截的应用，然后再次启动。
-
-### 从源码构建
-
-环境要求：
-
-- macOS 13 或更高版本
-- Xcode Command Line Tools（`xcode-select --install`）
-- 首次切换时允许管理员授权安装 helper
+生成本地测试 DMG：
 
 ```sh
-cd /Users/elliotwu/MacCoffee
-chmod +x build.sh install.sh package_dmg.sh
-./build.sh
-./install.sh
+./scripts/package-dmg.sh
+open dist/local/MacCoffee-2.0.0.dmg
 ```
 
-如需本地生成 DMG：
+构建不含 Sparkle 的 App Store 版本并验证两个包：
 
 ```sh
-./package_dmg.sh
-open dist/MacCoffee.dmg
+./scripts/build-local.sh app-store
+./scripts/verify-bundles.sh
 ```
 
-## 使用说明
+本地构建使用 ad-hoc 签名，只用于本机测试，不应作为正式版本发布。正式 Direct 发布脚本在缺少 Developer ID、notarytool 配置、HTTPS appcast 或 Sparkle EdDSA 密钥时会立即停止。
 
-Mac Coffee 常驻菜单栏，尽量做到开箱即用：
+## 从 1.x 升级
 
-- 需要保持唤醒时，直接开启 keep-awake 模式
-- 可以选择一个倒计时，或指定某个日期与时间恢复正常休眠
-- 如果你希望拔掉电源后立刻恢复休眠，可以开启电池保护
-- 如果想每次开机都可用，可以打开登录时启动
+2.0 不会安装或调用旧版特权 helper。如果安装过 1.x，请阅读[旧版清理指南](docs/LEGACY_CLEANUP.md)。清理脚本独立运行、需要管理员明确授权，并且不会被应用自动执行。
 
-首次切换时，macOS 会请求管理员授权安装 helper。安装完成后，只要 helper 没被移除，后续切换通常不会再次弹出密码框。
+## 隐私
 
-## 自动发布
-
-仓库已经包含 GitHub Actions release workflow。以后只要推送类似 `v1.0.1` 的 tag，就会自动构建应用并上传 `MacCoffee.dmg` 到对应 Release。
-
-## 贡献
-
-欢迎提交 issue、想法和 pull request。如果你想一起完善它，可以先阅读 [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)。
-
-## 安全
-
-本项目按开源项目常规方式提供，不附带任何保证。如发现安全问题，请参考 [docs/SECURITY.md](docs/SECURITY.md) 中的方式联系。
+Mac Coffee 不收集数据、不跟踪用户。Direct 版本仅在用户主动检查签名更新时访问网络；App Store 版本不包含第三方更新器。
 
 ## 许可证
 
-本项目基于 [MIT License](LICENSE) 开源。
-
-## 致谢
-
-- [dec0dOS/amazing-github-template](https://github.com/dec0dOS/amazing-github-template)
-- Apple 的 macOS 开发工具与系统框架
-- 感谢 [Linux.do](https://linux.do/) 社区的讨论、反馈与早期支持
+[MIT](LICENSE)

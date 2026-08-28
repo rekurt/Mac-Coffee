@@ -40,9 +40,12 @@ targets:
     platform: macOS
     sources:
       - Sources/Direct
-    resources:
-      - Resources/Shared
-      - Resources/Direct
+      - path: Resources/Shared
+        buildPhase: resources
+      - path: Resources/Direct
+        excludes:
+          - Info.plist
+        buildPhase: resources
     dependencies:
       - target: MacCoffeeCore
       - package: Sparkle
@@ -55,9 +58,12 @@ targets:
     platform: macOS
     sources:
       - Sources/AppStore
-    resources:
-      - Resources/Shared
-      - Resources/AppStore
+      - path: Resources/Shared
+        buildPhase: resources
+      - path: Resources/AppStore
+        excludes:
+          - Info.plist
+        buildPhase: resources
     dependencies:
       - target: MacCoffeeCore
     configFiles:

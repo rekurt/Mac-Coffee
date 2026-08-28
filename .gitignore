@@ -1,6 +1,7 @@
 .DS_Store
 .diagnostics/
 .worktrees/
+build/
 Mac Coffee.app/
 dist/
 *.dmg

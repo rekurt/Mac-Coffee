@@ -3,32 +3,35 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleDevelopmentRegion</key>
-    <string>zh_CN</string>
+    <string>en</string>
     <key>CFBundleDisplayName</key>
     <string>Mac Coffee</string>
     <key>CFBundleExecutable</key>
-    <string>MacCoffee</string>
-    <key>CFBundleIconFile</key>
-    <string>AppIcon</string>
+    <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
-    <string>com.elliotwu.maccoffee</string>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>ru</string>
+    </array>
     <key>CFBundleName</key>
-    <string>Mac Coffee</string>
+    <string>$(PRODUCT_NAME)</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>$(MARKETING_VERSION)</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>$(CURRENT_PROJECT_VERSION)</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
     <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
+    <string>$(MACOSX_DEPLOYMENT_TARGET)</string>
     <key>LSUIElement</key>
     <true/>
-    <key>NSAppleEventsUsageDescription</key>
-    <string>Mac Coffee 需要管理员权限来修改系统休眠设置。</string>
-    <key>NSSupportsAutomaticTermination</key>
-    <false/>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2026 Mac Coffee contributors.</string>
 </dict>
 </plist>

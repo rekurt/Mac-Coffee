@@ -9,6 +9,7 @@ public struct AppEnvironment {
     public let launchAtLogin: LaunchAtLoginManaging
     public let notifications: NotificationSending
     public let lifecycle: LifecycleObserving
+    public let updater: UpdaterProviding?
     public let now: () -> Date
 
     public init(
@@ -19,6 +20,7 @@ public struct AppEnvironment {
         launchAtLogin: LaunchAtLoginManaging,
         notifications: NotificationSending,
         lifecycle: LifecycleObserving,
+        updater: UpdaterProviding? = nil,
         now: @escaping () -> Date = Date.init
     ) {
         self.powerAssertions = powerAssertions
@@ -28,10 +30,11 @@ public struct AppEnvironment {
         self.launchAtLogin = launchAtLogin
         self.notifications = notifications
         self.lifecycle = lifecycle
+        self.updater = updater
         self.now = now
     }
 
-    public static func live() -> AppEnvironment {
+    public static func live(updater: UpdaterProviding? = nil) -> AppEnvironment {
         let settings = UserDefaultsSettingsStore()
         return AppEnvironment(
             powerAssertions: IOKitPowerAssertionManager(),
@@ -40,7 +43,8 @@ public struct AppEnvironment {
             settings: settings,
             launchAtLogin: SMAppLaunchAtLoginManager(),
             notifications: UserNotificationSender(settings: settings),
-            lifecycle: AppLifecycleObserver()
+            lifecycle: AppLifecycleObserver(),
+            updater: updater
         )
     }
 }

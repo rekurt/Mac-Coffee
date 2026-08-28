@@ -1,0 +1,830 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		09D89609C61A47FAA59FAAE8 /* MacCoffeeCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; };
+		0EEAC0EC8C9761D380F06F56 /* MacCoffeeCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; };
+		118C3A16D9E34DB840EC9ADE /* MacCoffeeCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; };
+		1BBDD6627B7C6D150B90957E /* MacCoffeeCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4FC0D2C41E715F9A736AE459 /* BatteryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC3454B9CF649A4EAFBB52C /* BatteryState.swift */; };
+		602D7B519D635665C79129CD /* MacCoffeeCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		831AB034334ED0737CA6DD43 /* SessionDuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF11C2D6753C36C41368C85 /* SessionDuration.swift */; };
+		87260475D871741D6EBEBC1B /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 69FCA508D039BB8197E9CB0F /* Sparkle */; };
+		AF923D52E64190829CE51444 /* MacCoffeeCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82A246A0DCF736C0A7ACD7F /* MacCoffeeCore.swift */; };
+		C1C6567B68AB69BAC0E91776 /* MacCoffeeCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D359AC96C98CB5E7BAD57550 /* DomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7FC0CED383B614B3C223EF /* DomainTests.swift */; };
+		F63E89C795154771CDF0E7B4 /* WakeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE6386A3BEB15FE1E1F45F51 /* WakeSession.swift */; };
+		FC5369913EA7672DECBAE639 /* WakeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC288A6517BA4411F2353161 /* WakeMode.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		38E6800EBFFC50FEB981EAF2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A71D42048F48FBC2CEFB365C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8312A6E6223341D60ECBEC53;
+			remoteInfo = MacCoffeeDirect;
+		};
+		D17FC42AAA518E96A678BCDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A71D42048F48FBC2CEFB365C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 75BB45C9B49C9CEB8446A30B;
+			remoteInfo = MacCoffeeCore;
+		};
+		D84A030C9F14D0498E9057F4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A71D42048F48FBC2CEFB365C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 75BB45C9B49C9CEB8446A30B;
+			remoteInfo = MacCoffeeCore;
+		};
+		E2365A0544A2EFE77B8D4D0D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A71D42048F48FBC2CEFB365C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 75BB45C9B49C9CEB8446A30B;
+			remoteInfo = MacCoffeeCore;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5E444967A09B0C1DF2B5AF21 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C1C6567B68AB69BAC0E91776 /* MacCoffeeCore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AB9B4C4C714CCB6A29933CDC /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1BBDD6627B7C6D150B90957E /* MacCoffeeCore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F0A8F4306BBBB66D8C742E3C /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				602D7B519D635665C79129CD /* MacCoffeeCore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0FCF5616C19108989B4BF53F /* AppStore.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppStore.xcconfig; sourceTree = "<group>"; };
+		1473B9DE0FB8D0F8F3C52E77 /* MacCoffeeAppStore.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacCoffeeAppStore.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3E7FC0CED383B614B3C223EF /* DomainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainTests.swift; sourceTree = "<group>"; };
+		4634EF20BE0718DB6BA7B949 /* Direct.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Direct.xcconfig; sourceTree = "<group>"; };
+		470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MacCoffeeCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		87316A786DADC3D5F5D02BFE /* MacCoffeeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacCoffeeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AF11C2D6753C36C41368C85 /* SessionDuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDuration.swift; sourceTree = "<group>"; };
+		AC288A6517BA4411F2353161 /* WakeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeMode.swift; sourceTree = "<group>"; };
+		CE6386A3BEB15FE1E1F45F51 /* WakeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeSession.swift; sourceTree = "<group>"; };
+		DBC3454B9CF649A4EAFBB52C /* BatteryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryState.swift; sourceTree = "<group>"; };
+		F4CCE3B663849BE1E1F02E53 /* MacCoffeeDirect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacCoffeeDirect.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F82A246A0DCF736C0A7ACD7F /* MacCoffeeCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacCoffeeCore.swift; sourceTree = "<group>"; };
+		FB719DFEBF09A4B7A1C98EB7 /* MacCoffeeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacCoffeeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0D7141B0CFE141655CEA8FAA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0EEAC0EC8C9761D380F06F56 /* MacCoffeeCore.framework in Frameworks */,
+				87260475D871741D6EBEBC1B /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1BB8C0D5564685E66C26C95A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				118C3A16D9E34DB840EC9ADE /* MacCoffeeCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		397A754BA7579C6302471F6F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				09D89609C61A47FAA59FAAE8 /* MacCoffeeCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		01EB2F38D26D9A0E22D43CA9 /* Unit */ = {
+			isa = PBXGroup;
+			children = (
+				3E7FC0CED383B614B3C223EF /* DomainTests.swift */,
+			);
+			name = Unit;
+			path = Tests/Unit;
+			sourceTree = "<group>";
+		};
+		17795BA9B87BE2AB77D923F1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1473B9DE0FB8D0F8F3C52E77 /* MacCoffeeAppStore.app */,
+				470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */,
+				F4CCE3B663849BE1E1F02E53 /* MacCoffeeDirect.app */,
+				FB719DFEBF09A4B7A1C98EB7 /* MacCoffeeTests.xctest */,
+				87316A786DADC3D5F5D02BFE /* MacCoffeeUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4838CB8FD4BE1342E9AE7DD7 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				0FCF5616C19108989B4BF53F /* AppStore.xcconfig */,
+				4634EF20BE0718DB6BA7B949 /* Direct.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		6883A5D726CF4A9746B6A8F5 /* Direct */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Direct;
+			path = Sources/Direct;
+			sourceTree = "<group>";
+		};
+		9D33E1AB2D205B15026BBF8F /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				F82A246A0DCF736C0A7ACD7F /* MacCoffeeCore.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		C8D347C6EDEAE8F589718B5F /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				FCBDF3BF4A5AF2A42B9FC436 /* Domain */,
+				9D33E1AB2D205B15026BBF8F /* Support */,
+			);
+			name = Core;
+			path = Sources/Core;
+			sourceTree = "<group>";
+		};
+		EB89D770FC435C7D056C664E = {
+			isa = PBXGroup;
+			children = (
+				F016E20450408F5DC6959E7C /* AppStore */,
+				4838CB8FD4BE1342E9AE7DD7 /* Config */,
+				C8D347C6EDEAE8F589718B5F /* Core */,
+				6883A5D726CF4A9746B6A8F5 /* Direct */,
+				F9BC7E60DDAAA1F63587E78F /* Support */,
+				F5E3A29882CE73E374198714 /* UI */,
+				01EB2F38D26D9A0E22D43CA9 /* Unit */,
+				17795BA9B87BE2AB77D923F1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F016E20450408F5DC6959E7C /* AppStore */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = AppStore;
+			path = Sources/AppStore;
+			sourceTree = "<group>";
+		};
+		F5E3A29882CE73E374198714 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = UI;
+			path = Tests/UI;
+			sourceTree = "<group>";
+		};
+		F9BC7E60DDAAA1F63587E78F /* Support */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Support;
+			path = Tests/Support;
+			sourceTree = "<group>";
+		};
+		FCBDF3BF4A5AF2A42B9FC436 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				DBC3454B9CF649A4EAFBB52C /* BatteryState.swift */,
+				9AF11C2D6753C36C41368C85 /* SessionDuration.swift */,
+				AC288A6517BA4411F2353161 /* WakeMode.swift */,
+				CE6386A3BEB15FE1E1F45F51 /* WakeSession.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		56F6CDF1A96FF15BCAE62FF6 /* MacCoffeeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E912404F650EDCB2040F5CE7 /* Build configuration list for PBXNativeTarget "MacCoffeeTests" */;
+			buildPhases = (
+				2A71C25BC1E86C466F07F546 /* Sources */,
+				397A754BA7579C6302471F6F /* Frameworks */,
+				5E444967A09B0C1DF2B5AF21 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ED0DF280C718DE8C0BCABE73 /* PBXTargetDependency */,
+			);
+			name = MacCoffeeTests;
+			packageProductDependencies = (
+			);
+			productName = MacCoffeeTests;
+			productReference = FB719DFEBF09A4B7A1C98EB7 /* MacCoffeeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		75BB45C9B49C9CEB8446A30B /* MacCoffeeCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0A88EE3C6C92A2F5A99E060 /* Build configuration list for PBXNativeTarget "MacCoffeeCore" */;
+			buildPhases = (
+				838EB0C3D328FBD88BC441B1 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MacCoffeeCore;
+			packageProductDependencies = (
+			);
+			productName = MacCoffeeCore;
+			productReference = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		8312A6E6223341D60ECBEC53 /* MacCoffeeDirect */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 13FD4A5B1538D1745656E9A5 /* Build configuration list for PBXNativeTarget "MacCoffeeDirect" */;
+			buildPhases = (
+				FE979F9F05647D363E22C0D3 /* Sources */,
+				0D7141B0CFE141655CEA8FAA /* Frameworks */,
+				F0A8F4306BBBB66D8C742E3C /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0BE81CF4C0C3EF8B34AF8589 /* PBXTargetDependency */,
+			);
+			name = MacCoffeeDirect;
+			packageProductDependencies = (
+				69FCA508D039BB8197E9CB0F /* Sparkle */,
+			);
+			productName = MacCoffeeDirect;
+			productReference = F4CCE3B663849BE1E1F02E53 /* MacCoffeeDirect.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BB7970E7F588AB0EE0A7285E /* MacCoffeeUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 87D9446FD21759904D083CA3 /* Build configuration list for PBXNativeTarget "MacCoffeeUITests" */;
+			buildPhases = (
+				AD00AEF5E924E45C1DBBDCDC /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7E58156E2598FFF2C8BDD81D /* PBXTargetDependency */,
+			);
+			name = MacCoffeeUITests;
+			packageProductDependencies = (
+			);
+			productName = MacCoffeeUITests;
+			productReference = 87316A786DADC3D5F5D02BFE /* MacCoffeeUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		D2ADA9BDAE25C4AFF6405A80 /* MacCoffeeAppStore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B8908933A51A4D2D2604B8CE /* Build configuration list for PBXNativeTarget "MacCoffeeAppStore" */;
+			buildPhases = (
+				8B44FD8C37D0ED10BD369E18 /* Sources */,
+				1BB8C0D5564685E66C26C95A /* Frameworks */,
+				AB9B4C4C714CCB6A29933CDC /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				71BD11B33B24E8A0DA2B5170 /* PBXTargetDependency */,
+			);
+			name = MacCoffeeAppStore;
+			packageProductDependencies = (
+			);
+			productName = MacCoffeeAppStore;
+			productReference = 1473B9DE0FB8D0F8F3C52E77 /* MacCoffeeAppStore.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A71D42048F48FBC2CEFB365C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					56F6CDF1A96FF15BCAE62FF6 = {
+						ProvisioningStyle = Automatic;
+					};
+					75BB45C9B49C9CEB8446A30B = {
+						ProvisioningStyle = Automatic;
+					};
+					8312A6E6223341D60ECBEC53 = {
+						ProvisioningStyle = Automatic;
+					};
+					BB7970E7F588AB0EE0A7285E = {
+						ProvisioningStyle = Automatic;
+						TestTargetID = 8312A6E6223341D60ECBEC53;
+					};
+					D2ADA9BDAE25C4AFF6405A80 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = CF623E5B37A441BA666E33B6 /* Build configuration list for PBXProject "MacCoffee" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = EB89D770FC435C7D056C664E;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				32C0B466D6D7627C4F35904A /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 17795BA9B87BE2AB77D923F1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				75BB45C9B49C9CEB8446A30B /* MacCoffeeCore */,
+				8312A6E6223341D60ECBEC53 /* MacCoffeeDirect */,
+				D2ADA9BDAE25C4AFF6405A80 /* MacCoffeeAppStore */,
+				56F6CDF1A96FF15BCAE62FF6 /* MacCoffeeTests */,
+				BB7970E7F588AB0EE0A7285E /* MacCoffeeUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2A71C25BC1E86C466F07F546 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D359AC96C98CB5E7BAD57550 /* DomainTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		838EB0C3D328FBD88BC441B1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4FC0D2C41E715F9A736AE459 /* BatteryState.swift in Sources */,
+				AF923D52E64190829CE51444 /* MacCoffeeCore.swift in Sources */,
+				831AB034334ED0737CA6DD43 /* SessionDuration.swift in Sources */,
+				FC5369913EA7672DECBAE639 /* WakeMode.swift in Sources */,
+				F63E89C795154771CDF0E7B4 /* WakeSession.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8B44FD8C37D0ED10BD369E18 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD00AEF5E924E45C1DBBDCDC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FE979F9F05647D363E22C0D3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0BE81CF4C0C3EF8B34AF8589 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 75BB45C9B49C9CEB8446A30B /* MacCoffeeCore */;
+			targetProxy = E2365A0544A2EFE77B8D4D0D /* PBXContainerItemProxy */;
+		};
+		71BD11B33B24E8A0DA2B5170 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 75BB45C9B49C9CEB8446A30B /* MacCoffeeCore */;
+			targetProxy = D17FC42AAA518E96A678BCDD /* PBXContainerItemProxy */;
+		};
+		7E58156E2598FFF2C8BDD81D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8312A6E6223341D60ECBEC53 /* MacCoffeeDirect */;
+			targetProxy = 38E6800EBFFC50FEB981EAF2 /* PBXContainerItemProxy */;
+		};
+		ED0DF280C718DE8C0BCABE73 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 75BB45C9B49C9CEB8446A30B /* MacCoffeeCore */;
+			targetProxy = D84A030C9F14D0498E9057F4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		081B339A8103F96E6254249D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rekurt.maccoffee.core;
+				PRODUCT_NAME = MacCoffeeCore;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		0C26ED50258E4D112FD6A81A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		1E98E52DDCF8A88F8B5FF7A8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		2D8272FED3CCE30FC0734A67 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rekurt.maccoffee.uitests;
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = MacCoffeeDirect;
+			};
+			name = Debug;
+		};
+		71ACB831EDFAE276A79054DE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rekurt.maccoffee.tests;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		A7461093DE3C9BDB54494C85 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rekurt.maccoffee.core;
+				PRODUCT_NAME = MacCoffeeCore;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		B46B8DCCF58D7331E9BC62B2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rekurt.maccoffee.uitests;
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = MacCoffeeDirect;
+			};
+			name = Release;
+		};
+		B58E6452932E2AB622D73968 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4634EF20BE0718DB6BA7B949 /* Direct.xcconfig */;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		E9B4246F43391088E59A4777 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0FCF5616C19108989B4BF53F /* AppStore.xcconfig */;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		EA7645C3C7A43770BA618AEA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rekurt.maccoffee.tests;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		FCDD7E1775FCA909419237BC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4634EF20BE0718DB6BA7B949 /* Direct.xcconfig */;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		FEC2EF0462412C0FFB90AD6F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0FCF5616C19108989B4BF53F /* AppStore.xcconfig */;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		13FD4A5B1538D1745656E9A5 /* Build configuration list for PBXNativeTarget "MacCoffeeDirect" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCDD7E1775FCA909419237BC /* Debug */,
+				B58E6452932E2AB622D73968 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		87D9446FD21759904D083CA3 /* Build configuration list for PBXNativeTarget "MacCoffeeUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D8272FED3CCE30FC0734A67 /* Debug */,
+				B46B8DCCF58D7331E9BC62B2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B8908933A51A4D2D2604B8CE /* Build configuration list for PBXNativeTarget "MacCoffeeAppStore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FEC2EF0462412C0FFB90AD6F /* Debug */,
+				E9B4246F43391088E59A4777 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CF623E5B37A441BA666E33B6 /* Build configuration list for PBXProject "MacCoffee" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0C26ED50258E4D112FD6A81A /* Debug */,
+				1E98E52DDCF8A88F8B5FF7A8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D0A88EE3C6C92A2F5A99E060 /* Build configuration list for PBXNativeTarget "MacCoffeeCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A7461093DE3C9BDB54494C85 /* Debug */,
+				081B339A8103F96E6254249D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E912404F650EDCB2040F5CE7 /* Build configuration list for PBXNativeTarget "MacCoffeeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA7645C3C7A43770BA618AEA /* Debug */,
+				71ACB831EDFAE276A79054DE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		32C0B466D6D7627C4F35904A /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.9.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		69FCA508D039BB8197E9CB0F /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 32C0B466D6D7627C4F35904A /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A71D42048F48FBC2CEFB365C /* Project object */;
+}

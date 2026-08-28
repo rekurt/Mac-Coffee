@@ -1,0 +1,131 @@
+name: MacCoffee
+
+options:
+  minimumXcodeGenVersion: 2.46.0
+  deploymentTarget:
+    macOS: "13.0"
+  groupSortPosition: top
+
+configs:
+  Debug: debug
+  Release: release
+
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.9.4
+
+settings:
+  base:
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+    SWIFT_VERSION: "6.0"
+    ARCHS: "$(ARCHS_STANDARD)"
+    CLANG_ENABLE_MODULES: YES
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  MacCoffeeCore:
+    type: framework
+    platform: macOS
+    sources:
+      - Sources/Core
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.core
+        PRODUCT_NAME: MacCoffeeCore
+        GENERATE_INFOPLIST_FILE: YES
+
+  MacCoffeeDirect:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/Direct
+    resources:
+      - Resources/Shared
+      - Resources/Direct
+    dependencies:
+      - target: MacCoffeeCore
+      - package: Sparkle
+    configFiles:
+      Debug: Config/Direct.xcconfig
+      Release: Config/Direct.xcconfig
+
+  MacCoffeeAppStore:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/AppStore
+    resources:
+      - Resources/Shared
+      - Resources/AppStore
+    dependencies:
+      - target: MacCoffeeCore
+    configFiles:
+      Debug: Config/AppStore.xcconfig
+      Release: Config/AppStore.xcconfig
+
+  MacCoffeeTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/Unit
+      - Tests/Support
+    dependencies:
+      - target: MacCoffeeCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+  MacCoffeeUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - Tests/UI
+    dependencies:
+      - target: MacCoffeeDirect
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: MacCoffeeDirect
+
+schemes:
+  MacCoffeeDirect:
+    build:
+      targets:
+        MacCoffeeDirect: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+
+  MacCoffeeAppStore:
+    build:
+      targets:
+        MacCoffeeAppStore: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+
+  MacCoffeeTests:
+    build:
+      targets:
+        MacCoffeeCore: all
+        MacCoffeeTests: [test]
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - MacCoffeeTests
+
+  MacCoffeeUITests:
+    build:
+      targets:
+        MacCoffeeDirect: all
+        MacCoffeeUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - MacCoffeeUITests

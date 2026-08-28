@@ -12,6 +12,29 @@ public enum AppModelError: LocalizedError {
     }
 }
 
+public enum AppStatusNotice: Equatable, Sendable {
+    case batteryBlocked
+    case timerCompleted
+    case powerAssertionFailed
+    case launchAtLoginFailed
+
+    @MainActor
+    func localized(using localization: LocalizationController) -> String {
+        let key: String
+        switch self {
+        case .batteryBlocked:
+            key = "battery.blocked"
+        case .timerCompleted:
+            key = "notification.timerCompleted"
+        case .powerAssertionFailed:
+            key = "error.powerAssertion"
+        case .launchAtLoginFailed:
+            key = "error.launchAtLogin"
+        }
+        return localization.localized(key)
+    }
+}
+
 @MainActor
 public final class AppModel: ObservableObject {
     @Published public private(set) var mode: WakeMode = .off
@@ -21,8 +44,12 @@ public final class AppModel: ObservableObject {
     @Published public private(set) var batteryThreshold: Int
     @Published public private(set) var isBatteryBlocked: Bool
     @Published public private(set) var launchAtLoginStatus: LaunchAtLoginStatus
-    @Published public private(set) var statusMessage: String?
+    @Published public private(set) var statusNotice: AppStatusNotice?
     @Published public private(set) var isBusy = false
+
+    public var statusMessage: String? {
+        statusNotice.map { $0.localized(using: environment.localization) }
+    }
 
     public let environment: AppEnvironment
 
@@ -51,7 +78,7 @@ public final class AppModel: ObservableObject {
         guard requestedMode != mode else { return }
         if requestedMode != .off, isBatteryBlocked {
             let error = AppModelError.batteryBlocked
-            statusMessage = error.localizedDescription
+            statusNotice = .batteryBlocked
             throw error
         }
 
@@ -68,7 +95,7 @@ public final class AppModel: ObservableObject {
                 previousMode: previousMode,
                 previousSession: previousSession
             )
-            statusMessage = error.localizedDescription
+            statusNotice = .powerAssertionFailed
             throw error
         }
 
@@ -77,7 +104,7 @@ public final class AppModel: ObservableObject {
             previousMode: previousMode,
             previousSession: previousSession
         )
-        statusMessage = nil
+        statusNotice = nil
         if previousMode == .off, requestedMode != .off {
             environment.notifications.requestAuthorizationIfNeeded()
         }
@@ -108,10 +135,10 @@ public final class AppModel: ObservableObject {
             try environment.launchAtLogin.setEnabled(enabled)
             environment.settings.launchAtLoginRequested = enabled
             launchAtLoginStatus = environment.launchAtLogin.status
-            statusMessage = nil
+            statusNotice = nil
         } catch {
             launchAtLoginStatus = environment.launchAtLogin.status
-            statusMessage = error.localizedDescription
+            statusNotice = .launchAtLoginFailed
             throw error
         }
     }
@@ -130,7 +157,7 @@ public final class AppModel: ObservableObject {
     }
 
     public func dismissStatus() {
-        statusMessage = nil
+        statusNotice = nil
     }
 
     public func prepareForTermination() {
@@ -225,13 +252,13 @@ public final class AppModel: ObservableObject {
             environment.scheduler.cancel()
             environment.notifications.send(reason)
             if reason == .lowBatteryStopped {
-                statusMessage = String(localized: "battery.blocked", bundle: .main)
+                statusNotice = .batteryBlocked
             } else if reason == .timerCompleted {
-                statusMessage = String(localized: "notification.timerCompleted", bundle: .main)
+                statusNotice = .timerCompleted
             }
         } catch {
             reconcileAfterFailedStop(previousSession: previousSession)
-            statusMessage = error.localizedDescription
+            statusNotice = .powerAssertionFailed
         }
     }
 

@@ -1,36 +1,45 @@
 import Foundation
 @preconcurrency import UserNotifications
 
+public struct LocalizedNotificationMessage: Equatable, Sendable {
+    public let title: String
+    public let body: String
+
+    public init(title: String, body: String) {
+        self.title = title
+        self.body = body
+    }
+}
+
 @MainActor
 public final class UserNotificationSender: NotificationSending {
-    private let center: UNUserNotificationCenter
+    private let center: UNUserNotificationCenter?
     private let settings: SettingsStoring
+    private let localization: LocalizationController
 
     public init(
-        center: UNUserNotificationCenter = .current(),
-        settings: SettingsStoring
+        center: UNUserNotificationCenter? = nil,
+        settings: SettingsStoring,
+        localization: LocalizationController
     ) {
         self.center = center
         self.settings = settings
+        self.localization = localization
     }
 
     public func requestAuthorizationIfNeeded() {
         guard !settings.notificationAuthorizationRequested else { return }
         settings.notificationAuthorizationRequested = true
-        center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        notificationCenter.requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
     public func send(_ event: AppNotificationEvent) {
         requestAuthorizationIfNeeded()
 
+        let message = localizedMessage(for: event)
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "notification.title", bundle: .main)
-        switch event {
-        case .timerCompleted:
-            content.body = String(localized: "notification.timerCompleted", bundle: .main)
-        case .lowBatteryStopped:
-            content.body = String(localized: "notification.lowBatteryStopped", bundle: .main)
-        }
+        content.title = message.title
+        content.body = message.body
         content.sound = .default
 
         let request = UNNotificationRequest(
@@ -38,6 +47,24 @@ public final class UserNotificationSender: NotificationSending {
             content: content,
             trigger: nil
         )
-        center.add(request) { _ in }
+        notificationCenter.add(request) { _ in }
+    }
+
+    public func localizedMessage(for event: AppNotificationEvent) -> LocalizedNotificationMessage {
+        let bodyKey: String
+        switch event {
+        case .timerCompleted:
+            bodyKey = "notification.timerCompleted"
+        case .lowBatteryStopped:
+            bodyKey = "notification.lowBatteryStopped"
+        }
+        return LocalizedNotificationMessage(
+            title: localization.localized("notification.title"),
+            body: localization.localized(bodyKey)
+        )
+    }
+
+    private var notificationCenter: UNUserNotificationCenter {
+        center ?? .current()
     }
 }

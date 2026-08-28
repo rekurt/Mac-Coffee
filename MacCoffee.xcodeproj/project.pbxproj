@@ -18,8 +18,10 @@
 		21048DCEE6A4A9AFC7AC68DD /* MacCoffeeDirectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5941C5C1AC867972C6CCCFDD /* MacCoffeeDirectApp.swift */; };
 		2965DC5CBA7CC0EB96A393D4 /* IOKitPowerAssertionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D722A2CD1809F7EC89DF67 /* IOKitPowerAssertionManager.swift */; };
 		297DB849E32338D5628BAA7F /* IOKitBatteryMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DB617796F0EB3E60CBBDEB /* IOKitBatteryMonitor.swift */; };
+		299B32B73C8F5C1FA7AB9BF3 /* LocalizationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68CC44D26FE932D1B3B26B05 /* LocalizationController.swift */; };
 		324BC7B651C0F91E2AD0BAFF /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 78033B85BB961A3E0A2572CE /* Localizable.strings */; };
 		377A8929707A28B303CE9BAA /* TaskSessionScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB31B714F40A174B90DD7622 /* TaskSessionScheduler.swift */; };
+		38D2DA11D7967D82CF3061AF /* RuntimeLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBECE1EBECCC6116C200421 /* RuntimeLocalizationTests.swift */; };
 		39D58A9447339964C81CA991 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9358E95FF4C20DF0FA97F82D /* Assets.xcassets */; };
 		3A7F19B201ED57CE847ADE6F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9358E95FF4C20DF0FA97F82D /* Assets.xcassets */; };
 		3B3EA9C36D3965A429445999 /* NotificationSending.swift in Sources */ = {isa = PBXBuildFile; fileRef = C969EF5E001651BE0474D10A /* NotificationSending.swift */; };
@@ -46,6 +48,7 @@
 		87762EE4E47AF119C64029A2 /* DurationPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE25748D5CC981F842795247 /* DurationPicker.swift */; };
 		898C373B9AF81550F661E011 /* AppModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63985A8FA69869AE2D27FE3 /* AppModelTests.swift */; };
 		8B7B8DA49FF537819BE041D0 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C6F98578631B0DCD5D2D61 /* AppEnvironment.swift */; };
+		901BAB0FD1A8F144D088A213 /* SupportedLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBF74D49B9B0C8B6711E9729 /* SupportedLanguage.swift */; };
 		955AFC31665DABBCFE310CF1 /* MacCoffeeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125DB0E365F9BB3DCE223D75 /* MacCoffeeUITests.swift */; };
 		9BAA614B51B2E799B6A5BE76 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D698D77A2FD5F0B873AC6A /* SettingsView.swift */; };
 		AF923D52E64190829CE51444 /* MacCoffeeCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82A246A0DCF736C0A7ACD7F /* MacCoffeeCore.swift */; };
@@ -157,6 +160,7 @@
 		5BC452DF0E5C8DF5FE3AFCDC /* LowBatteryPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowBatteryPolicyTests.swift; sourceTree = "<group>"; };
 		5D76E91559DD558AEF50FB2C /* SparkleUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkleUpdater.swift; sourceTree = "<group>"; };
 		621BA2020D7E00925D4251DA /* UserDefaultsSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsSettingsStore.swift; sourceTree = "<group>"; };
+		68CC44D26FE932D1B3B26B05 /* LocalizationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationController.swift; sourceTree = "<group>"; };
 		6A3AB23774EE6FDE8AA3572C /* SettingsStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStoring.swift; sourceTree = "<group>"; };
 		757AAEC2D42FE71C35BA4B2A /* UpdaterProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterProviding.swift; sourceTree = "<group>"; };
 		7D47105CD7F05419F0A41E4F /* MacCoffeeAppStoreApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacCoffeeAppStoreApp.swift; sourceTree = "<group>"; };
@@ -179,11 +183,13 @@
 		B842E9D4C6BD4DC510EFDB80 /* FakePowerAssertionDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakePowerAssertionDriver.swift; sourceTree = "<group>"; };
 		BCCF65F6050BB0DD681FEF98 /* PowerAssertionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerAssertionManagerTests.swift; sourceTree = "<group>"; };
 		BE25748D5CC981F842795247 /* DurationPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationPicker.swift; sourceTree = "<group>"; };
+		BFBECE1EBECCC6116C200421 /* RuntimeLocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeLocalizationTests.swift; sourceTree = "<group>"; };
 		C969EF5E001651BE0474D10A /* NotificationSending.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSending.swift; sourceTree = "<group>"; };
 		CE6386A3BEB15FE1E1F45F51 /* WakeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeSession.swift; sourceTree = "<group>"; };
 		DA487582AFBF62F9954FA4F2 /* MenuBarPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPanel.swift; sourceTree = "<group>"; };
 		DB31B714F40A174B90DD7622 /* TaskSessionScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskSessionScheduler.swift; sourceTree = "<group>"; };
 		DBC3454B9CF649A4EAFBB52C /* BatteryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryState.swift; sourceTree = "<group>"; };
+		DBF74D49B9B0C8B6711E9729 /* SupportedLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportedLanguage.swift; sourceTree = "<group>"; };
 		E525A34EC2464A276FC490AC /* PowerAssertionManaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerAssertionManaging.swift; sourceTree = "<group>"; };
 		EFE9B144CD4A309102A71B02 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F4CCE3B663849BE1E1F02E53 /* MacCoffeeDirect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacCoffeeDirect.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -235,6 +241,7 @@
 				AB165D15D8DE850D6BBA56CC /* PlatformAdapterTests.swift */,
 				BCCF65F6050BB0DD681FEF98 /* PowerAssertionManagerTests.swift */,
 				3B71879AD0164694C3D0973A /* RealIOKitIntegrationTests.swift */,
+				BFBECE1EBECCC6116C200421 /* RuntimeLocalizationTests.swift */,
 				FB5C8ECBEAAF29972964CE15 /* SettingsStoreTests.swift */,
 			);
 			name = Unit;
@@ -348,6 +355,7 @@
 			isa = PBXGroup;
 			children = (
 				FCBDF3BF4A5AF2A42B9FC436 /* Domain */,
+				EAC51325EA5B7883FA72AD2D /* Localization */,
 				855D08AA15A7775D188CF0D4 /* Policy */,
 				13A42E7C5E37E0A70038D5B4 /* Services */,
 				EFA8B32625CF73F4C5D0057D /* State */,
@@ -365,6 +373,15 @@
 			);
 			name = AppStore;
 			path = Sources/AppStore;
+			sourceTree = "<group>";
+		};
+		EAC51325EA5B7883FA72AD2D /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				68CC44D26FE932D1B3B26B05 /* LocalizationController.swift */,
+				DBF74D49B9B0C8B6711E9729 /* SupportedLanguage.swift */,
+			);
+			path = Localization;
 			sourceTree = "<group>";
 		};
 		EB89D770FC435C7D056C664E = {
@@ -624,6 +641,7 @@
 				B843C8577EA694BE4A0FC0FA /* PlatformAdapterTests.swift in Sources */,
 				E97F170C6A2FDF527534B215 /* PowerAssertionManagerTests.swift in Sources */,
 				10288B496B52A2AF0EDBE3B8 /* RealIOKitIntegrationTests.swift in Sources */,
+				38D2DA11D7967D82CF3061AF /* RuntimeLocalizationTests.swift in Sources */,
 				6BB9FA00674B08127BF7A8CF /* SettingsStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -644,6 +662,7 @@
 				2965DC5CBA7CC0EB96A393D4 /* IOKitPowerAssertionManager.swift in Sources */,
 				ED129BB71A387CFDF181D401 /* LaunchAtLoginManaging.swift in Sources */,
 				748B3532C37B8F8410B25B92 /* LifecycleObserving.swift in Sources */,
+				299B32B73C8F5C1FA7AB9BF3 /* LocalizationController.swift in Sources */,
 				783FFC771E685CE54BA2A390 /* LowBatteryPolicy.swift in Sources */,
 				AF923D52E64190829CE51444 /* MacCoffeeCore.swift in Sources */,
 				B9A53C66585491208A5DD67C /* MenuBarLabel.swift in Sources */,
@@ -656,6 +675,7 @@
 				46FCE77E0EEDF57EC3925C06 /* SessionScheduling.swift in Sources */,
 				56FBBB39BF16B685C4F52FC4 /* SettingsStoring.swift in Sources */,
 				9BAA614B51B2E799B6A5BE76 /* SettingsView.swift in Sources */,
+				901BAB0FD1A8F144D088A213 /* SupportedLanguage.swift in Sources */,
 				377A8929707A28B303CE9BAA /* TaskSessionScheduler.swift in Sources */,
 				FB14DC4FF8269AFE839D317C /* UpdaterProviding.swift in Sources */,
 				62449F7EE636ADF82468613B /* UserDefaultsSettingsStore.swift in Sources */,

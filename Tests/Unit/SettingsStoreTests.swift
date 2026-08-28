@@ -21,6 +21,7 @@ final class SettingsStoreTests: XCTestCase {
     func testDefaultsMatchProductDecisions() {
         let store = UserDefaultsSettingsStore(defaults: defaults)
 
+        XCTAssertEqual(store.selectedLanguage, .system)
         XCTAssertEqual(store.selectedDuration, .hours1)
         XCTAssertEqual(store.batteryThreshold, 15)
         XCTAssertFalse(store.launchAtLoginRequested)
@@ -30,12 +31,14 @@ final class SettingsStoreTests: XCTestCase {
     func testValuesRoundTripAndThresholdIsClamped() {
         let store = UserDefaultsSettingsStore(defaults: defaults)
 
+        store.selectedLanguage = .german
         store.selectedDuration = .hours4
         store.batteryThreshold = 50
         store.launchAtLoginRequested = true
         store.notificationAuthorizationRequested = true
 
         let reloaded = UserDefaultsSettingsStore(defaults: defaults)
+        XCTAssertEqual(reloaded.selectedLanguage, .german)
         XCTAssertEqual(reloaded.selectedDuration, .hours4)
         XCTAssertEqual(reloaded.batteryThreshold, 30)
         XCTAssertTrue(reloaded.launchAtLoginRequested)

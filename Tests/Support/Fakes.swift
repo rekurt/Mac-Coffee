@@ -6,17 +6,20 @@ enum FakeServiceError: Error {
 }
 
 final class FakeSettingsStore: SettingsStoring {
+    var selectedLanguage: SupportedLanguage
     var selectedDuration: SessionDuration
     var batteryThreshold: Int
     var launchAtLoginRequested: Bool
     var notificationAuthorizationRequested: Bool
 
     init(
+        selectedLanguage: SupportedLanguage = .system,
         savedDuration: SessionDuration = .hours1,
         batteryThreshold: Int = 15,
         launchAtLoginRequested: Bool = false,
         notificationAuthorizationRequested: Bool = false
     ) {
+        self.selectedLanguage = selectedLanguage
         self.selectedDuration = savedDuration
         self.batteryThreshold = batteryThreshold
         self.launchAtLoginRequested = launchAtLoginRequested

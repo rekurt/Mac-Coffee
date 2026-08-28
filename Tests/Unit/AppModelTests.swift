@@ -65,9 +65,11 @@ final class AppModelTests: XCTestCase {
 
         XCTAssertThrowsError(try harness.model.setMode(.system))
         XCTAssertEqual(harness.model.mode, .off)
+        XCTAssertEqual(harness.model.statusNotice, .batteryBlocked)
         XCTAssertNotNil(harness.model.statusMessage)
 
         harness.model.dismissStatus()
+        XCTAssertNil(harness.model.statusNotice)
         XCTAssertNil(harness.model.statusMessage)
     }
 

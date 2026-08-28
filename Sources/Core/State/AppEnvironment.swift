@@ -6,6 +6,7 @@ public struct AppEnvironment {
     public let battery: BatteryMonitoring
     public let scheduler: SessionScheduling
     public let settings: SettingsStoring
+    public let localization: LocalizationController
     public let launchAtLogin: LaunchAtLoginManaging
     public let notifications: NotificationSending
     public let lifecycle: LifecycleObserving
@@ -20,6 +21,7 @@ public struct AppEnvironment {
         launchAtLogin: LaunchAtLoginManaging,
         notifications: NotificationSending,
         lifecycle: LifecycleObserving,
+        localization: LocalizationController? = nil,
         updater: UpdaterProviding? = nil,
         now: @escaping () -> Date = Date.init
     ) {
@@ -27,6 +29,7 @@ public struct AppEnvironment {
         self.battery = battery
         self.scheduler = scheduler
         self.settings = settings
+        self.localization = localization ?? LocalizationController(settings: settings)
         self.launchAtLogin = launchAtLogin
         self.notifications = notifications
         self.lifecycle = lifecycle
@@ -36,14 +39,16 @@ public struct AppEnvironment {
 
     public static func live(updater: UpdaterProviding? = nil) -> AppEnvironment {
         let settings = UserDefaultsSettingsStore()
+        let localization = LocalizationController(settings: settings)
         return AppEnvironment(
             powerAssertions: IOKitPowerAssertionManager(),
             battery: IOKitBatteryMonitor(),
             scheduler: TaskSessionScheduler(),
             settings: settings,
             launchAtLogin: SMAppLaunchAtLoginManager(),
-            notifications: UserNotificationSender(settings: settings),
+            notifications: UserNotificationSender(settings: settings, localization: localization),
             lifecycle: AppLifecycleObserver(),
+            localization: localization,
             updater: updater
         )
     }

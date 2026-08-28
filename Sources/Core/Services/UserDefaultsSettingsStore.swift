@@ -2,6 +2,7 @@ import Foundation
 
 public final class UserDefaultsSettingsStore: SettingsStoring {
     private enum Key {
+        static let selectedLanguage = "selectedLanguage"
         static let selectedDuration = "selectedDuration"
         static let batteryThreshold = "batteryThreshold"
         static let launchAtLoginRequested = "launchAtLoginRequested"
@@ -12,6 +13,20 @@ public final class UserDefaultsSettingsStore: SettingsStoring {
 
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+    }
+
+    public var selectedLanguage: SupportedLanguage {
+        get {
+            guard let rawValue = defaults.string(forKey: Key.selectedLanguage),
+                  let language = SupportedLanguage(rawValue: rawValue)
+            else {
+                return .system
+            }
+            return language
+        }
+        set {
+            defaults.set(newValue.rawValue, forKey: Key.selectedLanguage)
+        }
     }
 
     public var selectedDuration: SessionDuration {

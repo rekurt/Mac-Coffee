@@ -11,7 +11,9 @@ Mac Coffee is a lightweight native macOS menu-bar app that prevents idle sleep w
 - Low-battery cutoff from 10% to 30%, defaulting to 15%, with hysteresis
 - Event-driven battery and lifecycle handling—no polling while idle
 - Launch at Login through `SMAppService`
-- English and Russian localization with VoiceOver identifiers
+- Instant in-app language switching for Russian, English, German, French,
+  Simplified Chinese, Japanese, Korean, and Spanish, plus a System setting
+  with an English fallback and VoiceOver identifiers
 - No root helper, daemon, analytics, account, backend, or activity simulation
 - Separate Direct and Mac App Store targets; Sparkle is present only in Direct
 - Universal `arm64` + `x86_64` local builds

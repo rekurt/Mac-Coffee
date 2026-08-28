@@ -8,6 +8,7 @@ struct MacCoffeeDirectApp: App {
     @StateObject private var model: AppModel
     @ObservedObject private var localization: LocalizationController
     private let updater: SparkleUpdater
+    private let quitCoordinator: QuitConfirmationCoordinator
 #if DEBUG
     private static var uiTestWindowController: NSWindowController?
 #endif
@@ -22,17 +23,27 @@ struct MacCoffeeDirectApp: App {
 #endif
         let model = AppModel(environment: environment)
         self.updater = updater
+        let quitCoordinator = QuitConfirmationCoordinator(model: model)
+        self.quitCoordinator = quitCoordinator
         _model = StateObject(wrappedValue: model)
         _localization = ObservedObject(wrappedValue: environment.localization)
 #if DEBUG
-        Self.openUITestWindowIfRequested(model: model, updater: updater)
+        Self.openUITestWindowIfRequested(
+            model: model,
+            updater: updater,
+            quitCoordinator: quitCoordinator
+        )
 #endif
     }
 
     var body: some Scene {
         MenuBarExtra {
             LocalizedRootView(localization: localization) {
-                MenuBarPanel(model: model, updater: updater)
+                MenuBarPanel(
+                    model: model,
+                    updater: updater,
+                    quitCoordinator: quitCoordinator
+                )
             }
         } label: {
             LocalizedRootView(localization: localization) {
@@ -56,7 +67,11 @@ struct MacCoffeeDirectApp: App {
     }
 
 #if DEBUG
-    private static func openUITestWindowIfRequested(model: AppModel, updater: SparkleUpdater) {
+    private static func openUITestWindowIfRequested(
+        model: AppModel,
+        updater: SparkleUpdater,
+        quitCoordinator: QuitConfirmationCoordinator
+    ) {
         guard CommandLine.arguments.contains("--ui-testing-window") else { return }
         let windowWidth = uiTestWindowWidth()
         DispatchQueue.main.async {
@@ -71,7 +86,12 @@ struct MacCoffeeDirectApp: App {
             window.isReleasedWhenClosed = false
             window.contentViewController = NSHostingController(
                 rootView: LocalizedRootView(localization: model.environment.localization) {
-                    MenuBarPanel(model: model, updater: updater, panelWidth: windowWidth)
+                    MenuBarPanel(
+                        model: model,
+                        updater: updater,
+                        quitCoordinator: quitCoordinator,
+                        panelWidth: windowWidth
+                    )
                 }
             )
             let contentSize = NSSize(width: windowWidth, height: 680)

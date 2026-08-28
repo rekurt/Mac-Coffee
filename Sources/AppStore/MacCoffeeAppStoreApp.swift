@@ -7,23 +7,26 @@ import SwiftUI
 struct MacCoffeeAppStoreApp: App {
     @StateObject private var model: AppModel
     @ObservedObject private var localization: LocalizationController
+    private let quitCoordinator: QuitConfirmationCoordinator
 #if DEBUG
     private static var uiTestWindowController: NSWindowController?
 #endif
 
     init() {
         let model = AppModel(environment: .live())
+        let quitCoordinator = QuitConfirmationCoordinator(model: model)
+        self.quitCoordinator = quitCoordinator
         _model = StateObject(wrappedValue: model)
         _localization = ObservedObject(wrappedValue: model.environment.localization)
 #if DEBUG
-        Self.openUITestWindowIfRequested(model: model)
+        Self.openUITestWindowIfRequested(model: model, quitCoordinator: quitCoordinator)
 #endif
     }
 
     var body: some Scene {
         MenuBarExtra {
             LocalizedRootView(localization: localization) {
-                MenuBarPanel(model: model)
+                MenuBarPanel(model: model, quitCoordinator: quitCoordinator)
             }
         } label: {
             LocalizedRootView(localization: localization) {
@@ -47,7 +50,10 @@ struct MacCoffeeAppStoreApp: App {
     }
 
 #if DEBUG
-    private static func openUITestWindowIfRequested(model: AppModel) {
+    private static func openUITestWindowIfRequested(
+        model: AppModel,
+        quitCoordinator: QuitConfirmationCoordinator
+    ) {
         guard CommandLine.arguments.contains("--ui-testing-window") else { return }
         let windowWidth = uiTestWindowWidth()
         DispatchQueue.main.async {
@@ -62,7 +68,11 @@ struct MacCoffeeAppStoreApp: App {
             window.isReleasedWhenClosed = false
             window.contentViewController = NSHostingController(
                 rootView: LocalizedRootView(localization: model.environment.localization) {
-                    MenuBarPanel(model: model, panelWidth: windowWidth)
+                    MenuBarPanel(
+                        model: model,
+                        quitCoordinator: quitCoordinator,
+                        panelWidth: windowWidth
+                    )
                 }
             )
             let contentSize = NSSize(width: windowWidth, height: 680)

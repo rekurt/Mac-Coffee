@@ -7,24 +7,26 @@ This checklist is both the release gate and the evidence record for version 2.0.
 - [x] Regenerate `MacCoffee.xcodeproj` with XcodeGen 2.46.0.
 - [x] Pass all `MacCoffeeTests` with code coverage enabled.
 - [x] Domain values reach 100% line coverage, `AppModel` 97.37%, and `LowBatteryPolicy` 95.45%.
-- [x] Build the English/Russian `MacCoffeeUITests` bundle, including both Direct and App Store hosts.
-- [ ] Pass all English/Russian `MacCoffeeUITests`.
+- [x] Build the eight-language `MacCoffeeUITests` bundle, including both Direct and App Store hosts.
+- [ ] Pass all system-language and explicit-language `MacCoffeeUITests`.
 - [x] Build universal Direct and App Store applications.
 - [x] Verify strict code-signing structure and release entitlements for both bundles.
 - [x] Confirm `arm64` and `x86_64` in both executables.
 - [x] Confirm Sparkle and `SUFeedURL` exist only in Direct.
-- [x] Confirm English, Russian, PrivacyInfo, and icons in both bundles.
+- [x] Confirm all eight localizations, PrivacyInfo, and icons in both bundles.
 - [x] Confirm source runtime contains no `pmset`, `disablesleep`, or privilege escalation.
 - [x] Generate and validate a signed Sparkle appcast with a one-time test key; confirm its DMG URL and EdDSA enclosure signature.
 - [x] Tag workflow defines temporary-keychain materialization and cleanup for its Developer ID certificate, notary profile, and Sparkle key.
 
-The final UI rerun remains unchecked while the macOS GUI session is locked. A DEBUG-only deterministic test window now removes the status-item dependency in CI, but macOS still rejects synthesized UI events in a locked secure session. Earlier English, Russian, battery-block, Settings, and quit scenarios completed; the expanded suite must be rerun in an unlocked session before a public release. The test-only window is absent from both Release binaries.
+The final UI rerun remains unchecked until it completes in a stable, unlocked macOS GUI session. A DEBUG-only deterministic test window removes the status-item dependency in CI, but macOS can still reject synthesized UI events or expose a stale accessibility hierarchy after interrupted automation runs. Focused footer cancellation has completed successfully, while the shared coordinator, real shortcut-handler routing, cleanup ordering, and localization are covered by unit tests. The full expanded suite must be rerun before a public release. The test-only window is absent from both Release binaries.
 
 ## Runtime verification
 
 - [x] System mode appears in `pmset -g assertions` as `Mac Coffee active wake session` under `PreventUserIdleSystemSleep`.
 - [x] Display mode appears under `PreventUserIdleDisplaySleep`.
 - [x] Off and application termination leave no Mac Coffee assertion.
+- [x] Footer Quit and `Command-Q` use one localized native confirmation; Cancel preserves the active session.
+- [x] Confirmed user quit prepares termination exactly once before terminating; logout and shutdown cleanup remains noninteractive.
 - [x] Low battery at the configured boundary stops or blocks a session.
 - [x] Launch always begins in Off, including after an active-session termination.
 - [x] Manual Sleep, lid close, and macOS thermal/safety decisions remain outside the app's guarantees.

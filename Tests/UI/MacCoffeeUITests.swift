@@ -5,7 +5,7 @@ import XCTest
 final class MacCoffeeUITests: XCTestCase {
     private var app: XCUIApplication!
 
-    func testEnglishModeDurationSettingsAndQuitFlow() {
+    func testEnglishModeDurationAndSettingsFlow() {
         launch(language: "en", batteryPercentage: 80)
 
         XCTAssertTrue(testWindow.waitForExistence(timeout: 5))
@@ -38,16 +38,49 @@ final class MacCoffeeUITests: XCTestCase {
         XCTAssertTrue(app.steppers["maccoffee.settings.batteryThreshold"].exists)
 
         app.windows["Mac Coffee Settings"].buttons[XCUIIdentifierCloseWindow].click()
-        openMenuBarPanel()
-        XCTAssertTrue(app.buttons["maccoffee.action.quit"].waitForExistence(timeout: 2))
-        app.buttons["maccoffee.action.quit"].click()
-        XCTAssertTrue(app.sheets.firstMatch.waitForExistence(timeout: 2))
-        app.sheets.firstMatch.buttons["Cancel"].click()
+        XCTAssertTrue(app.exists)
+    }
+
+    func testFooterQuitCancellationPreservesActiveSessionProcessAndWindow() throws {
+        launch(language: "en", batteryPercentage: 80)
+        testWindow.radioButtons["maccoffee.mode.system"].click()
+        testWindow.radioButtons["maccoffee.duration.hours2"].click()
+        let processID = try XCTUnwrap(runningAppProcessID())
+        let session = try XCTUnwrap(sessionMarker())
+        let windowFrame = testWindow.frame
+
+        testWindow.buttons["maccoffee.action.quit"].click()
+
+        let confirmation = waitForQuitConfirmation()
+        XCTAssertTrue(confirmation.staticTexts["Quit Mac Coffee"].exists)
+        XCTAssertTrue(confirmation.staticTexts["Quit Mac Coffee and allow your Mac to sleep normally?"].exists)
+        confirmation.buttons["Cancel"].click()
+
+        XCTAssertEqual(try XCTUnwrap(runningAppProcessID()), processID)
+        XCTAssertEqual(try XCTUnwrap(sessionMarker()), session)
+        XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.mode.system"]), 1)
+        XCTAssertEqual(testWindow.frame, windowFrame)
+        XCTAssertTrue(testWindow.exists)
+    }
+
+    func testCommandQCancellationUsesTheSameDialogAndPreservesActiveSession() throws {
+        launch(language: "en", batteryPercentage: 80)
+        testWindow.radioButtons["maccoffee.mode.system"].click()
+        testWindow.radioButtons["maccoffee.duration.hours2"].click()
+        let processID = try XCTUnwrap(runningAppProcessID())
+        let session = try XCTUnwrap(sessionMarker())
 
         app.typeKey("q", modifierFlags: .command)
-        XCTAssertTrue(app.sheets.firstMatch.waitForExistence(timeout: 2))
-        app.sheets.firstMatch.buttons["Cancel"].click()
-        XCTAssertTrue(app.exists)
+
+        let confirmation = waitForQuitConfirmation()
+        XCTAssertTrue(confirmation.staticTexts["Quit Mac Coffee"].exists)
+        XCTAssertTrue(confirmation.staticTexts["Quit Mac Coffee and allow your Mac to sleep normally?"].exists)
+        confirmation.buttons["Cancel"].click()
+
+        XCTAssertEqual(try XCTUnwrap(runningAppProcessID()), processID)
+        XCTAssertEqual(try XCTUnwrap(sessionMarker()), session)
+        XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.mode.system"]), 1)
+        XCTAssertTrue(testWindow.exists)
     }
 
     func testLowBatteryBlocksActivationAndShowsBanner() {
@@ -273,13 +306,10 @@ final class MacCoffeeUITests: XCTestCase {
     }
 
     private func openMenuBarPanel() {
-        if testWindow.waitForExistence(timeout: 2) {
-            return
-        }
-        let statusItem = app.descendants(matching: .statusItem)["Mac Coffee"]
-        XCTAssertTrue(statusItem.waitForExistence(timeout: 5))
-        statusItem.click()
-        XCTAssertTrue(testWindow.waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            testWindow.waitForExistence(timeout: 10),
+            "The deterministic UI-test window did not open"
+        )
     }
 
     private func integerValue(of element: XCUIElement) -> Int? {
@@ -477,9 +507,34 @@ final class MacCoffeeUITests: XCTestCase {
         app.windows["maccoffee.ui-test.window"]
     }
 
+    private func waitForQuitConfirmation(
+        timeout: TimeInterval = 3,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> XCUIElement {
+        let candidates = [
+            app.dialogs["maccoffee.quit.confirmation"],
+            app.sheets["maccoffee.quit.confirmation"],
+            app.windows["maccoffee.quit.confirmation"]
+        ]
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            if let confirmation = candidates.first(where: \.exists) {
+                return confirmation
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+        } while Date() < deadline
+
+        XCTFail("The native quit confirmation did not appear", file: file, line: line)
+        return candidates[0]
+    }
+
     private func sessionMarker() -> String? {
-        let marker = testWindow.staticTexts["maccoffee.session.marker"]
-        return marker.exists ? marker.label : nil
+        let marker = testWindow.staticTexts.matching(
+            NSPredicate(format: "value CONTAINS %@", "|")
+        ).firstMatch
+        guard marker.waitForExistence(timeout: 2) else { return nil }
+        return marker.value as? String
     }
 
     private func assertCountdown(_ value: String, matches pattern: String, language: String) {

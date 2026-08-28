@@ -24,13 +24,19 @@ public struct MenuBarPanel: View {
     @ObservedObject private var localization: LocalizationController
     @Environment(\.openWindow) private var openWindow
     private let updater: UpdaterProviding?
+    private let quitCoordinator: QuitConfirmationCoordinator
     private let panelWidth: CGFloat?
-    @State private var showsQuitConfirmation = false
 
-    public init(model: AppModel, updater: UpdaterProviding? = nil, panelWidth: CGFloat? = nil) {
+    public init(
+        model: AppModel,
+        updater: UpdaterProviding? = nil,
+        quitCoordinator: QuitConfirmationCoordinator,
+        panelWidth: CGFloat? = nil
+    ) {
         self.model = model
         _localization = ObservedObject(wrappedValue: model.environment.localization)
         self.updater = updater
+        self.quitCoordinator = quitCoordinator
         self.panelWidth = panelWidth
     }
 
@@ -82,15 +88,6 @@ public struct MenuBarPanel: View {
             idealWidth: panelWidth ?? 420,
             maxWidth: panelWidth ?? 420
         )
-        .alert("action.quit", isPresented: $showsQuitConfirmation) {
-            Button("action.cancel", role: .cancel) {}
-            Button("action.confirmQuit", role: .destructive) {
-                model.prepareForTermination()
-                NSApplication.shared.terminate(nil)
-            }
-        } message: {
-            Text("quit.message")
-        }
     }
 
     private var header: some View {
@@ -243,12 +240,11 @@ public struct MenuBarPanel: View {
 
     private var quitAction: some View {
         Button {
-            showsQuitConfirmation = true
+            quitCoordinator.requestQuit()
         } label: {
             FooterActionLabel(title: "action.quit", symbol: "power", isDestructive: true)
         }
         .buttonStyle(FooterActionButtonStyle())
-        .keyboardShortcut("q")
         .accessibilityIdentifier("maccoffee.action.quit")
     }
 

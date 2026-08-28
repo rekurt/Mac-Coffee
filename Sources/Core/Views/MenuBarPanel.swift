@@ -130,74 +130,104 @@ public struct MenuBarPanel: View {
 
     private var footer: some View {
         ViewThatFits(in: .horizontal) {
-            horizontalFooter
-                .fixedSize(horizontal: true, vertical: false)
-            compactFooter
+            actionGrid
+                .frame(width: 388)
+            actionList
         }
+        .frame(width: footerWidth, alignment: .leading)
         .font(.caption)
+        .accessibilityIdentifier("maccoffee.footer")
     }
 
-    private var horizontalFooter: some View {
-        HStack(spacing: 14) {
-            if #available(macOS 14.0, *) {
-                SettingsLink {
-                    Text("action.settings")
-                }
-                .buttonStyle(.plain)
-                .frame(minWidth: 70)
-                .accessibilityIdentifier("maccoffee.action.settings")
+    private var footerWidth: CGFloat {
+        max((panelWidth ?? 420) - 32, 0)
+    }
+
+    private var actionGrid: some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible(minimum: 150), spacing: 8),
+                GridItem(.flexible(minimum: 150), spacing: 8)
+            ],
+            spacing: 8
+        ) {
+            settingsAction
+            aboutAction
+            if hasUpdateAction {
+                updateAction
+                quitAction
             } else {
-                Button("action.settings", action: openLegacySettings)
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("maccoffee.action.settings")
+                quitAction
+                    .gridCellColumns(2)
             }
-            Button("action.about") {
-                openWindow(id: "maccoffee.about")
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("maccoffee.footer.grid")
+    }
+
+    private var actionList: some View {
+        VStack(spacing: 8) {
+            settingsAction
+            aboutAction
+            if hasUpdateAction {
+                updateAction
             }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("maccoffee.action.about")
-            if let updater, updater.canCheckForUpdates {
-                Button("action.checkUpdates") { updater.checkForUpdates() }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("maccoffee.action.update")
+            quitAction
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("maccoffee.footer.list")
+    }
+
+    private var hasUpdateAction: Bool {
+        updater?.canCheckForUpdates == true
+    }
+
+    @ViewBuilder
+    private var settingsAction: some View {
+        if #available(macOS 14.0, *) {
+            SettingsLink {
+                FooterActionLabel(title: "action.settings", symbol: "gearshape")
             }
-            Spacer()
-            Button("action.quit") { showsQuitConfirmation = true }
-                .buttonStyle(.plain)
-                .keyboardShortcut("q")
-                .accessibilityIdentifier("maccoffee.action.quit")
+            .buttonStyle(FooterActionButtonStyle())
+            .accessibilityIdentifier("maccoffee.action.settings")
+        } else {
+            Button(action: openLegacySettings) {
+                FooterActionLabel(title: "action.settings", symbol: "gearshape")
+            }
+            .buttonStyle(FooterActionButtonStyle())
+            .accessibilityIdentifier("maccoffee.action.settings")
         }
     }
 
-    private var compactFooter: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 14) {
-                if #available(macOS 14.0, *) {
-                    SettingsLink { Text("action.settings") }
-                        .buttonStyle(.plain)
-                        .frame(minWidth: 70)
-                        .accessibilityIdentifier("maccoffee.action.settings")
-                } else {
-                    Button("action.settings", action: openLegacySettings)
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("maccoffee.action.settings")
-                }
-                Button("action.about") {
-                    openWindow(id: "maccoffee.about")
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("maccoffee.action.about")
-                if let updater, updater.canCheckForUpdates {
-                    Button("action.checkUpdates") { updater.checkForUpdates() }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("maccoffee.action.update")
-                }
-            }
-            Button("action.quit") { showsQuitConfirmation = true }
-                .buttonStyle(.plain)
-                .keyboardShortcut("q")
-                .accessibilityIdentifier("maccoffee.action.quit")
+    private var aboutAction: some View {
+        Button {
+            openWindow(id: "maccoffee.about")
+        } label: {
+            FooterActionLabel(title: "action.about", symbol: "info.circle")
         }
+        .buttonStyle(FooterActionButtonStyle())
+        .accessibilityIdentifier("maccoffee.action.about")
+    }
+
+    private var updateAction: some View {
+        Button {
+            updater?.checkForUpdates()
+        } label: {
+            FooterActionLabel(title: "action.checkUpdates", symbol: "arrow.triangle.2.circlepath")
+        }
+        .buttonStyle(FooterActionButtonStyle())
+        .accessibilityIdentifier("maccoffee.action.update")
+    }
+
+    private var quitAction: some View {
+        Button {
+            showsQuitConfirmation = true
+        } label: {
+            FooterActionLabel(title: "action.quit", symbol: "power", isDestructive: true)
+        }
+        .buttonStyle(FooterActionButtonStyle())
+        .keyboardShortcut("q")
+        .accessibilityIdentifier("maccoffee.action.quit")
     }
 
     private var batteryText: String {
@@ -231,5 +261,47 @@ public struct MenuBarPanel: View {
     private func openLegacySettings() {
         NSApplication.shared.activate(ignoringOtherApps: true)
         NSApplication.shared.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+    }
+}
+
+private struct FooterActionLabel: View {
+    let title: LocalizedStringKey
+    let symbol: String
+    var isDestructive = false
+    @State private var isHovering = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: symbol)
+                .font(.system(size: 15, weight: .medium))
+                .frame(width: 16)
+            Text(title)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .minimumScaleFactor(0.85)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, minHeight: 38)
+        .padding(.horizontal, 10)
+        .foregroundStyle(isDestructive ? Color.red : Color.primary)
+        .background(
+            Color.secondary.opacity(isHovering ? 0.16 : 0.09),
+            in: RoundedRectangle(cornerRadius: 9, style: .continuous)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+        .onHover { hover in
+            withAnimation(.easeOut(duration: 0.14)) {
+                isHovering = hover
+            }
+        }
+    }
+}
+
+private struct FooterActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
+            .brightness(configuration.isPressed ? -0.03 : 0)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }

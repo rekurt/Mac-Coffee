@@ -90,6 +90,54 @@ final class MacCoffeeUITests: XCTestCase {
         XCTAssertTrue(testWindow.radioButtons["maccoffee.mode.system"].exists)
         XCTAssertTrue(app.staticTexts["Длительность"].exists)
         XCTAssertFalse(app.buttons["maccoffee.action.update"].exists)
+        assertAppStoreFooterGrid()
+    }
+
+    func testNormalWidthFooterUsesEqualActionGrid() {
+        launch(language: "en", batteryPercentage: 80)
+
+        assertFooterActionTargets(["settings", "about", "quit"], inside: testWindow)
+
+        let settings = footerAction("settings")
+        let about = footerAction("about")
+        XCTAssertEqual(settings.frame.minY, about.frame.minY, accuracy: 1)
+        XCTAssertEqual(settings.frame.width, about.frame.width, accuracy: 1)
+        XCTAssertEqual(settings.frame.height, about.frame.height, accuracy: 1)
+
+        let update = footerAction("update")
+        let quit = footerAction("quit")
+        if update.exists {
+            assertFooterActionTargets(["update"], inside: testWindow)
+            XCTAssertEqual(update.frame.minY, quit.frame.minY, accuracy: 1)
+            XCTAssertEqual(update.frame.width, quit.frame.width, accuracy: 1)
+            XCTAssertEqual(update.frame.height, quit.frame.height, accuracy: 1)
+            XCTAssertGreaterThan(update.frame.minY, settings.frame.minY)
+        } else {
+            XCTAssertEqual(quit.frame.minX, settings.frame.minX, accuracy: 1)
+            XCTAssertEqual(quit.frame.maxX, about.frame.maxX, accuracy: 1)
+            XCTAssertGreaterThan(quit.frame.minY, settings.frame.minY)
+        }
+    }
+
+    func testNarrowFooterUsesSingleColumnActionList() {
+        launch(language: "en", batteryPercentage: 80, windowWidth: 280)
+
+        let identifiers = ["settings", "about"]
+            + (footerAction("update").exists ? ["update"] : [])
+            + ["quit"]
+        assertFooterActionTargets(identifiers, inside: testWindow)
+
+        let buttons = identifiers.map(footerAction)
+        if let first = buttons.first {
+            for button in buttons.dropFirst() {
+                XCTAssertEqual(button.frame.minX, first.frame.minX, accuracy: 1)
+                XCTAssertEqual(button.frame.width, first.frame.width, accuracy: 1)
+                XCTAssertEqual(button.frame.height, first.frame.height, accuracy: 1)
+            }
+        }
+        for (upper, lower) in zip(buttons, buttons.dropFirst()) {
+            XCTAssertGreaterThan(lower.frame.minY, upper.frame.minY)
+        }
     }
 
     func testExplicitLanguageSwitchPreservesActiveWakeSessionAndKeepsPanelControlsVisible() throws {
@@ -281,6 +329,44 @@ final class MacCoffeeUITests: XCTestCase {
                 XCTAssertEqual(width, firstWidth, accuracy: 1, "Duration segments must be equal width", file: file, line: line)
             }
         }
+    }
+
+    private func assertAppStoreFooterGrid(
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        assertFooterActionTargets(["settings", "about", "quit"], inside: testWindow, file: file, line: line)
+
+        let settings = footerAction("settings")
+        let about = footerAction("about")
+        let quit = footerAction("quit")
+        XCTAssertEqual(settings.frame.minY, about.frame.minY, accuracy: 1, file: file, line: line)
+        XCTAssertEqual(settings.frame.width, about.frame.width, accuracy: 1, file: file, line: line)
+        XCTAssertGreaterThan(quit.frame.minY, settings.frame.minY, file: file, line: line)
+        XCTAssertEqual(quit.frame.minX, settings.frame.minX, accuracy: 1, file: file, line: line)
+        XCTAssertEqual(quit.frame.maxX, about.frame.maxX, accuracy: 1, file: file, line: line)
+    }
+
+    private func assertFooterActionTargets(
+        _ identifiers: [String],
+        inside container: XCUIElement,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        for identifier in identifiers {
+            let button = footerAction(identifier)
+            XCTAssertTrue(button.exists, "Missing \(identifier) action", file: file, line: line)
+            XCTAssertGreaterThanOrEqual(button.frame.height, 38, "\(identifier) has no full hit target", file: file, line: line)
+            XCTAssertTrue(container.frame.contains(button.frame), "\(identifier) is outside the footer", file: file, line: line)
+            XCTAssertTrue(testWindow.frame.contains(button.frame), "\(identifier) is outside the test window", file: file, line: line)
+            XCTAssertTrue(button.isHittable, "\(identifier) is not hittable", file: file, line: line)
+            XCTAssertFalse(button.label.contains("\n"), "\(identifier) label wrapped", file: file, line: line)
+            XCTAssertFalse(button.label.isEmpty, "\(identifier) label is empty", file: file, line: line)
+        }
+    }
+
+    private func footerAction(_ identifier: String) -> XCUIElement {
+        testWindow.descendants(matching: .any)["maccoffee.action.\(identifier)"].firstMatch
     }
 
     private func runningAppProcessID() -> pid_t? {

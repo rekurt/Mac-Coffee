@@ -1,0 +1,9 @@
+Mac Coffee is a lightweight native menu-bar utility that keeps your Mac awake when you choose.
+
+Choose Keep Mac Awake or Keep Display Awake, then run the session for 30 minutes, 1, 2, 4, or 8 hours, or indefinitely. Mac Coffee always launches in Off mode and releases its wake request when you turn it off or quit.
+
+Protect a MacBook battery with a configurable 10–30% cutoff (15% by default), optionally start Mac Coffee at login, and receive clear local status notifications. The interface is available in English and Russian.
+
+Mac Coffee uses public, process-owned macOS power assertions. It needs no administrator helper, account, analytics, or backend and collects no data.
+
+Mac Coffee prevents idle sleep only. Manual Sleep, closing a MacBook lid, shutdown, and macOS thermal or safety decisions still take effect.

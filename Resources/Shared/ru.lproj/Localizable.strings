@@ -18,11 +18,15 @@
 "status.off" = "Mac Coffee выключен";
 "status.active" = "Mac Coffee работает";
 "status.remaining" = "Осталось: %@";
+"countdown.hoursMinutes" = "%d ч %d мин";
+"countdown.minutes" = "%d мин";
+"countdown.seconds" = "%d с";
 "battery.title" = "Питание";
 "battery.ac" = "Адаптер питания";
 "battery.percent" = "Заряд: %d%%";
 "battery.unknown" = "Состояние батареи недоступно";
 "battery.blocked" = "Режим бодрствования остановлен для защиты батареи.";
+"error.powerAssertion" = "Mac Coffee не удалось изменить режим бодрствования. Попробуйте ещё раз.";
 "settings.title" = "Настройки Mac Coffee";
 "settings.batteryThreshold" = "Остановить при заряде";
 "settings.batteryThresholdValue" = "%d%%";

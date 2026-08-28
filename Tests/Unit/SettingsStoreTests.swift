@@ -21,7 +21,7 @@ final class SettingsStoreTests: XCTestCase {
     func testDefaultsMatchProductDecisions() {
         let store = UserDefaultsSettingsStore(defaults: defaults)
 
-        XCTAssertEqual(store.selectedDuration, .indefinite)
+        XCTAssertEqual(store.selectedDuration, .hours1)
         XCTAssertEqual(store.batteryThreshold, 15)
         XCTAssertFalse(store.launchAtLoginRequested)
         XCTAssertFalse(store.notificationAuthorizationRequested)

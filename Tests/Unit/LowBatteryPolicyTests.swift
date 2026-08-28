@@ -24,11 +24,17 @@ final class LowBatteryPolicyTests: XCTestCase {
         XCTAssertFalse(LowBatteryPolicy.nextBlockedState(currentlyBlocked: true, battery: eighteen, threshold: 15))
     }
 
-    func testACDesktopAndUnknownPercentageNeverBlock() {
+    func testACDesktopClearsBlock() {
         XCTAssertFalse(LowBatteryPolicy.nextBlockedState(currentlyBlocked: true, battery: .acDesktop, threshold: 15))
+    }
 
-        let unknown = BatteryState(powerSource: .battery, percentage: nil, hasInternalBattery: true)
-        XCTAssertFalse(LowBatteryPolicy.nextBlockedState(currentlyBlocked: true, battery: unknown, threshold: 15))
+    func testTransientUnknownBatteryReadingPreservesCurrentBlock() {
+        let unknownPercentage = BatteryState(powerSource: .battery, percentage: nil, hasInternalBattery: true)
+        let unknownSource = BatteryState(powerSource: .unknown, percentage: nil, hasInternalBattery: true)
+
+        XCTAssertTrue(LowBatteryPolicy.nextBlockedState(currentlyBlocked: true, battery: unknownPercentage, threshold: 15))
+        XCTAssertTrue(LowBatteryPolicy.nextBlockedState(currentlyBlocked: true, battery: unknownSource, threshold: 15))
+        XCTAssertFalse(LowBatteryPolicy.nextBlockedState(currentlyBlocked: false, battery: unknownSource, threshold: 15))
     }
 
     func testThresholdIsClampedToSupportedRange() {

@@ -1,6 +1,7 @@
 #include "Shared.xcconfig"
 
 PRODUCT_BUNDLE_IDENTIFIER = com.rekurt.maccoffee.direct
+PRODUCT_BUNDLE_IDENTIFIER[config=Debug] = com.rekurt.maccoffee.direct.debug
 PRODUCT_NAME = Mac Coffee
 INFOPLIST_FILE = Resources/Direct/Info.plist
 CODE_SIGN_ENTITLEMENTS = Config/Direct.entitlements

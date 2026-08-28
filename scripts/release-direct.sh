@@ -74,31 +74,53 @@ xcodebuild -exportArchive \
 app_path="$export_dir/Mac Coffee.app"
 /usr/bin/codesign --verify --deep --strict --verbose=2 "$app_path"
 /usr/bin/lipo "$app_path/Contents/MacOS/Mac Coffee" -verify_arch arm64 x86_64
+if ! /usr/bin/codesign -dvv "$app_path" 2>&1 | /usr/bin/grep -q 'flags=.*runtime'; then
+  print -u2 "Direct archive does not have Hardened Runtime enabled."
+  exit 65
+fi
+entitlements_file=$(/usr/bin/mktemp -t maccoffee-direct-entitlements)
+/usr/bin/codesign -d --entitlements - --xml "$app_path" > "$entitlements_file" 2>/dev/null
+if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.get-task-allow' "$entitlements_file" >/dev/null 2>&1; then
+  print -u2 "Direct archive contains the debug get-task-allow entitlement."
+  exit 65
+fi
+if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.app-sandbox' "$entitlements_file" >/dev/null 2>&1; then
+  print -u2 "Direct archive unexpectedly enables App Sandbox."
+  exit 65
+fi
+/bin/rm -f "$entitlements_file"
 
-notary_zip="$release_dir/MacCoffee-2.0.0-notary.zip"
+version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Contents/Info.plist")
+notary_zip="$release_dir/MacCoffee-$version-notary.zip"
 /bin/rm -f "$notary_zip"
 /usr/bin/ditto -c -k --keepParent "$app_path" "$notary_zip"
-xcrun notarytool submit "$notary_zip" --keychain-profile "$MACCOFFEE_NOTARY_PROFILE" --wait
+notary_options=(--keychain-profile "$MACCOFFEE_NOTARY_PROFILE")
+if [[ -n "${MACCOFFEE_NOTARY_KEYCHAIN:-}" ]]; then
+  notary_options+=(--keychain "$MACCOFFEE_NOTARY_KEYCHAIN")
+fi
+xcrun notarytool submit "$notary_zip" "${notary_options[@]}" --wait
 xcrun stapler staple "$app_path"
 xcrun stapler validate "$app_path"
 
 export MACCOFFEE_APP_PATH="$app_path"
-export MACCOFFEE_DMG_PATH="$release_dir/MacCoffee-2.0.0.dmg"
+export MACCOFFEE_DMG_PATH="$release_dir/MacCoffee-$version.dmg"
 export MACCOFFEE_SIGN_IDENTITY="$MACCOFFEE_DEVELOPER_ID"
 "$SCRIPT_DIR/package-dmg.sh"
 
-xcrun notarytool submit "$MACCOFFEE_DMG_PATH" --keychain-profile "$MACCOFFEE_NOTARY_PROFILE" --wait
+xcrun notarytool submit "$MACCOFFEE_DMG_PATH" "${notary_options[@]}" --wait
 xcrun stapler staple "$MACCOFFEE_DMG_PATH"
 xcrun stapler validate "$MACCOFFEE_DMG_PATH"
 /usr/sbin/spctl --assess --type execute --verbose=2 "$app_path"
 /usr/sbin/spctl --assess --type open --context context:primary-signature --verbose=2 "$MACCOFFEE_DMG_PATH"
 
-sign_update=$(/usr/bin/find "$derived_dir/SourcePackages/artifacts" -type f -path '*/bin/sign_update' -perm -111 -print -quit)
-[[ -x "$sign_update" ]] || {
-  print -u2 "Sparkle 2.9.4 sign_update tool was not resolved."
-  exit 69
-}
-"$sign_update" --ed-key-file "$MACCOFFEE_SPARKLE_PRIVATE_KEY_FILE" "$MACCOFFEE_DMG_PATH" \
-  | /usr/bin/tee "$release_dir/MacCoffee-2.0.0.sparkle-signature.txt"
+export MACCOFFEE_APPCAST_OUTPUT_DIR="$release_dir"
+export MACCOFFEE_GENERATE_APPCAST=$(/usr/bin/find "$derived_dir/SourcePackages/artifacts" \
+  -type f -path '*/bin/generate_appcast' -perm -111 -print -quit)
+"$SCRIPT_DIR/generate-appcast.sh"
 
-print "Release artifacts are signed, notarized, stapled, and ready in: $release_dir"
+(
+  cd "$release_dir"
+  /usr/bin/shasum -a 256 "${MACCOFFEE_DMG_PATH:t}" > "${MACCOFFEE_DMG_PATH:t}.sha256"
+)
+
+print "Release artifacts and signed appcast are ready in: $release_dir"

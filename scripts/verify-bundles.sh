@@ -18,6 +18,14 @@ for app_path in "$direct_app" "$store_app"; do
   [[ -f "$app_path/Contents/Resources/en.lproj/Localizable.strings" ]]
   [[ -f "$app_path/Contents/Resources/ru.lproj/Localizable.strings" ]]
   [[ "$(/usr/libexec/PlistBuddy -c 'Print :LSUIElement' "$app_path/Contents/Info.plist")" == true ]]
+
+  entitlements_file=$(/usr/bin/mktemp -t maccoffee-entitlements)
+  /usr/bin/codesign -d --entitlements - --xml "$app_path" > "$entitlements_file" 2>/dev/null
+  if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.get-task-allow' "$entitlements_file" >/dev/null 2>&1; then
+    print -u2 "Release bundle contains get-task-allow: $app_path"
+    exit 65
+  fi
+  /bin/rm -f "$entitlements_file"
 done
 
 [[ -d "$direct_app/Contents/Frameworks/Sparkle.framework" ]] || {
@@ -25,6 +33,22 @@ done
   exit 65
 }
 /usr/bin/lipo "$direct_app/Contents/Frameworks/Sparkle.framework/Versions/B/Sparkle" -verify_arch arm64 x86_64
+
+direct_entitlements=$(/usr/bin/mktemp -t maccoffee-direct-entitlements)
+/usr/bin/codesign -d --entitlements - --xml "$direct_app" > "$direct_entitlements" 2>/dev/null
+if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.app-sandbox' "$direct_entitlements" >/dev/null 2>&1; then
+  print -u2 "Direct bundle unexpectedly enables App Sandbox."
+  exit 65
+fi
+/bin/rm -f "$direct_entitlements"
+
+store_entitlements=$(/usr/bin/mktemp -t maccoffee-store-entitlements)
+/usr/bin/codesign -d --entitlements - --xml "$store_app" > "$store_entitlements" 2>/dev/null
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.app-sandbox' "$store_entitlements")" == true ]] || {
+  print -u2 "App Store bundle is not sandboxed."
+  exit 65
+}
+/bin/rm -f "$store_entitlements"
 
 if /usr/bin/find "$store_app" \( -iname '*Sparkle*' -o -iname '*Updater*' \) -print | /usr/bin/grep -q .; then
   print -u2 "App Store bundle contains an alternate updater."

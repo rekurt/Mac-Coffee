@@ -32,7 +32,7 @@ brew bundle
 open "dist/local/Mac Coffee.app"
 ```
 
-The local build is ad-hoc signed for testing on this Mac. Create the local DMG with:
+The local build is ad-hoc signed for testing on this Mac and intentionally omits Hardened Runtime, which requires a real signing identity for nested frameworks. Official Direct and App Store archives keep Hardened Runtime enabled. Create the local DMG with:
 
 ```sh
 ./scripts/package-dmg.sh
@@ -53,11 +53,17 @@ xcodegen generate
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
   xcodebuild test -project MacCoffee.xcodeproj -scheme MacCoffeeTests \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
+
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  xcodebuild test -project MacCoffee.xcodeproj -scheme MacCoffeeUITests \
+  -destination 'platform=macOS'
 ```
 
 ## Signed releases
 
-`scripts/release-direct.sh` intentionally refuses to run without a Developer ID identity, notarytool profile, HTTPS appcast URL, and Sparkle EdDSA private-key file. It archives, exports, notarizes, staples, assesses with Gatekeeper, and signs the update artifact. The ad-hoc local DMG must never be published as an official release.
+`scripts/release-direct.sh` intentionally refuses to run without a Developer ID identity, notarytool profile, HTTPS appcast URL, and Sparkle EdDSA private-key file. It archives, exports, verifies Hardened Runtime and release entitlements, notarizes, staples, assesses with Gatekeeper, and generates an EdDSA-signed `appcast.xml` plus a SHA-256 checksum. The ad-hoc local DMG must never be published as an official release.
+
+The tag workflow creates an isolated temporary keychain and requires these GitHub Actions secrets: `MACCOFFEE_DEVELOPER_ID`, `MACCOFFEE_DEVELOPER_ID_P12_BASE64`, `MACCOFFEE_DEVELOPER_ID_P12_PASSWORD`, `MACCOFFEE_NOTARY_APPLE_ID`, `MACCOFFEE_NOTARY_APP_PASSWORD`, `MACCOFFEE_NOTARY_TEAM_ID`, `MACCOFFEE_APPCAST_URL`, and `MACCOFFEE_SPARKLE_PRIVATE_KEY`. It uploads the notarized DMG, checksum, and signed appcast to the same GitHub release.
 
 The App Store pipeline is isolated in `scripts/archive-app-store.sh` and never invokes Sparkle tooling.
 

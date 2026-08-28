@@ -12,7 +12,7 @@ final class FakeSettingsStore: SettingsStoring {
     var notificationAuthorizationRequested: Bool
 
     init(
-        savedDuration: SessionDuration = .indefinite,
+        savedDuration: SessionDuration = .hours1,
         batteryThreshold: Int = 15,
         launchAtLoginRequested: Bool = false,
         notificationAuthorizationRequested: Bool = false
@@ -27,13 +27,19 @@ final class FakeSettingsStore: SettingsStoring {
 final class FakePowerAssertionManager: PowerAssertionManaging {
     private(set) var activeMode: WakeMode = .off
     var failNextTransition = false
+    var failEveryTransition = false
+    var confirmedModeOnFailure: WakeMode?
     private(set) var transitions: [WakeMode] = []
     private(set) var releaseAllCalled = false
 
     func transition(to mode: WakeMode) throws {
         transitions.append(mode)
-        if failNextTransition {
+        if failEveryTransition || failNextTransition {
             failNextTransition = false
+            if let confirmedModeOnFailure {
+                activeMode = confirmedModeOnFailure
+                self.confirmedModeOnFailure = nil
+            }
             throw FakeServiceError.failed
         }
         activeMode = mode
@@ -67,10 +73,12 @@ final class FakeBatteryMonitor: BatteryMonitoring {
 @MainActor
 final class FakeSessionScheduler: SessionScheduling {
     private(set) var deadline: Date?
+    private(set) var scheduleCount = 0
     private var action: (@MainActor @Sendable () -> Void)?
     var hasScheduledAction: Bool { action != nil }
 
     func schedule(deadline: Date, action: @escaping @MainActor @Sendable () -> Void) {
+        scheduleCount += 1
         self.deadline = deadline
         self.action = action
     }

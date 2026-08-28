@@ -616,7 +616,7 @@ git commit -m "feat: compose direct and App Store applications"
 **Interfaces:**
 - `scripts/build-local.sh [direct|app-store]` creates a fully sealed ad-hoc local `.app` after resources are installed.
 - `scripts/package-dmg.sh` packages the already verified direct app.
-- `scripts/release-direct.sh` requires Developer ID, notarization, HTTPS appcast, and Sparkle EdDSA inputs; it exits nonzero if any are absent.
+- `scripts/release-direct.sh` requires Developer ID, notarization, HTTPS appcast, and Sparkle EdDSA inputs; it exits nonzero if any are absent and produces a signed `appcast.xml` alongside the notarized DMG.
 - `scripts/uninstall-legacy-helper.sh` removes only exact legacy paths and restores `disablesleep 0` after administrator authorization.
 
 - [ ] **Step 1: Write a verification script that fails the upstream bundle**
@@ -638,7 +638,7 @@ Run `xcodebuild` with standard architectures and local ad-hoc signing, copy the 
 
 - [ ] **Step 3: Implement credential-gated direct release**
 
-Require these exact environment keys: `MACCOFFEE_DEVELOPER_ID`, `MACCOFFEE_NOTARY_PROFILE`, `MACCOFFEE_APPCAST_URL`, and `MACCOFFEE_SPARKLE_PRIVATE_KEY_FILE`. Archive/export through Xcode, sign the update with Sparkle 2.9.4, submit with `notarytool --wait`, staple the app and DMG, and run Gatekeeper assessment before publication.
+Require these exact environment keys: `MACCOFFEE_DEVELOPER_ID`, `MACCOFFEE_NOTARY_PROFILE`, `MACCOFFEE_APPCAST_URL`, and `MACCOFFEE_SPARKLE_PRIVATE_KEY_FILE`. Archive/export through Xcode, generate the EdDSA-signed Sparkle 2.9.4 appcast, submit with `notarytool --wait`, staple the app and DMG, and run Gatekeeper assessment before publication. CI imports the Developer ID certificate and stores the notary profile in an isolated temporary keychain before this script runs.
 
 - [ ] **Step 4: Implement App Store archive and CI isolation**
 
@@ -704,7 +704,7 @@ Launch the local Direct app. Activate system mode and confirm `pmset -g assertio
 
 - [ ] **Step 4: Verify runtime resources and packaging**
 
-Measure the release process for five idle minutes with the panel closed. Record average CPU, resident memory, and wakeups in `docs/RELEASE_CHECKLIST.md`; acceptance is CPU at or below 0.1% and resident memory below 50 MB. Run `codesign`, `spctl` where applicable, `lipo`, bundle inspection, DMG mount/copy/launch smoke test, English/Russian UI checks, and Sparkle-free App Store inspection.
+Measure the release process for five idle minutes with the panel closed. Record average CPU, physical footprint, resident memory, and wakeups in `docs/RELEASE_CHECKLIST.md`; acceptance is CPU at or below 0.1% and physical footprint below 50 MB. Record resident size separately because it includes shared framework mappings. Run `codesign`, `spctl` where applicable, `lipo`, bundle inspection, DMG mount/copy/launch smoke test, English/Russian UI checks, and Sparkle-free App Store inspection.
 
 - [ ] **Step 5: Write store/release metadata**
 

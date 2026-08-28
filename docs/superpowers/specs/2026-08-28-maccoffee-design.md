@@ -301,7 +301,7 @@ The updater and login-item service are side capabilities. They cannot mutate the
 - The session task sleeps directly until expiration.
 - Countdown rendering updates only while the panel is visible: once per minute when more than one minute remains and once per second during the final minute.
 - Average idle CPU target with a closed panel: at or below 0.1% over five minutes on a release build.
-- Idle resident-memory target: below 50 MB on a release build.
+- Idle physical-footprint target: below 50 MB on a release build. Resident size is recorded as an informational metric because it includes shared AppKit and SwiftUI mappings that are not private process cost.
 - No network access occurs in the App Store build. Direct network access is limited to Sparkle update checks over HTTPS.
 - The only third-party runtime dependency is Sparkle 2.9.4 in `MacCoffeeDirect`.
 
@@ -330,7 +330,7 @@ The updater and login-item service are side capabilities. They cannot mutate the
 - is packaged as a drag-to-Applications DMG;
 - is notarized with `notarytool` and stapled;
 - publishes versioned artifacts, checksums, release notes, and an EdDSA-signed Sparkle appcast;
-- supports automatic and user-initiated update checks.
+- supports user-initiated update checks without background network polling.
 
 The appcast URL is supplied by the release configuration key `MACCOFFEE_APPCAST_URL`. Release builds fail at build time if the value is absent or not HTTPS.
 

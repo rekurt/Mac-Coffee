@@ -5,7 +5,9 @@ final class LocalizationTests: XCTestCase {
     func testEnglishAndRussianContainRequiredKeys() throws {
         let required = Set([
             "mode.off", "mode.system", "mode.display", "duration.indefinite",
-            "battery.blocked", "settings.launchAtLogin", "action.quit"
+            "battery.blocked", "countdown.hoursMinutes", "countdown.minutes",
+            "countdown.seconds", "error.powerAssertion", "notification.timerCompleted",
+            "settings.launchAtLogin", "action.quit"
         ])
         let english = try keys(in: "en")
         let russian = try keys(in: "ru")

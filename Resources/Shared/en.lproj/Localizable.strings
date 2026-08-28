@@ -18,11 +18,15 @@
 "status.off" = "Mac Coffee is off";
 "status.active" = "Mac Coffee is active";
 "status.remaining" = "%@ remaining";
+"countdown.hoursMinutes" = "%dh %dm";
+"countdown.minutes" = "%dm";
+"countdown.seconds" = "%ds";
 "battery.title" = "Power";
 "battery.ac" = "Power adapter";
 "battery.percent" = "%d%% battery";
 "battery.unknown" = "Battery status unavailable";
 "battery.blocked" = "Wake mode stopped to protect the battery.";
+"error.powerAssertion" = "Mac Coffee could not update the wake mode. Try again.";
 "settings.title" = "Mac Coffee Settings";
 "settings.batteryThreshold" = "Stop on battery at";
 "settings.batteryThresholdValue" = "%d%%";

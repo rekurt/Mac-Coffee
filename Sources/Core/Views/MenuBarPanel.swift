@@ -103,9 +103,17 @@ public struct MenuBarPanel: View {
 
     private var footer: some View {
         HStack(spacing: 14) {
-            Button("action.settings", action: openSettings)
+            if #available(macOS 14.0, *) {
+                SettingsLink {
+                    Text("action.settings")
+                }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("maccoffee.action.settings")
+            } else {
+                Button("action.settings", action: openLegacySettings)
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("maccoffee.action.settings")
+            }
             Button("action.about") {
                 NSApplication.shared.orderFrontStandardAboutPanel(nil)
             }
@@ -139,7 +147,7 @@ public struct MenuBarPanel: View {
         return model.batteryState.powerSource == .ac ? "battery.100.bolt" : "battery.50"
     }
 
-    private func openSettings() {
+    private func openLegacySettings() {
         NSApplication.shared.activate(ignoringOtherApps: true)
         NSApplication.shared.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     }

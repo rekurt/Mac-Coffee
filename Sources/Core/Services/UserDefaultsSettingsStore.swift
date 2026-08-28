@@ -19,7 +19,7 @@ public final class UserDefaultsSettingsStore: SettingsStoring {
             guard let rawValue = defaults.string(forKey: Key.selectedDuration),
                   let duration = SessionDuration(rawValue: rawValue)
             else {
-                return .indefinite
+                return .hours1
             }
             return duration
         }

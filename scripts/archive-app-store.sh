@@ -37,4 +37,20 @@ if /usr/bin/find "$archive_path" \( -iname '*Sparkle*' -o -iname '*Updater*' \) 
   print -u2 "App Store archive contains an alternate updater."
   exit 65
 fi
+app_path="$archive_path/Products/Applications/Mac Coffee.app"
+if ! /usr/bin/codesign -dvv "$app_path" 2>&1 | /usr/bin/grep -q 'flags=.*runtime'; then
+  print -u2 "App Store archive does not have Hardened Runtime enabled."
+  exit 65
+fi
+entitlements_file=$(/usr/bin/mktemp -t maccoffee-store-entitlements)
+/usr/bin/codesign -d --entitlements - --xml "$app_path" > "$entitlements_file" 2>/dev/null
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.app-sandbox' "$entitlements_file")" == true ]] || {
+  print -u2 "App Store archive is not sandboxed."
+  exit 65
+}
+if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.get-task-allow' "$entitlements_file" >/dev/null 2>&1; then
+  print -u2 "App Store archive contains the debug get-task-allow entitlement."
+  exit 65
+fi
+/bin/rm -f "$entitlements_file"
 print "App Store archive ready: $archive_path"

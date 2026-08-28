@@ -2,26 +2,36 @@ import SwiftUI
 
 public struct DurationPicker: View {
     @ObservedObject private var model: AppModel
+    @State private var selection: SessionDuration
 
     public init(model: AppModel) {
         self.model = model
+        _selection = State(initialValue: model.selectedDuration)
     }
 
     public var body: some View {
         Picker(
             "duration.title",
-            selection: Binding(
-                get: { model.selectedDuration },
-                set: { duration in model.selectDuration(duration) }
-            )
+            selection: $selection
         ) {
             ForEach(SessionDuration.allCases, id: \.self) { duration in
-                Text(verbatim: duration.localizedTitle).tag(duration)
+                Text(verbatim: duration.localizedTitle)
+                    .tag(duration)
+                    .accessibilityIdentifier("maccoffee.duration.\(duration.rawValue)")
             }
         }
         .pickerStyle(.segmented)
         .accessibilityIdentifier("maccoffee.duration.picker")
         .accessibilityValue(Text(verbatim: model.selectedDuration.localizedTitle))
+        .onChange(of: selection) { duration in
+            Task { @MainActor in
+                model.selectDuration(duration)
+                selection = model.selectedDuration
+            }
+        }
+        .onChange(of: model.selectedDuration) { duration in
+            selection = duration
+        }
     }
 }
 

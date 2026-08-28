@@ -34,11 +34,21 @@ public struct CountdownText: View {
         let total = max(0, Int(ceil(deadline.timeIntervalSince(now))))
         let formatted: String
         if total >= 3_600 {
-            formatted = "\(total / 3_600)h \((total % 3_600) / 60)m"
+            formatted = String(
+                format: String(localized: "countdown.hoursMinutes", bundle: .main),
+                total / 3_600,
+                (total % 3_600) / 60
+            )
         } else if total > 60 {
-            formatted = "\(total / 60)m"
+            formatted = String(
+                format: String(localized: "countdown.minutes", bundle: .main),
+                total / 60
+            )
         } else {
-            formatted = "\(total)s"
+            formatted = String(
+                format: String(localized: "countdown.seconds", bundle: .main),
+                total
+            )
         }
         return String(
             format: String(localized: "status.remaining", bundle: .main),

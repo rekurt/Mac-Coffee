@@ -27,6 +27,14 @@ jobs:
           -destination 'platform=macOS'
           CODE_SIGNING_ALLOWED=NO
 
+      - name: Menu bar UI tests
+        timeout-minutes: 10
+        run: >-
+          xcodebuild test
+          -project MacCoffee.xcodeproj
+          -scheme MacCoffeeUITests
+          -destination 'platform=macOS'
+
       - name: Build Direct target
         run: ./scripts/build-local.sh direct
 
@@ -35,6 +43,9 @@ jobs:
 
       - name: Verify distribution boundary
         run: ./scripts/verify-bundles.sh
+
+      - name: Verify release script syntax
+        run: zsh -n scripts/*.sh
 
       - name: Package local smoke-test DMG
         run: ./scripts/package-dmg.sh

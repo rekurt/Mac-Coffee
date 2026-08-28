@@ -36,6 +36,11 @@ command -v xcodegen >/dev/null || {
 cd "$ROOT_DIR"
 xcodegen generate
 
+optional_build_settings=()
+if [[ "$variant" == direct && -n "${MACCOFFEE_SPARKLE_PUBLIC_KEY:-}" ]]; then
+  optional_build_settings+=(MACCOFFEE_SPARKLE_PUBLIC_KEY="$MACCOFFEE_SPARKLE_PUBLIC_KEY")
+fi
+
 xcodebuild build \
   -project MacCoffee.xcodeproj \
   -scheme "$scheme" \
@@ -44,11 +49,13 @@ xcodebuild build \
   -derivedDataPath "$build_dir" \
   ARCHS='arm64 x86_64' \
   ONLY_ACTIVE_ARCH=NO \
+  ENABLE_HARDENED_RUNTIME=NO \
   CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY=- \
   CODE_SIGNING_ALLOWED=YES \
   CODE_SIGNING_REQUIRED=YES \
-  DEVELOPMENT_TEAM=
+  DEVELOPMENT_TEAM= \
+  "${optional_build_settings[@]}"
 
 source_app="$build_dir/Build/Products/Release/Mac Coffee.app"
 destination_app="$destination_dir/Mac Coffee.app"

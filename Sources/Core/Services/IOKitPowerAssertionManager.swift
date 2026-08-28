@@ -1,17 +1,13 @@
 import Foundation
 import IOKit.pwr_mgt
+import OSLog
 
 public enum PowerAssertionError: LocalizedError, Equatable {
     case createFailed(IOReturn)
     case releaseFailed(IOPMAssertionID, IOReturn)
 
     public var errorDescription: String? {
-        switch self {
-        case let .createFailed(code):
-            "Could not create a macOS power assertion (IOKit error \(code))."
-        case let .releaseFailed(id, code):
-            "Could not release macOS power assertion \(id) (IOKit error \(code))."
-        }
+        String(localized: "error.powerAssertion", bundle: .main)
     }
 }
 
@@ -21,6 +17,8 @@ protocol PowerAssertionDriving: AnyObject {
 }
 
 private final class SystemPowerAssertionDriver: PowerAssertionDriving {
+    private let logger = Logger(subsystem: "com.rekurt.maccoffee", category: "PowerAssertion")
+
     func create(type: CFString, name: CFString) throws -> IOPMAssertionID {
         var assertionID = IOPMAssertionID(0)
         let result = IOPMAssertionCreateWithName(
@@ -30,6 +28,7 @@ private final class SystemPowerAssertionDriver: PowerAssertionDriving {
             &assertionID
         )
         guard result == kIOReturnSuccess else {
+            logger.error("IOPMAssertionCreateWithName failed with IOKit code \(result, privacy: .public)")
             throw PowerAssertionError.createFailed(result)
         }
         return assertionID
@@ -38,6 +37,9 @@ private final class SystemPowerAssertionDriver: PowerAssertionDriving {
     func release(id: IOPMAssertionID) throws {
         let result = IOPMAssertionRelease(id)
         guard result == kIOReturnSuccess else {
+            logger.error(
+                "IOPMAssertionRelease failed for ID \(id, privacy: .public), IOKit code \(result, privacy: .public)"
+            )
             throw PowerAssertionError.releaseFailed(id, result)
         }
     }
@@ -53,9 +55,11 @@ public final class IOKitPowerAssertionManager: PowerAssertionManaging {
 
     private let driver: PowerAssertionDriving
     private var activeAssertion: ActiveAssertion?
-    private var pendingReleaseIDs: [IOPMAssertionID] = []
+    private var pendingReleaseAssertions: [ActiveAssertion] = []
 
-    public var activeMode: WakeMode { activeAssertion?.mode ?? .off }
+    public var activeMode: WakeMode {
+        activeAssertion?.mode ?? pendingReleaseAssertions.first?.mode ?? .off
+    }
 
     public convenience init() {
         self.init(driver: SystemPowerAssertionDriver())
@@ -70,12 +74,13 @@ public final class IOKitPowerAssertionManager: PowerAssertionManaging {
     }
 
     public func transition(to mode: WakeMode) throws {
-        guard mode != activeMode else { return }
-
         if mode == .off {
             try transitionToOff()
             return
         }
+
+        try releasePendingAssertions()
+        guard mode != activeAssertion?.mode else { return }
 
         let newID = try driver.create(
             type: assertionType(for: mode),
@@ -88,35 +93,64 @@ public final class IOKitPowerAssertionManager: PowerAssertionManaging {
         do {
             try driver.release(id: previous.id)
         } catch {
-            trackForRelease(previous.id)
+            trackForRelease(previous)
             throw error
         }
     }
 
     public func releaseAll() {
-        var ids = pendingReleaseIDs
-        if let activeID = activeAssertion?.id, !ids.contains(activeID) {
-            ids.append(activeID)
-        }
-
-        var failures: [IOPMAssertionID] = []
-        for id in ids {
-            do {
-                try driver.release(id: id)
-                if activeAssertion?.id == id {
-                    activeAssertion = nil
-                }
-            } catch {
-                failures.append(id)
-            }
-        }
-        pendingReleaseIDs = failures.filter { $0 != activeAssertion?.id }
+        _ = releaseTrackedAssertions()
     }
 
     private func transitionToOff() throws {
-        guard let activeAssertion else { return }
-        try driver.release(id: activeAssertion.id)
-        self.activeAssertion = nil
+        if let firstError = releaseTrackedAssertions() {
+            throw firstError
+        }
+    }
+
+    private func releasePendingAssertions() throws {
+        var failures: [ActiveAssertion] = []
+        var firstError: Error?
+
+        for assertion in pendingReleaseAssertions {
+            do {
+                try driver.release(id: assertion.id)
+            } catch {
+                failures.append(assertion)
+                firstError = firstError ?? error
+            }
+        }
+        pendingReleaseAssertions = failures
+
+        if let firstError {
+            throw firstError
+        }
+    }
+
+    private func releaseTrackedAssertions() -> Error? {
+        var assertions = pendingReleaseAssertions
+        if let activeAssertion,
+           !assertions.contains(where: { $0.id == activeAssertion.id }) {
+            assertions.append(activeAssertion)
+        }
+
+        var pendingFailures: [ActiveAssertion] = []
+        var firstError: Error?
+        for assertion in assertions {
+            do {
+                try driver.release(id: assertion.id)
+                if activeAssertion?.id == assertion.id {
+                    activeAssertion = nil
+                }
+            } catch {
+                firstError = firstError ?? error
+                if activeAssertion?.id != assertion.id {
+                    pendingFailures.append(assertion)
+                }
+            }
+        }
+        pendingReleaseAssertions = pendingFailures
+        return firstError
     }
 
     private func assertionType(for mode: WakeMode) -> CFString {
@@ -130,9 +164,9 @@ public final class IOKitPowerAssertionManager: PowerAssertionManaging {
         }
     }
 
-    private func trackForRelease(_ id: IOPMAssertionID) {
-        if !pendingReleaseIDs.contains(id) {
-            pendingReleaseIDs.append(id)
+    private func trackForRelease(_ assertion: ActiveAssertion) {
+        if !pendingReleaseAssertions.contains(where: { $0.id == assertion.id }) {
+            pendingReleaseAssertions.append(assertion)
         }
     }
 }

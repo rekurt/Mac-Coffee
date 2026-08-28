@@ -121,8 +121,12 @@ public final class AppModel: ObservableObject {
     }
 
     public func revalidateDeadline() {
-        guard let deadline = session?.expiresAt, deadline <= environment.now() else { return }
-        stop(reason: .timerCompleted)
+        guard let session, let deadline = session.expiresAt else { return }
+        if deadline <= environment.now() {
+            stop(reason: .timerCompleted)
+        } else {
+            schedule(session)
+        }
     }
 
     public func dismissStatus() {
@@ -209,10 +213,11 @@ public final class AppModel: ObservableObject {
 
     private func revalidateDeadlineAfterScheduledWake(deadline: Date) {
         guard session?.expiresAt == deadline else { return }
-        stop(reason: .timerCompleted)
+        revalidateDeadline()
     }
 
     private func stop(reason: AppNotificationEvent) {
+        let previousSession = session
         do {
             try environment.powerAssertions.transition(to: .off)
             mode = .off
@@ -221,10 +226,29 @@ public final class AppModel: ObservableObject {
             environment.notifications.send(reason)
             if reason == .lowBatteryStopped {
                 statusMessage = String(localized: "battery.blocked", bundle: .main)
+            } else if reason == .timerCompleted {
+                statusMessage = String(localized: "notification.timerCompleted", bundle: .main)
             }
         } catch {
-            mode = environment.powerAssertions.activeMode
+            reconcileAfterFailedStop(previousSession: previousSession)
             statusMessage = error.localizedDescription
         }
+    }
+
+    private func reconcileAfterFailedStop(previousSession: WakeSession?) {
+        let confirmedMode = environment.powerAssertions.activeMode
+        mode = confirmedMode
+        environment.scheduler.cancel()
+
+        guard confirmedMode != .off, let previousSession else {
+            session = nil
+            return
+        }
+        session = WakeSession(
+            mode: confirmedMode,
+            startedAt: previousSession.startedAt,
+            duration: previousSession.duration,
+            expiresAt: previousSession.expiresAt
+        )
     }
 }

@@ -74,4 +74,36 @@ final class PowerAssertionManagerTests: XCTestCase {
         XCTAssertEqual(manager.activeMode, .off)
         XCTAssertEqual(driver.events.suffix(2), [.release(1), .release(2)])
     }
+
+    func testOffRetriesEveryStaleAssertionBeforeReportingOff() throws {
+        let driver = FakePowerAssertionDriver(failReleaseIDs: [1])
+        let manager = IOKitPowerAssertionManager(driver: driver)
+        try manager.transition(to: .system)
+
+        XCTAssertThrowsError(try manager.transition(to: .display))
+        XCTAssertEqual(manager.activeMode, .display)
+
+        XCTAssertThrowsError(try manager.transition(to: .off))
+        XCTAssertEqual(manager.activeMode, .system)
+
+        driver.failReleaseIDs = []
+        try manager.transition(to: .off)
+
+        XCTAssertEqual(manager.activeMode, .off)
+        XCTAssertEqual(driver.events.suffix(3), [.release(1), .release(2), .release(1)])
+    }
+
+    func testNewTransitionRetriesStaleAssertionsBeforeCreatingAnotherOne() throws {
+        let driver = FakePowerAssertionDriver(failReleaseIDs: [1])
+        let manager = IOKitPowerAssertionManager(driver: driver)
+        try manager.transition(to: .system)
+        XCTAssertThrowsError(try manager.transition(to: .display))
+
+        let eventCount = driver.events.count
+        XCTAssertThrowsError(try manager.transition(to: .system))
+
+        XCTAssertEqual(driver.events.count, eventCount + 1)
+        XCTAssertEqual(driver.events.last, .release(1))
+        XCTAssertEqual(manager.activeMode, .display)
+    }
 }

@@ -21,7 +21,12 @@ public struct SettingsView: View {
                             ),
                             in: LowBatteryPolicy.thresholdRange
                         ) {
-                            Text("\(model.batteryThreshold)%")
+                            Text(
+                                String(
+                                    format: String(localized: "settings.batteryThresholdValue", bundle: .main),
+                                    model.batteryThreshold
+                                )
+                            )
                                 .monospacedDigit()
                         }
                         .accessibilityIdentifier("maccoffee.settings.batteryThreshold")

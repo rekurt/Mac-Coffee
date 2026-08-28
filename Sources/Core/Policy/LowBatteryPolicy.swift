@@ -10,11 +10,21 @@ public enum LowBatteryPolicy {
         battery: BatteryState,
         threshold: Int
     ) -> Bool {
-        guard battery.hasInternalBattery,
-              battery.powerSource == .battery,
-              let percentage = battery.percentage
-        else {
+        guard battery.hasInternalBattery else {
             return false
+        }
+
+        switch battery.powerSource {
+        case .ac:
+            return false
+        case .unknown:
+            return currentlyBlocked
+        case .battery:
+            break
+        }
+
+        guard let percentage = battery.percentage else {
+            return currentlyBlocked
         }
 
         let safeThreshold = min(thresholdRange.upperBound, max(thresholdRange.lowerBound, threshold))

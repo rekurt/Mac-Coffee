@@ -57,4 +57,26 @@ final class PlatformAdapterTests: XCTestCase {
         await fulfillment(of: [fired], timeout: 1)
         XCTAssertFalse(scheduler.hasScheduledAction)
     }
+
+    @MainActor
+    func testCancelledTaskCannotClearReplacementSchedule() async throws {
+        let scheduler = TaskSessionScheduler()
+        scheduler.schedule(deadline: Date().addingTimeInterval(60)) {}
+        scheduler.schedule(deadline: Date().addingTimeInterval(120)) {}
+
+        try await Task.sleep(for: .milliseconds(20))
+
+        XCTAssertTrue(scheduler.hasScheduledAction)
+        scheduler.cancel()
+    }
+
+    func testBatteryReadFailurePreservesLaptopIdentityAsUnknown() {
+        let previous = BatteryState(powerSource: .battery, percentage: 12, hasInternalBattery: true)
+
+        let fallback = IOKitBatteryMonitor.stateAfterReadFailure(previous: previous)
+
+        XCTAssertEqual(fallback.powerSource, .unknown)
+        XCTAssertNil(fallback.percentage)
+        XCTAssertTrue(fallback.hasInternalBattery)
+    }
 }

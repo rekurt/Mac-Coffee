@@ -69,16 +69,24 @@ public final class IOKitBatteryMonitor: BatteryMonitoring {
     }
 
     private func refreshAndPublish() {
-        let newState = Self.readCurrentState()
+        let newState = Self.readCurrentState(previous: currentState)
         currentState = newState
         onChange?(newState)
     }
 
-    private static func readCurrentState() -> BatteryState {
+    nonisolated static func stateAfterReadFailure(previous: BatteryState) -> BatteryState {
+        BatteryState(
+            powerSource: .unknown,
+            percentage: nil,
+            hasInternalBattery: previous.hasInternalBattery
+        )
+    }
+
+    private static func readCurrentState(previous: BatteryState) -> BatteryState {
         guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
               let sourceList = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef]
         else {
-            return .acDesktop
+            return stateAfterReadFailure(previous: previous)
         }
 
         for source in sourceList {

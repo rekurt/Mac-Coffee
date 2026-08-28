@@ -3,6 +3,7 @@ import Foundation
 @MainActor
 public final class TaskSessionScheduler: SessionScheduling {
     private var task: Task<Void, Never>?
+    private var generation: UInt64 = 0
     private let now: () -> Date
 
     public var hasScheduledAction: Bool { task != nil }
@@ -19,7 +20,9 @@ public final class TaskSessionScheduler: SessionScheduling {
         deadline: Date,
         action: @escaping @MainActor @Sendable () -> Void
     ) {
-        cancel()
+        generation &+= 1
+        let scheduledGeneration = generation
+        task?.cancel()
         let delay = max(0, deadline.timeIntervalSince(now()))
         task = Task { @MainActor [weak self] in
             do {
@@ -31,11 +34,13 @@ public final class TaskSessionScheduler: SessionScheduling {
             } catch {
                 // Cancellation is the normal rescheduling path.
             }
+            guard self?.generation == scheduledGeneration else { return }
             self?.task = nil
         }
     }
 
     public func cancel() {
+        generation &+= 1
         task?.cancel()
         task = nil
     }

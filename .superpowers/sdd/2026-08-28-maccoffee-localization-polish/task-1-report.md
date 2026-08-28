@@ -69,3 +69,29 @@
 
 - The fallback remains English for unsupported non-Chinese system languages.
 - Because only Simplified Chinese is supported by the product contract, the resolver intentionally maps all Chinese regions and bare `zh` to `zh-Hans`.
+
+---
+
+## Fix round 2/5 — Traditional Chinese system fallback
+
+### Change
+
+- Added regression coverage for `zh-Hant`, `zh_TW`, `zh_HK`, and `zh_MO` system locales falling back to `en`.
+- Updated the resolver to exclude the explicit Traditional Chinese script and regions `TW`, `HK`, and `MO` from the Simplified Chinese branch.
+
+### TDD evidence
+
+1. RED:
+   `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild test -project MacCoffee.xcodeproj -scheme MacCoffeeTests -destination 'platform=macOS' -only-testing:MacCoffeeTests/RuntimeLocalizationTests`
+   - The four new regression assertions failed as expected: each Traditional Chinese identifier resolved to `zh-Hans` rather than `en`.
+2. GREEN focused:
+   `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild test -project MacCoffee.xcodeproj -scheme MacCoffeeTests -destination 'platform=macOS' -only-testing:MacCoffeeTests/RuntimeLocalizationTests`
+   - Passed: 10 tests, 0 failures.
+3. GREEN full suite:
+   `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild test -project MacCoffee.xcodeproj -scheme MacCoffeeTests -destination 'platform=macOS' -enableCodeCoverage YES`
+   - Passed: 57 tests, 0 failures.
+
+### Self-review
+
+- `zh_CN`, `zh_SG`, and bare `zh` remain covered as `zh-Hans` and are unaffected.
+- Explicit `Hant` and `TW`/`HK`/`MO` subtags now reach the unsupported-language fallback, `en`.

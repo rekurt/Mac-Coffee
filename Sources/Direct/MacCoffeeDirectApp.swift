@@ -74,6 +74,10 @@ struct MacCoffeeDirectApp: App {
                     MenuBarPanel(model: model, updater: updater, panelWidth: windowWidth)
                 }
             )
+            let contentSize = NSSize(width: windowWidth, height: 680)
+            window.contentMinSize = contentSize
+            window.contentMaxSize = contentSize
+            window.setContentSize(contentSize)
             window.center()
             let controller = NSWindowController(window: window)
             uiTestWindowController = controller

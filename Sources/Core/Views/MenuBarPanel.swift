@@ -74,7 +74,14 @@ public struct MenuBarPanel: View {
             footer
         }
         .padding(16)
-        .frame(minWidth: 0, idealWidth: panelWidth ?? 420, maxWidth: panelWidth ?? 420)
+        // A deterministic UI-test host supplies an explicit panel width. Keep all
+        // three constraints equal in that case so the hosted AppKit window and
+        // SwiftUI content report the same geometry. Production remains flexible.
+        .frame(
+            minWidth: panelWidth ?? 0,
+            idealWidth: panelWidth ?? 420,
+            maxWidth: panelWidth ?? 420
+        )
         .alert("action.quit", isPresented: $showsQuitConfirmation) {
             Button("action.cancel", role: .cancel) {}
             Button("action.confirmQuit", role: .destructive) {
@@ -136,6 +143,7 @@ public struct MenuBarPanel: View {
         }
         .frame(width: footerWidth, alignment: .leading)
         .font(.caption)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("maccoffee.footer")
     }
 
@@ -144,25 +152,29 @@ public struct MenuBarPanel: View {
     }
 
     private var actionGrid: some View {
-        LazyVGrid(
-            columns: [
-                GridItem(.flexible(minimum: 150), spacing: 8),
-                GridItem(.flexible(minimum: 150), spacing: 8)
-            ],
-            spacing: 8
-        ) {
-            settingsAction
-            aboutAction
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                settingsAction
+                    .frame(maxWidth: .infinity)
+                aboutAction
+                    .frame(maxWidth: .infinity)
+            }
             if hasUpdateAction {
-                updateAction
-                quitAction
+                HStack(spacing: 8) {
+                    updateAction
+                        .frame(maxWidth: .infinity)
+                    quitAction
+                        .frame(maxWidth: .infinity)
+                }
             } else {
                 quitAction
-                    .gridCellColumns(2)
+                    .frame(maxWidth: .infinity)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("maccoffee.footer.grid")
+        .background(footerLayoutMarker("maccoffee.footer.grid"))
     }
 
     private var actionList: some View {
@@ -176,10 +188,20 @@ public struct MenuBarPanel: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("maccoffee.footer.list")
+        .background(footerLayoutMarker("maccoffee.footer.list"))
     }
 
     private var hasUpdateAction: Bool {
-        updater?.canCheckForUpdates == true
+        if updater?.canCheckForUpdates == true {
+            return true
+        }
+#if DEBUG
+        // Sparkle has no feed in the deterministic host. Expose the real Direct
+        // action there so UI tests can verify the four-action production layout.
+        return updater != nil && CommandLine.arguments.contains("--ui-testing-force-update-action")
+#else
+        return false
+#endif
     }
 
     @ViewBuilder
@@ -238,6 +260,21 @@ public struct MenuBarPanel: View {
             return localization.localized("battery.unknown")
         }
         return localization.format("battery.percent", arguments: percentage)
+    }
+
+    /// Gives UI automation a frame-bearing layout node without changing the
+    /// visual size or hit-testing of the footer itself.
+    @ViewBuilder
+    private func footerLayoutMarker(_ identifier: String) -> some View {
+#if DEBUG
+        Text(verbatim: identifier)
+            .font(.system(size: 1))
+            .lineLimit(1)
+            .fixedSize()
+            .opacity(0.01)
+            .allowsHitTesting(false)
+            .accessibilityIdentifier(identifier)
+#endif
     }
 
     private var batterySymbol: String {

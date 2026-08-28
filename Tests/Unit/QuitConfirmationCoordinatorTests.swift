@@ -146,6 +146,49 @@ final class QuitConfirmationCoordinatorTests: XCTestCase {
         withExtendedLifetime(coordinator) {}
     }
 
+    func testProductionLocalMonitorConsumesPostedCommandQBeforeMenuDispatch() throws {
+        let application = NSApplication.shared
+        let previousMainMenu = application.mainMenu
+        let actionProbe = MenuActionProbe()
+        application.mainMenu = makeTestMainMenu(target: actionProbe)
+        defer { application.mainMenu = previousMainMenu }
+        var presentationCount = 0
+        var preparationCount = 0
+        var terminationCount = 0
+        let coordinator = QuitConfirmationCoordinator(
+            localization: LocalizationController(
+                settings: FakeSettingsStore(selectedLanguage: .english)
+            ),
+            present: { _ in
+                presentationCount += 1
+                return .alertSecondButtonReturn
+            },
+            prepareForTermination: { preparationCount += 1 },
+            terminate: { terminationCount += 1 },
+            shortcutMonitorFactory: QuitConfirmationCoordinator.productionShortcutMonitorFactory
+        )
+
+        try postAndDispatch(
+            keyEvent("w", flags: [.command], keyCode: 13),
+            expecting: "w",
+            through: application
+        )
+        XCTAssertEqual(actionProbe.invocationCount, 1, "The menu must receive unconsumed shortcuts")
+        actionProbe.invocationCount = 0
+
+        try postAndDispatch(
+            keyEvent("q", flags: [.command], keyCode: 12),
+            expecting: "q",
+            through: application
+        )
+
+        XCTAssertEqual(presentationCount, 1)
+        XCTAssertEqual(preparationCount, 0)
+        XCTAssertEqual(terminationCount, 0)
+        XCTAssertEqual(actionProbe.invocationCount, 0, "The production monitor must consume Command-Q")
+        withExtendedLifetime(coordinator) {}
+    }
+
     private func makeCoordinator(
         response: NSApplication.ModalResponse,
         onPresent: @escaping () -> Void = {},
@@ -168,7 +211,8 @@ final class QuitConfirmationCoordinatorTests: XCTestCase {
     private func keyEvent(
         _ charactersIgnoringModifiers: String,
         flags: NSEvent.ModifierFlags,
-        isRepeat: Bool = false
+        isRepeat: Bool = false,
+        keyCode: UInt16 = 12
     ) throws -> NSEvent {
         try XCTUnwrap(NSEvent.keyEvent(
             with: .keyDown,
@@ -180,8 +224,52 @@ final class QuitConfirmationCoordinatorTests: XCTestCase {
             characters: charactersIgnoringModifiers,
             charactersIgnoringModifiers: charactersIgnoringModifiers,
             isARepeat: isRepeat,
-            keyCode: 12
+            keyCode: keyCode
         ))
+    }
+
+    private func makeTestMainMenu(target: MenuActionProbe) -> NSMenu {
+        let mainMenu = NSMenu()
+        let applicationItem = NSMenuItem()
+        let applicationMenu = NSMenu()
+        applicationItem.submenu = applicationMenu
+        mainMenu.addItem(applicationItem)
+        for key in ["w", "q"] {
+            let item = NSMenuItem(
+                title: key,
+                action: #selector(MenuActionProbe.performAction(_:)),
+                keyEquivalent: key
+            )
+            item.keyEquivalentModifierMask = .command
+            item.target = target
+            applicationMenu.addItem(item)
+        }
+        return mainMenu
+    }
+
+    private func postAndDispatch(
+        _ event: NSEvent,
+        expecting expectedCharacters: String,
+        through application: NSApplication
+    ) throws {
+        application.postEvent(event, atStart: true)
+        let queuedEvent = try XCTUnwrap(application.nextEvent(
+            matching: .keyDown,
+            until: Date().addingTimeInterval(1),
+            inMode: .default,
+            dequeue: true
+        ))
+        XCTAssertEqual(queuedEvent.charactersIgnoringModifiers, expectedCharacters)
+        application.sendEvent(queuedEvent)
+    }
+}
+
+@MainActor
+private final class MenuActionProbe: NSObject {
+    var invocationCount = 0
+
+    @objc func performAction(_ sender: Any?) {
+        invocationCount += 1
     }
 }
 

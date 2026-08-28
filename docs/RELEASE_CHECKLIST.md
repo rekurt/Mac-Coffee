@@ -18,14 +18,15 @@ This checklist is both the release gate and the evidence record for version 2.0.
 - [x] Generate and validate a signed Sparkle appcast with a one-time test key; confirm its DMG URL and EdDSA enclosure signature.
 - [x] Tag workflow defines temporary-keychain materialization and cleanup for its Developer ID certificate, notary profile, and Sparkle key.
 
-The final UI rerun remains unchecked until it completes in a stable, unlocked macOS GUI session. A DEBUG-only deterministic test window removes the status-item dependency in CI, but macOS can still reject synthesized UI events or expose a stale accessibility hierarchy after interrupted automation runs. Focused footer cancellation has completed successfully, while the shared coordinator, real shortcut-handler routing, cleanup ordering, and localization are covered by unit tests. The full expanded suite must be rerun before a public release. The test-only window is absent from both Release binaries.
+The final UI rerun remains unchecked until it completes in a stable, unlocked macOS GUI session. A DEBUG-only deterministic test window removes the status-item dependency in CI, but macOS can still reject synthesized UI events or expose a stale accessibility hierarchy after interrupted automation runs. Focused footer cancellation has completed successfully. AppKit integration installs the production local monitor, queues `Command-Q` through `NSApplication`, dispatches it through the real event path, and proves it is consumed before the main menu while routing to the shared coordinator. The attempted live System Events smoke launched the signed Debug app, but the secure black desktop exposed zero windows and did not deliver the synthetic shortcut, so it is not counted as live verification. The full expanded suite and live shortcut smoke must be rerun before a public release. The test-only window is absent from both Release binaries.
 
 ## Runtime verification
 
 - [x] System mode appears in `pmset -g assertions` as `Mac Coffee active wake session` under `PreventUserIdleSystemSleep`.
 - [x] Display mode appears under `PreventUserIdleDisplaySleep`.
 - [x] Off and application termination leave no Mac Coffee assertion.
-- [x] Footer Quit and `Command-Q` use one localized native confirmation; Cancel preserves the active session.
+- [x] AppKit integration proves the production `Command-Q` monitor consumes and routes the shortcut to the same localized confirmation used by footer Quit.
+- [ ] On an unlocked desktop, complete a live `Command-Q` Cancel/Confirm smoke and verify the same PID survives Cancel and exits after Confirm.
 - [x] Confirmed user quit prepares termination exactly once before terminating; logout and shutdown cleanup remains noninteractive.
 - [x] Low battery at the configured boundary stops or blocks a session.
 - [x] Launch always begins in Off, including after an active-session termination.

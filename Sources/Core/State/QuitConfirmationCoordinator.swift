@@ -13,6 +13,9 @@ public final class QuitConfirmationCoordinator {
     public typealias Action = @MainActor () -> Void
     typealias ShortcutHandler = @MainActor (NSEvent) -> NSEvent?
     typealias ShortcutMonitorFactory = @MainActor (@escaping ShortcutHandler) -> any QuitShortcutMonitoring
+    static let productionShortcutMonitorFactory: ShortcutMonitorFactory = {
+        LocalKeyDownMonitor(handler: $0)
+    }
 
     private let localization: LocalizationController
     private let present: Presenter
@@ -34,7 +37,7 @@ public final class QuitConfirmationCoordinator {
             },
             prepareForTermination: model.prepareForTermination,
             terminate: { application.terminate(nil) },
-            shortcutMonitorFactory: { LocalKeyDownMonitor(handler: $0) }
+            shortcutMonitorFactory: Self.productionShortcutMonitorFactory
         )
     }
 

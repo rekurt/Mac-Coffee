@@ -43,3 +43,29 @@
 
 - `AppStatusNotice.launchAtLoginFailed` uses the new `error.launchAtLogin` localization key. Task 2 must provide it in every locale (the key is intentionally not added here because translation resources belong to Task 2).
 - Views are not yet injected with the published SwiftUI locale; that runtime UI wiring is Task 3. The domain, notices, and future notifications already react to controller changes.
+
+---
+
+## Fix round 1/5 — system Simplified Chinese matching
+
+### Change
+
+- Added a focused regression test for `zh_CN`, `zh_SG`, and bare `zh` system locales.
+- Updated the system resolver so any `zh` base language resolves to the only supported Chinese choice, `zh-Hans`.
+
+### TDD evidence
+
+1. RED:
+   `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild test -project MacCoffee.xcodeproj -scheme MacCoffeeTests -destination 'platform=macOS' -only-testing:MacCoffeeTests/RuntimeLocalizationTests`
+   - The new regression test failed three assertions: `zh_CN`, `zh_SG`, and `zh` each resolved to `en` rather than `zh-Hans`.
+2. GREEN focused:
+   `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild test -project MacCoffee.xcodeproj -scheme MacCoffeeTests -destination 'platform=macOS' -only-testing:MacCoffeeTests/RuntimeLocalizationTests`
+   - Passed: 9 tests, 0 failures.
+3. GREEN full suite:
+   `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild test -project MacCoffee.xcodeproj -scheme MacCoffeeTests -destination 'platform=macOS' -enableCodeCoverage YES`
+   - Passed: 56 tests, 0 failures.
+
+### Self-review
+
+- The fallback remains English for unsupported non-Chinese system languages.
+- Because only Simplified Chinese is supported by the product contract, the resolver intentionally maps all Chinese regions and bare `zh` to `zh-Hans`.

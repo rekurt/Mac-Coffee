@@ -34,6 +34,17 @@ final class RuntimeLocalizationTests: XCTestCase {
         XCTAssertEqual(unsupported.locale.identifier, "en")
     }
 
+    func testSystemSimplifiedChineseIdentifiersResolveToSimplifiedChinese() {
+        for identifier in ["zh_CN", "zh_SG", "zh"] {
+            let controller = LocalizationController(
+                settings: FakeSettingsStore(selectedLanguage: .system),
+                systemLocale: { Locale(identifier: identifier) }
+            )
+
+            XCTAssertEqual(controller.locale.identifier, "zh-Hans", "Expected \(identifier) to resolve to zh-Hans")
+        }
+    }
+
     func testMalformedSavedLanguageDefaultsToSystem() {
         let suiteName = "MacCoffeeTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

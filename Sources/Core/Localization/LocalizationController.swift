@@ -48,10 +48,9 @@ public final class LocalizationController: ObservableObject {
         let identifier = systemLocale.identifier.replacingOccurrences(of: "_", with: "-")
         let components = identifier.split(separator: "-").map(String.init)
         let baseLanguage = components.first?.lowercased()
-        let script = components.dropFirst().first(where: { $0.count == 4 })?.lowercased()
 
         let resolvedLanguage: SupportedLanguage?
-        if baseLanguage == "zh", script == "hans" {
+        if baseLanguage == "zh" {
             resolvedLanguage = .simplifiedChinese
         } else if let baseLanguage {
             resolvedLanguage = SupportedLanguage(rawValue: baseLanguage)

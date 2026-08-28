@@ -51,3 +51,17 @@
 "about.limitations" = "Ручной сон, закрытие крышки, тепловая защита и выключение всегда остаются под контролем macOS.";
 "accessibility.modeValue" = "Текущий режим: %@";
 "accessibility.durationValue" = "Выбранная длительность: %@";
+"settings.language" = "Язык";
+"settings.language.system" = "Язык системы";
+"settings.language.help" = "Выберите язык Mac Coffee. Изменения применяются сразу.";
+"language.russian" = "Русский";
+"language.english" = "English";
+"language.german" = "Deutsch";
+"language.french" = "Français";
+"language.simplifiedChinese" = "简体中文";
+"language.japanese" = "日本語";
+"language.korean" = "한국어";
+"language.spanish" = "Español";
+"about.versionFormat" = "Версия %@ (%@)";
+"error.launchAtLogin" = "Mac Coffee не удалось настроить запуск при входе. Попробуйте ещё раз.";
+"error.generic" = "Что-то пошло не так. Попробуйте ещё раз.";

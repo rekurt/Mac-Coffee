@@ -17,7 +17,7 @@
 "duration.indefinite.long" = "Hasta desactivarlo";
 "status.off" = "Mac Coffee está desactivado";
 "status.active" = "Mac Coffee está activo";
-"status.remaining" = "Quedan %@";
+"status.remaining" = "Tiempo restante: %@";
 "countdown.hoursMinutes" = "%d h %d min";
 "countdown.minutes" = "%d min";
 "countdown.seconds" = "%d s";

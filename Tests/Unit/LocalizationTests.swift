@@ -47,6 +47,11 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(english["language.spanish"], "Español")
     }
 
+    func testFrenchAndSpanishRemainingTimeUseNumberNeutralWording() throws {
+        XCTAssertEqual(try strings(in: "fr")["status.remaining"], "Temps restant : %@")
+        XCTAssertEqual(try strings(in: "es")["status.remaining"], "Tiempo restante: %@")
+    }
+
     private func strings(in language: String) throws -> [String: String] {
         let repository = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()

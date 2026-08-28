@@ -17,6 +17,7 @@
 		3B3EA9C36D3965A429445999 /* NotificationSending.swift in Sources */ = {isa = PBXBuildFile; fileRef = C969EF5E001651BE0474D10A /* NotificationSending.swift */; };
 		46FCE77E0EEDF57EC3925C06 /* SessionScheduling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A8E5AB1F8946894D4337E5 /* SessionScheduling.swift */; };
 		4FC0D2C41E715F9A736AE459 /* BatteryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC3454B9CF649A4EAFBB52C /* BatteryState.swift */; };
+		5147B8BBD924833635924A3D /* Fakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B307F98231FFABB3C96D453 /* Fakes.swift */; };
 		56FBBB39BF16B685C4F52FC4 /* SettingsStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A3AB23774EE6FDE8AA3572C /* SettingsStoring.swift */; };
 		5B9B1775F556DD1EDA0A4D1E /* AppLifecycleObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F73A00FC58C259FCC0A62A /* AppLifecycleObserver.swift */; };
 		5EE87E6A4BB593ED0F5748FA /* BatteryMonitoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FB2117A03163E6CD6FEE95 /* BatteryMonitoring.swift */; };
@@ -29,7 +30,10 @@
 		82A58A07DA4870F16A49F50E /* UserNotificationSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29C0A82FFD24B1BF810A1E4 /* UserNotificationSender.swift */; };
 		831AB034334ED0737CA6DD43 /* SessionDuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF11C2D6753C36C41368C85 /* SessionDuration.swift */; };
 		87260475D871741D6EBEBC1B /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 69FCA508D039BB8197E9CB0F /* Sparkle */; };
+		898C373B9AF81550F661E011 /* AppModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63985A8FA69869AE2D27FE3 /* AppModelTests.swift */; };
+		8B7B8DA49FF537819BE041D0 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C6F98578631B0DCD5D2D61 /* AppEnvironment.swift */; };
 		AF923D52E64190829CE51444 /* MacCoffeeCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82A246A0DCF736C0A7ACD7F /* MacCoffeeCore.swift */; };
+		B1FED5159FB7DFB9F15ACCC3 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C887D4BEB03D4C79748A9B3 /* AppModel.swift */; };
 		B843C8577EA694BE4A0FC0FA /* PlatformAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB165D15D8DE850D6BBA56CC /* PlatformAdapterTests.swift */; };
 		C05AE9512260D824C6801292 /* PowerAssertionManaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = E525A34EC2464A276FC490AC /* PowerAssertionManaging.swift */; };
 		C1C6567B68AB69BAC0E91776 /* MacCoffeeCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -110,6 +114,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		03C6F98578631B0DCD5D2D61 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		0FCF5616C19108989B4BF53F /* AppStore.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppStore.xcconfig; sourceTree = "<group>"; };
 		1473B9DE0FB8D0F8F3C52E77 /* MacCoffeeAppStore.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacCoffeeAppStore.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		194D8817D619E72C0E39DF9B /* LaunchAtLoginManaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginManaging.swift; sourceTree = "<group>"; };
@@ -126,7 +131,9 @@
 		6A3AB23774EE6FDE8AA3572C /* SettingsStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStoring.swift; sourceTree = "<group>"; };
 		87316A786DADC3D5F5D02BFE /* MacCoffeeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacCoffeeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		89FB2117A03163E6CD6FEE95 /* BatteryMonitoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryMonitoring.swift; sourceTree = "<group>"; };
+		8B307F98231FFABB3C96D453 /* Fakes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fakes.swift; sourceTree = "<group>"; };
 		9AF11C2D6753C36C41368C85 /* SessionDuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDuration.swift; sourceTree = "<group>"; };
+		9C887D4BEB03D4C79748A9B3 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		A29C0A82FFD24B1BF810A1E4 /* UserNotificationSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNotificationSender.swift; sourceTree = "<group>"; };
 		A5F73A00FC58C259FCC0A62A /* AppLifecycleObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleObserver.swift; sourceTree = "<group>"; };
 		AB165D15D8DE850D6BBA56CC /* PlatformAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformAdapterTests.swift; sourceTree = "<group>"; };
@@ -140,6 +147,7 @@
 		DBC3454B9CF649A4EAFBB52C /* BatteryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryState.swift; sourceTree = "<group>"; };
 		E525A34EC2464A276FC490AC /* PowerAssertionManaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerAssertionManaging.swift; sourceTree = "<group>"; };
 		F4CCE3B663849BE1E1F02E53 /* MacCoffeeDirect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacCoffeeDirect.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F63985A8FA69869AE2D27FE3 /* AppModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelTests.swift; sourceTree = "<group>"; };
 		F82A246A0DCF736C0A7ACD7F /* MacCoffeeCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacCoffeeCore.swift; sourceTree = "<group>"; };
 		FB5C8ECBEAAF29972964CE15 /* SettingsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStoreTests.swift; sourceTree = "<group>"; };
 		FB719DFEBF09A4B7A1C98EB7 /* MacCoffeeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacCoffeeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -177,6 +185,7 @@
 		01EB2F38D26D9A0E22D43CA9 /* Unit */ = {
 			isa = PBXGroup;
 			children = (
+				F63985A8FA69869AE2D27FE3 /* AppModelTests.swift */,
 				3E7FC0CED383B614B3C223EF /* DomainTests.swift */,
 				5BC452DF0E5C8DF5FE3AFCDC /* LowBatteryPolicyTests.swift */,
 				AB165D15D8DE850D6BBA56CC /* PlatformAdapterTests.swift */,
@@ -259,6 +268,7 @@
 				FCBDF3BF4A5AF2A42B9FC436 /* Domain */,
 				855D08AA15A7775D188CF0D4 /* Policy */,
 				13A42E7C5E37E0A70038D5B4 /* Services */,
+				EFA8B32625CF73F4C5D0057D /* State */,
 				9D33E1AB2D205B15026BBF8F /* Support */,
 			);
 			name = Core;
@@ -277,6 +287,15 @@
 				01EB2F38D26D9A0E22D43CA9 /* Unit */,
 				17795BA9B87BE2AB77D923F1 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		EFA8B32625CF73F4C5D0057D /* State */ = {
+			isa = PBXGroup;
+			children = (
+				03C6F98578631B0DCD5D2D61 /* AppEnvironment.swift */,
+				9C887D4BEB03D4C79748A9B3 /* AppModel.swift */,
+			);
+			path = State;
 			sourceTree = "<group>";
 		};
 		F016E20450408F5DC6959E7C /* AppStore */ = {
@@ -299,6 +318,7 @@
 			isa = PBXGroup;
 			children = (
 				B842E9D4C6BD4DC510EFDB80 /* FakePowerAssertionDriver.swift */,
+				8B307F98231FFABB3C96D453 /* Fakes.swift */,
 			);
 			name = Support;
 			path = Tests/Support;
@@ -472,8 +492,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				898C373B9AF81550F661E011 /* AppModelTests.swift in Sources */,
 				D359AC96C98CB5E7BAD57550 /* DomainTests.swift in Sources */,
 				F338D94CFEEB20C359DDBE82 /* FakePowerAssertionDriver.swift in Sources */,
+				5147B8BBD924833635924A3D /* Fakes.swift in Sources */,
 				79CF3F2DC3CBC656772B6A98 /* LowBatteryPolicyTests.swift in Sources */,
 				B843C8577EA694BE4A0FC0FA /* PlatformAdapterTests.swift in Sources */,
 				E97F170C6A2FDF527534B215 /* PowerAssertionManagerTests.swift in Sources */,
@@ -485,7 +507,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B7B8DA49FF537819BE041D0 /* AppEnvironment.swift in Sources */,
 				5B9B1775F556DD1EDA0A4D1E /* AppLifecycleObserver.swift in Sources */,
+				B1FED5159FB7DFB9F15ACCC3 /* AppModel.swift in Sources */,
 				5EE87E6A4BB593ED0F5748FA /* BatteryMonitoring.swift in Sources */,
 				4FC0D2C41E715F9A736AE459 /* BatteryState.swift in Sources */,
 				297DB849E32338D5628BAA7F /* IOKitBatteryMonitor.swift in Sources */,

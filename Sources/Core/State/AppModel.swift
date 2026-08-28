@@ -1,0 +1,230 @@
+import Combine
+import Foundation
+
+public enum AppModelError: LocalizedError {
+    case batteryBlocked
+
+    public var errorDescription: String? {
+        switch self {
+        case .batteryBlocked:
+            String(localized: "battery.blocked", bundle: .main)
+        }
+    }
+}
+
+@MainActor
+public final class AppModel: ObservableObject {
+    @Published public private(set) var mode: WakeMode = .off
+    @Published public private(set) var session: WakeSession?
+    @Published public private(set) var selectedDuration: SessionDuration
+    @Published public private(set) var batteryState: BatteryState
+    @Published public private(set) var batteryThreshold: Int
+    @Published public private(set) var isBatteryBlocked: Bool
+    @Published public private(set) var launchAtLoginStatus: LaunchAtLoginStatus
+    @Published public private(set) var statusMessage: String?
+    @Published public private(set) var isBusy = false
+
+    public let environment: AppEnvironment
+
+    public init(environment: AppEnvironment) {
+        self.environment = environment
+        selectedDuration = environment.settings.selectedDuration
+        let initialThreshold = min(
+            LowBatteryPolicy.thresholdRange.upperBound,
+            max(LowBatteryPolicy.thresholdRange.lowerBound, environment.settings.batteryThreshold)
+        )
+        batteryThreshold = initialThreshold
+        batteryState = environment.battery.currentState
+        isBatteryBlocked = LowBatteryPolicy.nextBlockedState(
+            currentlyBlocked: false,
+            battery: environment.battery.currentState,
+            threshold: initialThreshold
+        )
+        launchAtLoginStatus = environment.launchAtLogin.status
+
+        configurePlatformEvents()
+        environment.battery.start()
+        environment.lifecycle.start()
+    }
+
+    public func setMode(_ requestedMode: WakeMode) throws {
+        guard requestedMode != mode else { return }
+        if requestedMode != .off, isBatteryBlocked {
+            let error = AppModelError.batteryBlocked
+            statusMessage = error.localizedDescription
+            throw error
+        }
+
+        let previousMode = mode
+        let previousSession = session
+        isBusy = true
+        defer { isBusy = false }
+
+        do {
+            try environment.powerAssertions.transition(to: requestedMode)
+        } catch {
+            commitConfirmedMode(
+                environment.powerAssertions.activeMode,
+                previousMode: previousMode,
+                previousSession: previousSession
+            )
+            statusMessage = error.localizedDescription
+            throw error
+        }
+
+        commitConfirmedMode(
+            requestedMode,
+            previousMode: previousMode,
+            previousSession: previousSession
+        )
+        statusMessage = nil
+        if previousMode == .off, requestedMode != .off {
+            environment.notifications.requestAuthorizationIfNeeded()
+        }
+    }
+
+    public func selectDuration(_ duration: SessionDuration) {
+        selectedDuration = duration
+        environment.settings.selectedDuration = duration
+
+        guard mode != .off else { return }
+        let newSession = WakeSession(mode: mode, startedAt: environment.now(), duration: duration)
+        session = newSession
+        schedule(newSession)
+    }
+
+    public func setBatteryThreshold(_ threshold: Int) {
+        let clamped = min(
+            LowBatteryPolicy.thresholdRange.upperBound,
+            max(LowBatteryPolicy.thresholdRange.lowerBound, threshold)
+        )
+        batteryThreshold = clamped
+        environment.settings.batteryThreshold = clamped
+        handleBatteryChange(batteryState)
+    }
+
+    public func setLaunchAtLogin(_ enabled: Bool) throws {
+        do {
+            try environment.launchAtLogin.setEnabled(enabled)
+            environment.settings.launchAtLoginRequested = enabled
+            launchAtLoginStatus = environment.launchAtLogin.status
+            statusMessage = nil
+        } catch {
+            launchAtLoginStatus = environment.launchAtLogin.status
+            statusMessage = error.localizedDescription
+            throw error
+        }
+    }
+
+    public func refreshLaunchAtLoginStatus() {
+        launchAtLoginStatus = environment.launchAtLogin.status
+    }
+
+    public func revalidateDeadline() {
+        guard let deadline = session?.expiresAt, deadline <= environment.now() else { return }
+        stop(reason: .timerCompleted)
+    }
+
+    public func dismissStatus() {
+        statusMessage = nil
+    }
+
+    public func prepareForTermination() {
+        environment.scheduler.cancel()
+        environment.battery.stop()
+        environment.lifecycle.stop()
+        environment.powerAssertions.releaseAll()
+        mode = .off
+        session = nil
+        isBusy = false
+    }
+
+    private func configurePlatformEvents() {
+        environment.battery.onChange = { [weak self] state in
+            self?.handleBatteryChange(state)
+        }
+        environment.lifecycle.onWake = { [weak self] in self?.revalidateDeadline() }
+        environment.lifecycle.onClockChange = { [weak self] in self?.revalidateDeadline() }
+        environment.lifecycle.onActivation = { [weak self] in
+            self?.revalidateDeadline()
+            self?.refreshLaunchAtLoginStatus()
+        }
+        environment.lifecycle.onTermination = { [weak self] in self?.prepareForTermination() }
+    }
+
+    private func handleBatteryChange(_ state: BatteryState) {
+        batteryState = state
+        isBatteryBlocked = LowBatteryPolicy.nextBlockedState(
+            currentlyBlocked: isBatteryBlocked,
+            battery: state,
+            threshold: batteryThreshold
+        )
+
+        if isBatteryBlocked, mode != .off {
+            stop(reason: .lowBatteryStopped)
+        }
+    }
+
+    private func commitConfirmedMode(
+        _ confirmedMode: WakeMode,
+        previousMode: WakeMode,
+        previousSession: WakeSession?
+    ) {
+        mode = confirmedMode
+        guard confirmedMode != .off else {
+            environment.scheduler.cancel()
+            session = nil
+            return
+        }
+
+        if previousMode == .off || previousSession == nil {
+            let newSession = WakeSession(
+                mode: confirmedMode,
+                startedAt: environment.now(),
+                duration: selectedDuration
+            )
+            session = newSession
+            schedule(newSession)
+        } else if let previousSession {
+            let replacement = WakeSession(
+                mode: confirmedMode,
+                startedAt: previousSession.startedAt,
+                duration: previousSession.duration,
+                expiresAt: previousSession.expiresAt
+            )
+            session = replacement
+            schedule(replacement)
+        }
+    }
+
+    private func schedule(_ session: WakeSession) {
+        guard let deadline = session.expiresAt else {
+            environment.scheduler.cancel()
+            return
+        }
+        environment.scheduler.schedule(deadline: deadline) { [weak self] in
+            self?.revalidateDeadlineAfterScheduledWake(deadline: deadline)
+        }
+    }
+
+    private func revalidateDeadlineAfterScheduledWake(deadline: Date) {
+        guard session?.expiresAt == deadline else { return }
+        stop(reason: .timerCompleted)
+    }
+
+    private func stop(reason: AppNotificationEvent) {
+        do {
+            try environment.powerAssertions.transition(to: .off)
+            mode = .off
+            session = nil
+            environment.scheduler.cancel()
+            environment.notifications.send(reason)
+            if reason == .lowBatteryStopped {
+                statusMessage = String(localized: "battery.blocked", bundle: .main)
+            }
+        } catch {
+            mode = environment.powerAssertions.activeMode
+            statusMessage = error.localizedDescription
+        }
+    }
+}

@@ -12,4 +12,16 @@ public struct WakeSession: Equatable, Sendable {
         self.duration = duration
         self.expiresAt = duration.interval.map { startedAt.addingTimeInterval($0) }
     }
+
+    public init(
+        mode: WakeMode,
+        startedAt: Date,
+        duration: SessionDuration,
+        expiresAt: Date?
+    ) {
+        self.mode = mode
+        self.startedAt = startedAt
+        self.duration = duration
+        self.expiresAt = expiresAt
+    }
 }

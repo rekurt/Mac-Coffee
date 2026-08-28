@@ -174,7 +174,7 @@ public struct MenuBarPanel: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("maccoffee.footer.grid")
-        .background(footerLayoutMarker("maccoffee.footer.grid"))
+        .background(footerLayoutMarker("maccoffee.footer.grid.marker"))
     }
 
     private var actionList: some View {
@@ -188,7 +188,7 @@ public struct MenuBarPanel: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("maccoffee.footer.list")
-        .background(footerLayoutMarker("maccoffee.footer.list"))
+        .background(footerLayoutMarker("maccoffee.footer.list.marker"))
     }
 
     private var hasUpdateAction: Bool {

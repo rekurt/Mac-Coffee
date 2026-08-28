@@ -411,6 +411,18 @@ final class MacCoffeeUITests: XCTestCase {
         let activeLayout = layout == "grid" ? footerGrid : footerList
         XCTAssertTrue(activeLayout.exists, "Missing maccoffee.footer.\(layout) container", file: file, line: line)
         XCTAssertTrue(footer.frame.contains(activeLayout.frame), "Footer \(layout) is outside maccoffee.footer", file: file, line: line)
+        XCTAssertFalse(
+            testWindow.staticTexts["maccoffee.footer.\(layout)"].exists,
+            "The hidden layout marker must not share the real \(layout) group identifier",
+            file: file,
+            line: line
+        )
+        XCTAssertTrue(
+            testWindow.staticTexts["maccoffee.footer.\(layout).marker"].exists,
+            "Missing distinct hidden \(layout) marker",
+            file: file,
+            line: line
+        )
     }
 
     private func assertEqualFooterRow(
@@ -430,15 +442,15 @@ final class MacCoffeeUITests: XCTestCase {
     }
 
     private var footer: XCUIElement {
-        testWindow.descendants(matching: .any)["maccoffee.footer"].firstMatch
+        testWindow.groups["maccoffee.footer"]
     }
 
     private var footerGrid: XCUIElement {
-        testWindow.descendants(matching: .any)["maccoffee.footer.grid"].firstMatch
+        testWindow.groups["maccoffee.footer.grid"]
     }
 
     private var footerList: XCUIElement {
-        testWindow.descendants(matching: .any)["maccoffee.footer.list"].firstMatch
+        testWindow.groups["maccoffee.footer.list"]
     }
 
     private func localeIdentifier(for language: String) -> String {

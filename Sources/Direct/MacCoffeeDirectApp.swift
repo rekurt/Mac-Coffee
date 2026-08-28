@@ -6,6 +6,7 @@ import SwiftUI
 @MainActor
 struct MacCoffeeDirectApp: App {
     @StateObject private var model: AppModel
+    @ObservedObject private var localization: LocalizationController
     private let updater: SparkleUpdater
 #if DEBUG
     private static var uiTestWindowController: NSWindowController?
@@ -22,6 +23,7 @@ struct MacCoffeeDirectApp: App {
         let model = AppModel(environment: environment)
         self.updater = updater
         _model = StateObject(wrappedValue: model)
+        _localization = ObservedObject(wrappedValue: environment.localization)
 #if DEBUG
         Self.openUITestWindowIfRequested(model: model, updater: updater)
 #endif
@@ -29,14 +31,20 @@ struct MacCoffeeDirectApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarPanel(model: model, updater: updater)
+            LocalizedRootView(localization: localization) {
+                MenuBarPanel(model: model, updater: updater)
+            }
         } label: {
-            MenuBarLabel(model: model)
+            LocalizedRootView(localization: localization) {
+                MenuBarLabel(model: model)
+            }
         }
         .menuBarExtraStyle(.window)
 
         Settings {
-            SettingsView(model: model)
+            LocalizedRootView(localization: localization) {
+                SettingsView(model: model)
+            }
         }
     }
 
@@ -45,15 +53,18 @@ struct MacCoffeeDirectApp: App {
         guard CommandLine.arguments.contains("--ui-testing-window") else { return }
         DispatchQueue.main.async {
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 340, height: 520),
+                contentRect: NSRect(x: 0, y: 0, width: 420, height: 680),
                 styleMask: [.titled, .closable],
                 backing: .buffered,
                 defer: false
             )
             window.title = "Mac Coffee"
+            window.identifier = NSUserInterfaceItemIdentifier("maccoffee.ui-test.window")
             window.isReleasedWhenClosed = false
             window.contentViewController = NSHostingController(
-                rootView: MenuBarPanel(model: model, updater: updater)
+                rootView: LocalizedRootView(localization: model.environment.localization) {
+                    MenuBarPanel(model: model, updater: updater)
+                }
             )
             window.center()
             let controller = NSWindowController(window: window)

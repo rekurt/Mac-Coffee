@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct CountdownText: View {
     private let deadline: Date?
+    @Environment(\.locale) private var locale
     @State private var now = Date()
 
     public init(deadline: Date?) {
@@ -36,22 +37,26 @@ public struct CountdownText: View {
         if total >= 3_600 {
             formatted = String(
                 format: String(localized: "countdown.hoursMinutes", bundle: .main),
+                locale: locale,
                 total / 3_600,
                 (total % 3_600) / 60
             )
         } else if total > 60 {
             formatted = String(
                 format: String(localized: "countdown.minutes", bundle: .main),
+                locale: locale,
                 total / 60
             )
         } else {
             formatted = String(
                 format: String(localized: "countdown.seconds", bundle: .main),
+                locale: locale,
                 total
             )
         }
         return String(
-            format: String(localized: "status.remaining", bundle: .main),
+            format: String(localized: "status.remaining", bundle: .main, locale: locale),
+            locale: locale,
             formatted
         )
     }

@@ -1,6 +1,8 @@
 import SwiftUI
 
 public struct AboutView: View {
+    @Environment(\.locale) private var locale
+
     public init() {}
 
     public var body: some View {
@@ -29,6 +31,7 @@ public struct AboutView: View {
     private var versionText: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "2.0.0"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
-        return "Version \(version) (\(build))"
+        let format = String(localized: "about.versionFormat", bundle: .main, locale: locale)
+        return String(format: format, locale: locale, arguments: [version, build])
     }
 }

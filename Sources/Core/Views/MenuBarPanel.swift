@@ -1,13 +1,33 @@
 import AppKit
 import SwiftUI
 
+/// Supplies one runtime-selected locale to an entire SwiftUI root.
+public struct LocalizedRootView<Content: View>: View {
+    @ObservedObject private var localization: LocalizationController
+    private let content: Content
+
+    public init(
+        localization: LocalizationController,
+        @ViewBuilder content: () -> Content
+    ) {
+        _localization = ObservedObject(wrappedValue: localization)
+        self.content = content()
+    }
+
+    public var body: some View {
+        content.environment(\.locale, localization.locale)
+    }
+}
+
 public struct MenuBarPanel: View {
     @ObservedObject private var model: AppModel
+    @ObservedObject private var localization: LocalizationController
     private let updater: UpdaterProviding?
     @State private var showsQuitConfirmation = false
 
     public init(model: AppModel, updater: UpdaterProviding? = nil) {
         self.model = model
+        _localization = ObservedObject(wrappedValue: model.environment.localization)
         self.updater = updater
     }
 
@@ -50,7 +70,7 @@ public struct MenuBarPanel: View {
             footer
         }
         .padding(16)
-        .frame(width: 340)
+        .frame(minWidth: 0, idealWidth: 420, maxWidth: 420)
         .alert("action.quit", isPresented: $showsQuitConfirmation) {
             Button("action.cancel", role: .cancel) {}
             Button("action.confirmQuit", role: .destructive) {
@@ -102,12 +122,22 @@ public struct MenuBarPanel: View {
     }
 
     private var footer: some View {
+        ViewThatFits(in: .horizontal) {
+            horizontalFooter
+                .fixedSize(horizontal: true, vertical: false)
+            compactFooter
+        }
+        .font(.caption)
+    }
+
+    private var horizontalFooter: some View {
         HStack(spacing: 14) {
             if #available(macOS 14.0, *) {
                 SettingsLink {
                     Text("action.settings")
                 }
                 .buttonStyle(.plain)
+                .frame(minWidth: 70)
                 .accessibilityIdentifier("maccoffee.action.settings")
             } else {
                 Button("action.settings", action: openLegacySettings)
@@ -129,17 +159,46 @@ public struct MenuBarPanel: View {
                 .keyboardShortcut("q")
                 .accessibilityIdentifier("maccoffee.action.quit")
         }
-        .font(.caption)
+    }
+
+    private var compactFooter: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 14) {
+                if #available(macOS 14.0, *) {
+                    SettingsLink { Text("action.settings") }
+                        .buttonStyle(.plain)
+                        .frame(minWidth: 70)
+                        .accessibilityIdentifier("maccoffee.action.settings")
+                } else {
+                    Button("action.settings", action: openLegacySettings)
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("maccoffee.action.settings")
+                }
+                Button("action.about") {
+                    NSApplication.shared.orderFrontStandardAboutPanel(nil)
+                }
+                .buttonStyle(.plain)
+                if let updater, updater.canCheckForUpdates {
+                    Button("action.checkUpdates") { updater.checkForUpdates() }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("maccoffee.action.update")
+                }
+            }
+            Button("action.quit") { showsQuitConfirmation = true }
+                .buttonStyle(.plain)
+                .keyboardShortcut("q")
+                .accessibilityIdentifier("maccoffee.action.quit")
+        }
     }
 
     private var batteryText: String {
         guard model.batteryState.hasInternalBattery else {
-            return String(localized: "battery.ac", bundle: .main)
+            return localization.localized("battery.ac")
         }
         guard let percentage = model.batteryState.percentage else {
-            return String(localized: "battery.unknown", bundle: .main)
+            return localization.localized("battery.unknown")
         }
-        return String(format: String(localized: "battery.percent", bundle: .main), percentage)
+        return localization.format("battery.percent", arguments: percentage)
     }
 
     private var batterySymbol: String {

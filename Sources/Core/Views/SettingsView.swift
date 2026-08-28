@@ -2,13 +2,39 @@ import SwiftUI
 
 public struct SettingsView: View {
     @ObservedObject private var model: AppModel
+    @ObservedObject private var localization: LocalizationController
 
     public init(model: AppModel) {
         self.model = model
+        _localization = ObservedObject(wrappedValue: model.environment.localization)
     }
 
     public var body: some View {
         Form {
+            Section {
+                Picker(
+                    "settings.language",
+                    selection: Binding(
+                        get: { localization.selectedLanguage },
+                        set: { localization.select($0) }
+                    )
+                ) {
+                    ForEach(SupportedLanguage.allCases, id: \.self) { language in
+                        Text(verbatim: language.localizedName(using: localization))
+                            .tag(language)
+                    }
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .accessibilityIdentifier("maccoffee.settings.language")
+
+                Text("settings.language.help")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } header: {
+                Text("settings.language")
+            }
+
             if model.batteryState.hasInternalBattery {
                 Section {
                     HStack {
@@ -23,7 +49,8 @@ public struct SettingsView: View {
                         ) {
                             Text(
                                 String(
-                                    format: String(localized: "settings.batteryThresholdValue", bundle: .main),
+                                    format: String(localized: "settings.batteryThresholdValue", bundle: .main, locale: localization.locale),
+                                    locale: localization.locale,
                                     model.batteryThreshold
                                 )
                             )
@@ -61,7 +88,20 @@ public struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
-        .frame(width: 440, height: model.batteryState.hasInternalBattery ? 260 : 170)
+        .frame(minWidth: 480)
+        .fixedSize(horizontal: false, vertical: true)
         .navigationTitle(Text("settings.title"))
+    }
+}
+
+private extension SupportedLanguage {
+    @MainActor
+    func localizedName(using localization: LocalizationController) -> String {
+        switch self {
+        case .system:
+            localization.localized("settings.language.system")
+        default:
+            displayName
+        }
     }
 }

@@ -2,10 +2,12 @@ import SwiftUI
 
 public struct DurationPicker: View {
     @ObservedObject private var model: AppModel
+    @ObservedObject private var localization: LocalizationController
     @State private var selection: SessionDuration
 
     public init(model: AppModel) {
         self.model = model
+        _localization = ObservedObject(wrappedValue: model.environment.localization)
         _selection = State(initialValue: model.selectedDuration)
     }
 
@@ -15,14 +17,19 @@ public struct DurationPicker: View {
             selection: $selection
         ) {
             ForEach(SessionDuration.allCases, id: \.self) { duration in
-                Text(verbatim: duration.localizedTitle)
+                Text(verbatim: duration.localizedTitle(using: localization))
                     .tag(duration)
                     .accessibilityIdentifier("maccoffee.duration.\(duration.rawValue)")
             }
         }
         .pickerStyle(.segmented)
+        .labelsHidden()
+        .frame(maxWidth: .infinity)
         .accessibilityIdentifier("maccoffee.duration.picker")
-        .accessibilityValue(Text(verbatim: model.selectedDuration.localizedTitle))
+        .accessibilityValue(Text(verbatim: localization.format(
+            "accessibility.durationValue",
+            arguments: model.selectedDuration.localizedTitle(using: localization)
+        )))
         .onChange(of: selection) { duration in
             Task { @MainActor in
                 model.selectDuration(duration)
@@ -36,8 +43,9 @@ public struct DurationPicker: View {
 }
 
 public extension SessionDuration {
-    var localizedTitle: String {
-        String(localized: String.LocalizationValue(localizationKey), bundle: .main)
+    @MainActor
+    func localizedTitle(using localization: LocalizationController) -> String {
+        localization.localized(localizationKey)
     }
 
     var localizationKey: String {

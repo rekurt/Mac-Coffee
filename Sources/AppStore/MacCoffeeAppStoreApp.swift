@@ -6,6 +6,7 @@ import SwiftUI
 @MainActor
 struct MacCoffeeAppStoreApp: App {
     @StateObject private var model: AppModel
+    @ObservedObject private var localization: LocalizationController
 #if DEBUG
     private static var uiTestWindowController: NSWindowController?
 #endif
@@ -13,6 +14,7 @@ struct MacCoffeeAppStoreApp: App {
     init() {
         let model = AppModel(environment: .live())
         _model = StateObject(wrappedValue: model)
+        _localization = ObservedObject(wrappedValue: model.environment.localization)
 #if DEBUG
         Self.openUITestWindowIfRequested(model: model)
 #endif
@@ -20,14 +22,20 @@ struct MacCoffeeAppStoreApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarPanel(model: model)
+            LocalizedRootView(localization: localization) {
+                MenuBarPanel(model: model)
+            }
         } label: {
-            MenuBarLabel(model: model)
+            LocalizedRootView(localization: localization) {
+                MenuBarLabel(model: model)
+            }
         }
         .menuBarExtraStyle(.window)
 
         Settings {
-            SettingsView(model: model)
+            LocalizedRootView(localization: localization) {
+                SettingsView(model: model)
+            }
         }
     }
 
@@ -36,15 +44,18 @@ struct MacCoffeeAppStoreApp: App {
         guard CommandLine.arguments.contains("--ui-testing-window") else { return }
         DispatchQueue.main.async {
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 340, height: 520),
+                contentRect: NSRect(x: 0, y: 0, width: 420, height: 680),
                 styleMask: [.titled, .closable],
                 backing: .buffered,
                 defer: false
             )
             window.title = "Mac Coffee"
+            window.identifier = NSUserInterfaceItemIdentifier("maccoffee.ui-test.window")
             window.isReleasedWhenClosed = false
             window.contentViewController = NSHostingController(
-                rootView: MenuBarPanel(model: model)
+                rootView: LocalizedRootView(localization: model.environment.localization) {
+                    MenuBarPanel(model: model)
+                }
             )
             window.center()
             let controller = NSWindowController(window: window)

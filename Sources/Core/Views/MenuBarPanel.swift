@@ -22,6 +22,7 @@ public struct LocalizedRootView<Content: View>: View {
 public struct MenuBarPanel: View {
     @ObservedObject private var model: AppModel
     @ObservedObject private var localization: LocalizationController
+    @Environment(\.openWindow) private var openWindow
     private let updater: UpdaterProviding?
     @State private var showsQuitConfirmation = false
 
@@ -109,10 +110,11 @@ public struct MenuBarPanel: View {
                 Text(batteryText)
                     .font(.callout)
                 if model.mode != .off {
-                    CountdownText(deadline: model.session?.expiresAt)
+                    CountdownText(deadline: model.session?.expiresAt, localization: localization)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+                uiTestSessionMarker
             }
             Spacer()
         }
@@ -145,9 +147,10 @@ public struct MenuBarPanel: View {
                     .accessibilityIdentifier("maccoffee.action.settings")
             }
             Button("action.about") {
-                NSApplication.shared.orderFrontStandardAboutPanel(nil)
+                openWindow(id: "maccoffee.about")
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("maccoffee.action.about")
             if let updater, updater.canCheckForUpdates {
                 Button("action.checkUpdates") { updater.checkForUpdates() }
                     .buttonStyle(.plain)
@@ -175,9 +178,10 @@ public struct MenuBarPanel: View {
                         .accessibilityIdentifier("maccoffee.action.settings")
                 }
                 Button("action.about") {
-                    NSApplication.shared.orderFrontStandardAboutPanel(nil)
+                    openWindow(id: "maccoffee.about")
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("maccoffee.action.about")
                 if let updater, updater.canCheckForUpdates {
                     Button("action.checkUpdates") { updater.checkForUpdates() }
                         .buttonStyle(.plain)
@@ -204,6 +208,17 @@ public struct MenuBarPanel: View {
     private var batterySymbol: String {
         guard model.batteryState.hasInternalBattery else { return "powerplug.fill" }
         return model.batteryState.powerSource == .ac ? "battery.100.bolt" : "battery.50"
+    }
+
+    @ViewBuilder
+    private var uiTestSessionMarker: some View {
+#if DEBUG
+        if CommandLine.arguments.contains("--ui-testing-window"), let session = model.session {
+            Text(verbatim: "\(session.startedAt.timeIntervalSince1970)|\(session.expiresAt?.timeIntervalSince1970.description ?? "indefinite")")
+                .opacity(0.01)
+                .accessibilityIdentifier("maccoffee.session.marker")
+        }
+#endif
     }
 
     private func openLegacySettings() {

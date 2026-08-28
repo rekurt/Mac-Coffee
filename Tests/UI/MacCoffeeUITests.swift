@@ -92,30 +92,41 @@ final class MacCoffeeUITests: XCTestCase {
         XCTAssertFalse(app.buttons["maccoffee.action.update"].exists)
     }
 
-    func testExplicitLanguageSwitchPreservesActiveWakeSessionAndKeepsPanelControlsVisible() {
+    func testExplicitLanguageSwitchPreservesActiveWakeSessionAndKeepsPanelControlsVisible() throws {
         launch(language: "en", batteryPercentage: 80)
 
         testWindow.radioButtons["maccoffee.mode.system"].click()
-        XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.mode.system"]), 1)
         testWindow.radioButtons["maccoffee.duration.hours2"].click()
-        let processID = runningAppProcessID()
-        XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.duration.hours2"]), 1)
+        let processID = try XCTUnwrap(runningAppProcessID(), "Could not find the launched Mac Coffee process")
+        let initialSessionMarker = try XCTUnwrap(sessionMarker(), "Active wake session has no deterministic marker")
 
         testWindow.buttons["maccoffee.action.settings"].click()
         let languagePicker = app.descendants(matching: .any)["maccoffee.settings.language"].firstMatch
         XCTAssertTrue(languagePicker.waitForExistence(timeout: 2))
 
-        for language in ["Русский", "English", "Deutsch", "Français", "简体中文", "日本語", "한국어", "Español"] {
+        for expectation in explicitLanguageExpectations {
             languagePicker.click()
-            app.menuItems[language].click()
+            app.menuItems[expectation.nativeName].click()
 
-            XCTAssertEqual(runningAppProcessID(), processID)
+            XCTAssertEqual(try XCTUnwrap(runningAppProcessID(), "Mac Coffee process disappeared"), processID)
+            XCTAssertEqual(try XCTUnwrap(sessionMarker(), "Wake session marker disappeared"), initialSessionMarker)
             XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.mode.system"]), 1)
             XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.duration.hours2"]), 1)
+            XCTAssertTrue(testWindow.staticTexts[expectation.activeStatus].exists)
+            XCTAssertTrue(testWindow.staticTexts["maccoffee.session.countdown"].label.contains(expectation.remainingFragment))
+            XCTAssertTrue(String(describing: testWindow.radioGroups["maccoffee.mode.picker"].value).contains(expectation.modeTitle))
+            XCTAssertTrue(app.staticTexts[expectation.settingsTitle].exists)
+            XCTAssertTrue(String(describing: languagePicker.value).contains(expectation.nativeName))
 
             app.typeKey("w", modifierFlags: .command)
             openMenuBarPanel()
             assertPanelControlsFitInsideTestWindow()
+
+            testWindow.buttons["maccoffee.action.about"].click()
+            let version = app.staticTexts["maccoffee.about.version"]
+            XCTAssertTrue(version.waitForExistence(timeout: 2))
+            XCTAssertTrue(version.label.contains(expectation.versionPrefix))
+            app.typeKey("w", modifierFlags: .command)
 
             testWindow.buttons["maccoffee.action.settings"].click()
             XCTAssertTrue(languagePicker.waitForExistence(timeout: 2))
@@ -167,16 +178,55 @@ final class MacCoffeeUITests: XCTestCase {
             "maccoffee.duration.picker",
             "maccoffee.status.card",
             "maccoffee.action.settings",
+            "maccoffee.action.about",
             "maccoffee.action.quit"
         ] {
             let element = testWindow.descendants(matching: .any)[identifier].firstMatch
             XCTAssertTrue(element.exists, "Missing \(identifier)", file: file, line: line)
+            XCTAssertGreaterThan(element.frame.width, 0, "\(identifier) has no width", file: file, line: line)
+            XCTAssertGreaterThan(element.frame.height, 0, "\(identifier) has no height", file: file, line: line)
             XCTAssertTrue(
                 windowFrame.contains(element.frame),
                 "\(identifier) is outside the test window: \(element.frame)",
                 file: file,
                 line: line
             )
+            XCTAssertTrue(element.isHittable, "\(identifier) is not hittable", file: file, line: line)
+        }
+
+        // The App Store variant deliberately omits its updater; when the control is
+        // present in the Direct variant, it must satisfy the same panel bounds.
+        let update = testWindow.buttons["maccoffee.action.update"]
+        if update.exists {
+            XCTAssertGreaterThan(update.frame.width, 0, "Update has no width", file: file, line: line)
+            XCTAssertGreaterThan(update.frame.height, 0, "Update has no height", file: file, line: line)
+            XCTAssertTrue(windowFrame.contains(update.frame), "Update is outside the test window", file: file, line: line)
+            XCTAssertTrue(update.isHittable, "Update is not hittable", file: file, line: line)
+        }
+
+        for identifier in ["off", "system", "display"] {
+            let element = testWindow.radioButtons["maccoffee.mode.\(identifier)"]
+            XCTAssertGreaterThan(element.frame.width, 0, "Mode \(identifier) is clipped", file: file, line: line)
+            XCTAssertGreaterThan(element.frame.height, 0, "Mode \(identifier) is clipped", file: file, line: line)
+            XCTAssertTrue(windowFrame.contains(element.frame), "Mode \(identifier) is outside the test window", file: file, line: line)
+            XCTAssertFalse(element.label.isEmpty, "Mode \(identifier) is missing a label", file: file, line: line)
+            XCTAssertTrue(element.isHittable, "Mode \(identifier) is not hittable", file: file, line: line)
+        }
+
+        let durationButtons = ["minutes30", "hours1", "hours2", "hours4", "hours8", "indefinite"].map {
+            testWindow.radioButtons["maccoffee.duration.\($0)"]
+        }
+        let widths = durationButtons.map(\.frame.width)
+        XCTAssertTrue(widths.allSatisfy { $0 > 0 }, "A duration segment is clipped", file: file, line: line)
+        for button in durationButtons {
+            XCTAssertTrue(windowFrame.contains(button.frame), "Duration \(button.identifier) is outside the test window", file: file, line: line)
+            XCTAssertFalse(button.label.isEmpty, "Duration \(button.identifier) is missing a label", file: file, line: line)
+            XCTAssertTrue(button.isHittable, "Duration \(button.identifier) is not hittable", file: file, line: line)
+        }
+        if let firstWidth = widths.first {
+            for width in widths.dropFirst() {
+                XCTAssertEqual(width, firstWidth, accuracy: 1, "Duration segments must be equal width", file: file, line: line)
+            }
         }
     }
 
@@ -189,5 +239,48 @@ final class MacCoffeeUITests: XCTestCase {
 
     private var testWindow: XCUIElement {
         app.windows["maccoffee.ui-test.window"]
+    }
+
+    private func sessionMarker() -> String? {
+        let marker = testWindow.staticTexts["maccoffee.session.marker"]
+        return marker.exists ? marker.label : nil
+    }
+
+    private var explicitLanguageExpectations: [LanguageExpectation] {
+        [
+            .init("Русский", "Mac Coffee работает", "Осталось", "Язык", "Не усыплять Mac", "Версия"),
+            .init("English", "Mac Coffee is active", "remaining", "Language", "Keep Mac awake", "Version"),
+            .init("Deutsch", "Mac Coffee ist aktiv", "verbleibend", "Sprache", "Mac wach halten", "Version"),
+            .init("Français", "Mac Coffee est actif", "Temps restant", "Langue", "Garder le Mac éveillé", "Version"),
+            .init("简体中文", "Mac Coffee 正在运行", "剩余", "语言", "保持 Mac 唤醒", "版本"),
+            .init("日本語", "Mac Coffee は有効です", "残り", "言語", "Mac をスリープさせない", "バージョン"),
+            .init("한국어", "Mac Coffee가 활성화되어 있습니다", "남음", "언어", "Mac 깨우기 유지", "버전"),
+            .init("Español", "Mac Coffee está activo", "Tiempo restante", "Idioma", "Mantener el Mac activo", "Versión")
+        ]
+    }
+}
+
+private struct LanguageExpectation {
+    let nativeName: String
+    let activeStatus: String
+    let remainingFragment: String
+    let settingsTitle: String
+    let modeTitle: String
+    let versionPrefix: String
+
+    init(
+        _ nativeName: String,
+        _ activeStatus: String,
+        _ remainingFragment: String,
+        _ settingsTitle: String,
+        _ modeTitle: String,
+        _ versionPrefix: String
+    ) {
+        self.nativeName = nativeName
+        self.activeStatus = activeStatus
+        self.remainingFragment = remainingFragment
+        self.settingsTitle = settingsTitle
+        self.modeTitle = modeTitle
+        self.versionPrefix = versionPrefix
     }
 }

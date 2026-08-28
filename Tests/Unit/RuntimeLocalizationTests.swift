@@ -111,6 +111,24 @@ final class RuntimeLocalizationTests: XCTestCase {
         XCTAssertEqual(controller.format("item.count", arguments: 2), "2 предмета")
     }
 
+    func testCountdownFormattingUsesTheControllerBundleAfterLanguageChanges() throws {
+        let fixture = try LocalizationFixture.make()
+        let controller = LocalizationController(
+            settings: FakeSettingsStore(selectedLanguage: .english),
+            systemLocale: { Locale(identifier: "en_US") },
+            bundle: fixture.bundle
+        )
+        let formatter = CountdownFormatter(localization: controller)
+        let deadline = Date(timeIntervalSince1970: 3_660)
+        let now = Date(timeIntervalSince1970: 0)
+
+        XCTAssertEqual(formatter.remainingText(until: deadline, now: now), "1h 1m remaining")
+
+        controller.select(.russian)
+
+        XCTAssertEqual(formatter.remainingText(until: deadline, now: now), "Осталось 1ч 1мин")
+    }
+
     func testStatusNoticeIsRenderedUsingCurrentLanguageInsteadOfFrozenText() throws {
         let fixture = try LocalizationFixture.make()
         let settings = FakeSettingsStore(selectedLanguage: .english)
@@ -171,8 +189,8 @@ private enum LocalizationFixture {
         <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
         <plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>com.rekurt.maccoffee.localization-tests</string><key>CFBundleDevelopmentRegion</key><string>en</string><key>CFBundleLocalizations</key><array><string>en</string><string>ru</string></array></dict></plist>
         """.write(to: url.appendingPathComponent("Info.plist"), atomically: true, encoding: .utf8)
-        try writeStrings(["battery.blocked": "Battery protection", "item.count": "%d items", "notification.title": "Mac Coffee", "notification.timerCompleted": "Timer finished", "notification.lowBatteryStopped": "Battery stopped"], language: "en", in: url)
-        try writeStrings(["battery.blocked": "Защита батареи", "item.count": "%d предмета", "notification.title": "Mac Coffee", "notification.timerCompleted": "Таймер завершён", "notification.lowBatteryStopped": "Батарея остановлена"], language: "ru", in: url)
+        try writeStrings(["battery.blocked": "Battery protection", "item.count": "%d items", "notification.title": "Mac Coffee", "notification.timerCompleted": "Timer finished", "notification.lowBatteryStopped": "Battery stopped", "countdown.hoursMinutes": "%dh %dm", "countdown.minutes": "%dm", "countdown.seconds": "%ds", "status.remaining": "%@ remaining"], language: "en", in: url)
+        try writeStrings(["battery.blocked": "Защита батареи", "item.count": "%d предмета", "notification.title": "Mac Coffee", "notification.timerCompleted": "Таймер завершён", "notification.lowBatteryStopped": "Батарея остановлена", "countdown.hoursMinutes": "%dч %dмин", "countdown.minutes": "%dмин", "countdown.seconds": "%dс", "status.remaining": "Осталось %@"], language: "ru", in: url)
         return (try XCTUnwrap(Bundle(url: url)), url)
     }
 

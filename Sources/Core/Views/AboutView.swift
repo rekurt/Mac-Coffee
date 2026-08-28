@@ -14,6 +14,7 @@ public struct AboutView: View {
                 .font(.title2.bold())
             Text(versionText)
                 .foregroundStyle(.secondary)
+                .accessibilityIdentifier("maccoffee.about.version")
             Text("about.description")
                 .multilineTextAlignment(.center)
             Text("about.privacy")
@@ -26,6 +27,7 @@ public struct AboutView: View {
         }
         .padding(24)
         .frame(width: 380)
+        .accessibilityIdentifier("maccoffee.about.content")
     }
 
     private var versionText: String {

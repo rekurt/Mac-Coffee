@@ -1,24 +1,46 @@
 import SwiftUI
 
+@MainActor
+public struct CountdownFormatter {
+    private let localization: LocalizationController
+
+    public init(localization: LocalizationController) {
+        self.localization = localization
+    }
+
+    public func remainingText(until deadline: Date, now: Date) -> String {
+        let total = max(0, Int(ceil(deadline.timeIntervalSince(now))))
+        let formatted: String
+        if total >= 3_600 {
+            formatted = localization.format(
+                "countdown.hoursMinutes",
+                arguments: total / 3_600,
+                (total % 3_600) / 60
+            )
+        } else if total > 60 {
+            formatted = localization.format("countdown.minutes", arguments: total / 60)
+        } else {
+            formatted = localization.format("countdown.seconds", arguments: total)
+        }
+        return localization.format("status.remaining", arguments: formatted)
+    }
+}
+
 public struct CountdownText: View {
     private let deadline: Date?
-    @Environment(\.locale) private var locale
+    @ObservedObject private var localization: LocalizationController
     @State private var now = Date()
 
-    public init(deadline: Date?) {
+    public init(deadline: Date?, localization: LocalizationController) {
         self.deadline = deadline
+        _localization = ObservedObject(wrappedValue: localization)
     }
 
     public var body: some View {
-        Group {
-            if let deadline {
-                Text(verbatim: remainingText(until: deadline))
-            } else {
-                Text("duration.indefinite.long")
-            }
-        }
+        Text(verbatim: displayText)
         .monospacedDigit()
         .accessibilityIdentifier("maccoffee.session.countdown")
+        .accessibilityLabel(Text(verbatim: displayText))
         .task(id: deadline) {
             guard let deadline else { return }
             while !Task.isCancelled {
@@ -31,33 +53,10 @@ public struct CountdownText: View {
         }
     }
 
-    private func remainingText(until deadline: Date) -> String {
-        let total = max(0, Int(ceil(deadline.timeIntervalSince(now))))
-        let formatted: String
-        if total >= 3_600 {
-            formatted = String(
-                format: String(localized: "countdown.hoursMinutes", bundle: .main),
-                locale: locale,
-                total / 3_600,
-                (total % 3_600) / 60
-            )
-        } else if total > 60 {
-            formatted = String(
-                format: String(localized: "countdown.minutes", bundle: .main),
-                locale: locale,
-                total / 60
-            )
-        } else {
-            formatted = String(
-                format: String(localized: "countdown.seconds", bundle: .main),
-                locale: locale,
-                total
-            )
+    private var displayText: String {
+        guard let deadline else {
+            return localization.localized("duration.indefinite.long")
         }
-        return String(
-            format: String(localized: "status.remaining", bundle: .main, locale: locale),
-            locale: locale,
-            formatted
-        )
+        return CountdownFormatter(localization: localization).remainingText(until: deadline, now: now)
     }
 }

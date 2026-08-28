@@ -37,6 +37,13 @@ struct MacCoffeeAppStoreApp: App {
                 SettingsView(model: model)
             }
         }
+
+        Window("about.title", id: "maccoffee.about") {
+            LocalizedRootView(localization: localization) {
+                AboutView()
+            }
+        }
+        .windowResizability(.contentSize)
     }
 
 #if DEBUG

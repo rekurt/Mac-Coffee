@@ -113,7 +113,11 @@ final class MacCoffeeUITests: XCTestCase {
             XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.mode.system"]), 1)
             XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.duration.hours2"]), 1)
             XCTAssertTrue(testWindow.staticTexts[expectation.activeStatus].exists)
-            XCTAssertTrue(testWindow.staticTexts["maccoffee.session.countdown"].label.contains(expectation.remainingFragment))
+            assertCountdown(
+                testWindow.staticTexts["maccoffee.session.countdown"].label,
+                matches: expectation.countdownPattern,
+                language: expectation.nativeName
+            )
             XCTAssertTrue(String(describing: testWindow.radioGroups["maccoffee.mode.picker"].value).contains(expectation.modeTitle))
             XCTAssertTrue(app.staticTexts[expectation.settingsTitle].exists)
             XCTAssertTrue(String(describing: languagePicker.value).contains(expectation.nativeName))
@@ -133,7 +137,53 @@ final class MacCoffeeUITests: XCTestCase {
         }
     }
 
-    private func launch(language: String, batteryPercentage: Int, batteryThreshold: Int? = nil) {
+    func testNarrowWindowUsesVerticalModeFallbackWithLocalizedSubtitles() throws {
+        // 280 pt is deliberately below the segmented control's guarded width;
+        // it exercises the same ViewThatFits fallback a small display would use.
+        launch(language: "en", batteryPercentage: 80, windowWidth: 280)
+
+        let fallbackTitle = testWindow.descendants(matching: .any)["maccoffee.mode.fallback.title"].firstMatch
+        XCTAssertTrue(fallbackTitle.waitForExistence(timeout: 2))
+        XCTAssertFalse(testWindow.descendants(matching: .any)["maccoffee.mode.segmented"].exists)
+
+        testWindow.buttons["maccoffee.action.settings"].click()
+        let languagePicker = app.descendants(matching: .any)["maccoffee.settings.language"].firstMatch
+        XCTAssertTrue(languagePicker.waitForExistence(timeout: 2))
+
+        for expectation in explicitLanguageExpectations {
+            languagePicker.click()
+            app.menuItems[expectation.nativeName].click()
+            app.typeKey("w", modifierFlags: .command)
+
+            XCTAssertTrue(fallbackTitle.waitForExistence(timeout: 2))
+            XCTAssertEqual(fallbackTitle.label, expectation.modeSectionTitle)
+            XCTAssertFalse(testWindow.descendants(matching: .any)["maccoffee.mode.segmented"].exists)
+
+            for (mode, expectedSubtitle) in zip(["off", "system", "display"], expectation.modeSubtitles) {
+                testWindow.radioButtons["maccoffee.mode.\(mode)"].click()
+                let subtitle = testWindow.descendants(matching: .any)["maccoffee.mode.fallback.subtitle"].firstMatch
+                XCTAssertTrue(subtitle.waitForExistence(timeout: 2))
+                XCTAssertEqual(subtitle.label, expectedSubtitle, "Wrong \(mode) subtitle for \(expectation.nativeName)")
+                XCTAssertGreaterThan(subtitle.frame.width, 0)
+                XCTAssertGreaterThanOrEqual(
+                    subtitle.frame.height,
+                    fallbackTitle.frame.height * 0.9,
+                    "Subtitle layout is too short to render a full caption"
+                )
+                XCTAssertTrue(testWindow.frame.contains(subtitle.frame), "Subtitle is clipped outside the narrow window")
+            }
+
+            testWindow.buttons["maccoffee.action.settings"].click()
+            XCTAssertTrue(languagePicker.waitForExistence(timeout: 2))
+        }
+    }
+
+    private func launch(
+        language: String,
+        batteryPercentage: Int,
+        batteryThreshold: Int? = nil,
+        windowWidth: Int? = nil
+    ) {
         app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-window",
@@ -143,6 +193,9 @@ final class MacCoffeeUITests: XCTestCase {
         ]
         if let batteryThreshold {
             app.launchArguments.append("--ui-battery-threshold=\(batteryThreshold)")
+        }
+        if let windowWidth {
+            app.launchArguments.append("--ui-testing-window-width=\(windowWidth)")
         }
         app.launch()
         openMenuBarPanel()
@@ -246,16 +299,23 @@ final class MacCoffeeUITests: XCTestCase {
         return marker.exists ? marker.label : nil
     }
 
+    private func assertCountdown(_ value: String, matches pattern: String, language: String) {
+        XCTAssertNotNil(
+            value.range(of: pattern, options: .regularExpression),
+            "Countdown '\(value)' does not use the expected outer status and inner units for \(language)"
+        )
+    }
+
     private var explicitLanguageExpectations: [LanguageExpectation] {
         [
-            .init("Русский", "Mac Coffee работает", "Осталось", "Язык", "Не усыплять Mac", "Версия"),
-            .init("English", "Mac Coffee is active", "remaining", "Language", "Keep Mac awake", "Version"),
-            .init("Deutsch", "Mac Coffee ist aktiv", "verbleibend", "Sprache", "Mac wach halten", "Version"),
-            .init("Français", "Mac Coffee est actif", "Temps restant", "Langue", "Garder le Mac éveillé", "Version"),
-            .init("简体中文", "Mac Coffee 正在运行", "剩余", "语言", "保持 Mac 唤醒", "版本"),
-            .init("日本語", "Mac Coffee は有効です", "残り", "言語", "Mac をスリープさせない", "バージョン"),
-            .init("한국어", "Mac Coffee가 활성화되어 있습니다", "남음", "언어", "Mac 깨우기 유지", "버전"),
-            .init("Español", "Mac Coffee está activo", "Tiempo restante", "Idioma", "Mantener el Mac activo", "Versión")
+            .init("Русский", "Mac Coffee работает", "^Осталось: \\d+ ч \\d+ мин$", "Язык", "Режим", "Не усыплять Mac", "Версия", ["Обычный режим сна macOS", "Предотвращает сон Mac из-за бездействия", "Предотвращает выключение экрана и сон Mac"]),
+            .init("English", "Mac Coffee is active", "^\\d+h \\d+m remaining$", "Language", "Mode", "Keep Mac awake", "Version", ["Normal macOS sleep behavior", "Prevents idle system sleep", "Prevents idle display and system sleep"]),
+            .init("Deutsch", "Mac Coffee ist aktiv", "^\\d+ Std\\. \\d+ Min\\. verbleibend$", "Sprache", "Modus", "Mac wach halten", "Version", ["Normales macOS-Ruheverhalten", "Verhindert Ruhezustand bei Inaktivität", "Verhindert Ruhezustand von Display und Mac"]),
+            .init("Français", "Mac Coffee est actif", "^Temps restant : \\d+ h \\d+ min$", "Langue", "Mode", "Garder le Mac éveillé", "Version", ["Comportement de veille normal de macOS", "Empêche la veille du système en cas d’inactivité", "Empêche la veille de l’écran et du système"]),
+            .init("简体中文", "Mac Coffee 正在运行", "^剩余 \\d+ 小时 \\d+ 分钟$", "语言", "模式", "保持 Mac 唤醒", "版本", ["使用 macOS 正常睡眠行为", "防止 Mac 因闲置而睡眠", "防止显示器和 Mac 因闲置而睡眠"]),
+            .init("日本語", "Mac Coffee は有効です", "^残り \\d+時間\\d+分$", "言語", "モード", "Mac をスリープさせない", "バージョン", ["通常の macOS のスリープ動作", "操作していないときの Mac のスリープを防ぎます", "ディスプレイと Mac のスリープを防ぎます"]),
+            .init("한국어", "Mac Coffee가 활성화되어 있습니다", "^\\d+시간 \\d+분 남음$", "언어", "모드", "Mac 깨우기 유지", "버전", ["일반적인 macOS 잠자기 동작", "유휴 상태에서 Mac이 잠자지 않도록 합니다", "디스플레이와 Mac이 잠자지 않도록 합니다"]),
+            .init("Español", "Mac Coffee está activo", "^Tiempo restante: \\d+ h \\d+ min$", "Idioma", "Modo", "Mantener el Mac activo", "Versión", ["Comportamiento de reposo normal de macOS", "Evita que el Mac entre en reposo por inactividad", "Evita que la pantalla y el Mac entren en reposo"])
         ]
     }
 }
@@ -263,24 +323,30 @@ final class MacCoffeeUITests: XCTestCase {
 private struct LanguageExpectation {
     let nativeName: String
     let activeStatus: String
-    let remainingFragment: String
+    let countdownPattern: String
     let settingsTitle: String
+    let modeSectionTitle: String
     let modeTitle: String
     let versionPrefix: String
+    let modeSubtitles: [String]
 
     init(
         _ nativeName: String,
         _ activeStatus: String,
-        _ remainingFragment: String,
+        _ countdownPattern: String,
         _ settingsTitle: String,
+        _ modeSectionTitle: String,
         _ modeTitle: String,
-        _ versionPrefix: String
+        _ versionPrefix: String,
+        _ modeSubtitles: [String]
     ) {
         self.nativeName = nativeName
         self.activeStatus = activeStatus
-        self.remainingFragment = remainingFragment
+        self.countdownPattern = countdownPattern
         self.settingsTitle = settingsTitle
+        self.modeSectionTitle = modeSectionTitle
         self.modeTitle = modeTitle
         self.versionPrefix = versionPrefix
+        self.modeSubtitles = modeSubtitles
     }
 }

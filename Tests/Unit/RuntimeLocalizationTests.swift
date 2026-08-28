@@ -111,7 +111,7 @@ final class RuntimeLocalizationTests: XCTestCase {
         XCTAssertEqual(controller.format("item.count", arguments: 2), "2 предмета")
     }
 
-    func testCountdownFormattingUsesTheControllerBundleAfterLanguageChanges() throws {
+    func testCountdownFormattingUsesTheControllerBundleForEveryExplicitLanguage() throws {
         let fixture = try LocalizationFixture.make()
         let controller = LocalizationController(
             settings: FakeSettingsStore(selectedLanguage: .english),
@@ -122,11 +122,19 @@ final class RuntimeLocalizationTests: XCTestCase {
         let deadline = Date(timeIntervalSince1970: 3_660)
         let now = Date(timeIntervalSince1970: 0)
 
-        XCTAssertEqual(formatter.remainingText(until: deadline, now: now), "1h 1m remaining")
-
-        controller.select(.russian)
-
-        XCTAssertEqual(formatter.remainingText(until: deadline, now: now), "Осталось 1ч 1мин")
+        for (language, expected) in [
+            (SupportedLanguage.russian, "Осталось: 1 ч 1 мин"),
+            (.english, "1h 1m remaining"),
+            (.german, "1 Std. 1 Min. verbleibend"),
+            (.french, "Temps restant : 1 h 1 min"),
+            (.simplifiedChinese, "剩余 1 小时 1 分钟"),
+            (.japanese, "残り 1時間1分"),
+            (.korean, "1시간 1분 남음"),
+            (.spanish, "Tiempo restante: 1 h 1 min")
+        ] {
+            controller.select(language)
+            XCTAssertEqual(formatter.remainingText(until: deadline, now: now), expected, "Wrong countdown for \(language.rawValue)")
+        }
     }
 
     func testStatusNoticeIsRenderedUsingCurrentLanguageInsteadOfFrozenText() throws {
@@ -187,10 +195,16 @@ private enum LocalizationFixture {
         try """
         <?xml version=\"1.0\" encoding=\"UTF-8\"?>
         <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-        <plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>com.rekurt.maccoffee.localization-tests</string><key>CFBundleDevelopmentRegion</key><string>en</string><key>CFBundleLocalizations</key><array><string>en</string><string>ru</string></array></dict></plist>
+        <plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>com.rekurt.maccoffee.localization-tests</string><key>CFBundleDevelopmentRegion</key><string>en</string><key>CFBundleLocalizations</key><array><string>en</string><string>ru</string><string>de</string><string>fr</string><string>zh-Hans</string><string>ja</string><string>ko</string><string>es</string></array></dict></plist>
         """.write(to: url.appendingPathComponent("Info.plist"), atomically: true, encoding: .utf8)
         try writeStrings(["battery.blocked": "Battery protection", "item.count": "%d items", "notification.title": "Mac Coffee", "notification.timerCompleted": "Timer finished", "notification.lowBatteryStopped": "Battery stopped", "countdown.hoursMinutes": "%dh %dm", "countdown.minutes": "%dm", "countdown.seconds": "%ds", "status.remaining": "%@ remaining"], language: "en", in: url)
-        try writeStrings(["battery.blocked": "Защита батареи", "item.count": "%d предмета", "notification.title": "Mac Coffee", "notification.timerCompleted": "Таймер завершён", "notification.lowBatteryStopped": "Батарея остановлена", "countdown.hoursMinutes": "%dч %dмин", "countdown.minutes": "%dмин", "countdown.seconds": "%dс", "status.remaining": "Осталось %@"], language: "ru", in: url)
+        try writeStrings(["battery.blocked": "Защита батареи", "item.count": "%d предмета", "notification.title": "Mac Coffee", "notification.timerCompleted": "Таймер завершён", "notification.lowBatteryStopped": "Батарея остановлена", "countdown.hoursMinutes": "%d ч %d мин", "countdown.minutes": "%d мин", "countdown.seconds": "%d с", "status.remaining": "Осталось: %@"], language: "ru", in: url)
+        try writeStrings(["countdown.hoursMinutes": "%d Std. %d Min.", "status.remaining": "%@ verbleibend"], language: "de", in: url)
+        try writeStrings(["countdown.hoursMinutes": "%d h %d min", "status.remaining": "Temps restant : %@"], language: "fr", in: url)
+        try writeStrings(["countdown.hoursMinutes": "%d 小时 %d 分钟", "status.remaining": "剩余 %@"], language: "zh-Hans", in: url)
+        try writeStrings(["countdown.hoursMinutes": "%d時間%d分", "status.remaining": "残り %@"], language: "ja", in: url)
+        try writeStrings(["countdown.hoursMinutes": "%d시간 %d분", "status.remaining": "%@ 남음"], language: "ko", in: url)
+        try writeStrings(["countdown.hoursMinutes": "%d h %d min", "status.remaining": "Tiempo restante: %@"], language: "es", in: url)
         return (try XCTUnwrap(Bundle(url: url)), url)
     }
 

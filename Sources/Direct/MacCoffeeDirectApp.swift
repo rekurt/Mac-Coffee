@@ -58,9 +58,10 @@ struct MacCoffeeDirectApp: App {
 #if DEBUG
     private static func openUITestWindowIfRequested(model: AppModel, updater: SparkleUpdater) {
         guard CommandLine.arguments.contains("--ui-testing-window") else { return }
+        let windowWidth = uiTestWindowWidth()
         DispatchQueue.main.async {
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 420, height: 680),
+                contentRect: NSRect(x: 0, y: 0, width: windowWidth, height: 680),
                 styleMask: [.titled, .closable],
                 backing: .buffered,
                 defer: false
@@ -70,7 +71,7 @@ struct MacCoffeeDirectApp: App {
             window.isReleasedWhenClosed = false
             window.contentViewController = NSHostingController(
                 rootView: LocalizedRootView(localization: model.environment.localization) {
-                    MenuBarPanel(model: model, updater: updater)
+                    MenuBarPanel(model: model, updater: updater, panelWidth: windowWidth)
                 }
             )
             window.center()
@@ -79,6 +80,16 @@ struct MacCoffeeDirectApp: App {
             controller.showWindow(nil)
             NSApplication.shared.activate(ignoringOtherApps: true)
         }
+    }
+
+    private static func uiTestWindowWidth() -> CGFloat {
+        guard let width = CommandLine.arguments
+            .first(where: { $0.hasPrefix("--ui-testing-window-width=") })
+            .flatMap({ Double($0.split(separator: "=").last ?? "") }), width > 0
+        else {
+            return 420
+        }
+        return CGFloat(min(width, 420))
     }
 #endif
 }

@@ -3,32 +3,48 @@ import SwiftUI
 public struct ModePicker: View {
     @ObservedObject private var model: AppModel
     @ObservedObject private var localization: LocalizationController
+    private let availableWidth: CGFloat?
     @State private var selection: WakeMode
 
-    public init(model: AppModel) {
+    public init(model: AppModel, availableWidth: CGFloat? = nil) {
         self.model = model
         _localization = ObservedObject(wrappedValue: model.environment.localization)
+        self.availableWidth = availableWidth
         _selection = State(initialValue: model.mode)
     }
 
     public var body: some View {
         ViewThatFits(in: .horizontal) {
-            picker
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .fixedSize(horizontal: true, vertical: false)
+            if !prefersVerticalFallback {
+                picker
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .fixedSize(horizontal: true, vertical: false)
+                    // Keep the segmented controls at a width that preserves their
+                    // labels; ViewThatFits selects the native vertical picker below it.
+                    .frame(minWidth: 340)
+                    .accessibilityIdentifier("maccoffee.mode.segmented")
+            }
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("mode.title")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("maccoffee.mode.fallback.title")
                 picker
                     .pickerStyle(.radioGroup)
                     .labelsHidden()
                 Text(selection.localizedSubtitle(using: localization))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("maccoffee.mode.fallback.subtitle")
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("maccoffee.mode.fallback")
         }
         .disabled(model.isBusy)
         .accessibilityIdentifier("maccoffee.mode.picker")
@@ -45,6 +61,10 @@ public struct ModePicker: View {
         .onChange(of: model.mode) { mode in
             selection = mode
         }
+    }
+
+    private var prefersVerticalFallback: Bool {
+        availableWidth.map { $0 < 340 } ?? false
     }
 
     private var picker: some View {

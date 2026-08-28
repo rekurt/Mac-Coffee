@@ -24,19 +24,22 @@ public struct MenuBarPanel: View {
     @ObservedObject private var localization: LocalizationController
     @Environment(\.openWindow) private var openWindow
     private let updater: UpdaterProviding?
+    private let panelWidth: CGFloat?
     @State private var showsQuitConfirmation = false
 
-    public init(model: AppModel, updater: UpdaterProviding? = nil) {
+    public init(model: AppModel, updater: UpdaterProviding? = nil, panelWidth: CGFloat? = nil) {
         self.model = model
         _localization = ObservedObject(wrappedValue: model.environment.localization)
         self.updater = updater
+        self.panelWidth = panelWidth
     }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             header
 
-            ModePicker(model: model)
+            ModePicker(model: model, availableWidth: panelWidth)
+                .frame(width: panelWidth)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("duration.title")
@@ -71,7 +74,7 @@ public struct MenuBarPanel: View {
             footer
         }
         .padding(16)
-        .frame(minWidth: 0, idealWidth: 420, maxWidth: 420)
+        .frame(minWidth: 0, idealWidth: panelWidth ?? 420, maxWidth: panelWidth ?? 420)
         .alert("action.quit", isPresented: $showsQuitConfirmation) {
             Button("action.cancel", role: .cancel) {}
             Button("action.confirmQuit", role: .destructive) {
@@ -114,12 +117,14 @@ public struct MenuBarPanel: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                uiTestSessionMarker
             }
             Spacer()
         }
         .padding(10)
         .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 9))
+        .overlay(alignment: .topLeading) {
+            uiTestSessionMarker
+        }
         .accessibilityIdentifier("maccoffee.status.card")
     }
 
@@ -215,7 +220,9 @@ public struct MenuBarPanel: View {
 #if DEBUG
         if CommandLine.arguments.contains("--ui-testing-window"), let session = model.session {
             Text(verbatim: "\(session.startedAt.timeIntervalSince1970)|\(session.expiresAt?.timeIntervalSince1970.description ?? "indefinite")")
+                .font(.system(size: 1))
                 .opacity(0.01)
+                .allowsHitTesting(false)
                 .accessibilityIdentifier("maccoffee.session.marker")
         }
 #endif

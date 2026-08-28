@@ -3,28 +3,24 @@ import SwiftUI
 public struct ModePicker: View {
     @ObservedObject private var model: AppModel
     @ObservedObject private var localization: LocalizationController
-    private let availableWidth: CGFloat?
     @State private var selection: WakeMode
 
-    public init(model: AppModel, availableWidth: CGFloat? = nil) {
+    public init(model: AppModel) {
         self.model = model
         _localization = ObservedObject(wrappedValue: model.environment.localization)
-        self.availableWidth = availableWidth
         _selection = State(initialValue: model.mode)
     }
 
     public var body: some View {
         ViewThatFits(in: .horizontal) {
-            if !prefersVerticalFallback {
-                picker
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .fixedSize(horizontal: true, vertical: false)
-                    // Keep the segmented controls at a width that preserves their
-                    // labels; ViewThatFits selects the native vertical picker below it.
-                    .frame(minWidth: 340)
-                    .accessibilityIdentifier("maccoffee.mode.segmented")
-            }
+            picker
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize(horizontal: true, vertical: false)
+                // Keep the segmented controls at a width that preserves their
+                // labels; ViewThatFits selects the native vertical picker below it.
+                .frame(minWidth: 340)
+                .accessibilityIdentifier("maccoffee.mode.segmented")
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("mode.title")
@@ -61,10 +57,6 @@ public struct ModePicker: View {
         .onChange(of: model.mode) { mode in
             selection = mode
         }
-    }
-
-    private var prefersVerticalFallback: Bool {
-        availableWidth.map { $0 < 340 } ?? false
     }
 
     private var picker: some View {

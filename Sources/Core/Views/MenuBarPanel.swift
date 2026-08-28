@@ -38,7 +38,7 @@ public struct MenuBarPanel: View {
         VStack(alignment: .leading, spacing: 14) {
             header
 
-            ModePicker(model: model, availableWidth: panelWidth)
+            ModePicker(model: model)
                 .frame(width: panelWidth)
 
             VStack(alignment: .leading, spacing: 6) {

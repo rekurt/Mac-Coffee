@@ -51,6 +51,12 @@ struct MacCoffeeDirectApp: App {
             }
         }
         .menuBarExtraStyle(.window)
+        .commands {
+            MacCoffeeQuitCommands(
+                localization: localization,
+                quitCoordinator: quitCoordinator
+            )
+        }
 
         Settings {
             LocalizedRootView(localization: localization) {
@@ -58,9 +64,9 @@ struct MacCoffeeDirectApp: App {
             }
         }
 
-        Window("about.title", id: "maccoffee.about") {
+        Window(localization.localized("about.title"), id: "maccoffee.about") {
             LocalizedRootView(localization: localization) {
-                AboutView()
+                AboutView(localization: localization)
             }
         }
         .windowResizability(.contentSize)

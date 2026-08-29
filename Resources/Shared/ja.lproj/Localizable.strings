@@ -47,7 +47,9 @@
 "notification.lowBatteryStopped" = "バッテリーが安全しきい値に達したため、スリープ防止モードを停止しました。";
 "about.title" = "Mac Coffee";
 "about.description" = "必要なときに Mac を起こしておける、軽量でプライベートなメニューバーユーティリティです。";
-"about.privacy" = "解析、アカウント、トラッキング、ネットワークサービスはありません。";
+"about.privacy" = "解析、アカウント、トラッキング、個人データの収集はありません。";
+"about.privacyPolicy" = "プライバシーポリシー";
+"about.support" = "サポート";
 "about.limitations" = "手動スリープ、蓋を閉じる操作、熱保護、システム終了は常に macOS が制御します。";
 "accessibility.modeValue" = "現在のモード：%@";
 "accessibility.durationValue" = "選択した時間：%@";

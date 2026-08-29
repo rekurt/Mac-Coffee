@@ -3,23 +3,20 @@ import XCTest
 @testable import MacCoffeeCore
 
 final class SettingsStoreTests: XCTestCase {
-    private var defaults: UserDefaults!
+    private var preferences: InMemorySettingsPreferences!
 
     override func setUp() {
         super.setUp()
-        defaults = UserDefaults(suiteName: "MacCoffeeTests.\(UUID().uuidString)")
+        preferences = InMemorySettingsPreferences()
     }
 
     override func tearDown() {
-        if let suiteName = defaults.volatileDomainNames.first(where: { $0.hasPrefix("MacCoffeeTests.") }) {
-            defaults.removePersistentDomain(forName: suiteName)
-        }
-        defaults = nil
+        preferences = nil
         super.tearDown()
     }
 
     func testDefaultsMatchProductDecisions() {
-        let store = UserDefaultsSettingsStore(defaults: defaults)
+        let store = UserDefaultsSettingsStore(preferences: preferences)
 
         XCTAssertEqual(store.selectedLanguage, .system)
         XCTAssertEqual(store.selectedDuration, .hours1)
@@ -29,7 +26,7 @@ final class SettingsStoreTests: XCTestCase {
     }
 
     func testValuesRoundTripAndThresholdIsClamped() {
-        let store = UserDefaultsSettingsStore(defaults: defaults)
+        let store = UserDefaultsSettingsStore(preferences: preferences)
 
         store.selectedLanguage = .german
         store.selectedDuration = .hours4
@@ -37,7 +34,7 @@ final class SettingsStoreTests: XCTestCase {
         store.launchAtLoginRequested = true
         store.notificationAuthorizationRequested = true
 
-        let reloaded = UserDefaultsSettingsStore(defaults: defaults)
+        let reloaded = UserDefaultsSettingsStore(preferences: preferences)
         XCTAssertEqual(reloaded.selectedLanguage, .german)
         XCTAssertEqual(reloaded.selectedDuration, .hours4)
         XCTAssertEqual(reloaded.batteryThreshold, 30)
@@ -46,11 +43,11 @@ final class SettingsStoreTests: XCTestCase {
     }
 
     func testStoreNeverDefinesActiveModeOrSessionKeys() {
-        let store = UserDefaultsSettingsStore(defaults: defaults)
+        let store = UserDefaultsSettingsStore(preferences: preferences)
         store.selectedDuration = .hours1
 
-        XCTAssertNil(defaults.object(forKey: "mode"))
-        XCTAssertNil(defaults.object(forKey: "session"))
-        XCTAssertNil(defaults.object(forKey: "activeMode"))
+        XCTAssertNil(preferences.object(forKey: "mode"))
+        XCTAssertNil(preferences.object(forKey: "session"))
+        XCTAssertNil(preferences.object(forKey: "activeMode"))
     }
 }

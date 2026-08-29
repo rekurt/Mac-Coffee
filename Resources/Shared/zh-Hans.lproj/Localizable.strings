@@ -47,7 +47,9 @@
 "notification.lowBatteryStopped" = "电池已达到安全阈值，唤醒模式已停止。";
 "about.title" = "Mac Coffee";
 "about.description" = "轻量、私密的菜单栏工具，可按你的需要让 Mac 保持唤醒。";
-"about.privacy" = "无分析、账户、跟踪或网络服务。";
+"about.privacy" = "无分析、账户、跟踪或个人数据收集。";
+"about.privacyPolicy" = "隐私政策";
+"about.support" = "支持";
 "about.limitations" = "手动睡眠、合上笔记本电脑、热保护和关机始终由 macOS 控制。";
 "accessibility.modeValue" = "当前模式：%@";
 "accessibility.durationValue" = "所选时长：%@";

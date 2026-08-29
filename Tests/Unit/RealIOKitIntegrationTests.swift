@@ -8,18 +8,27 @@ final class RealIOKitIntegrationTests: XCTestCase {
         defer { manager.releaseAll() }
 
         try manager.transition(to: .system)
-        var output = try powerAssertionOutput()
-        XCTAssertTrue(output.contains("PreventUserIdleSystemSleep"))
-        XCTAssertTrue(output.contains("Mac Coffee active wake session"))
+        var ownedAssertions = try assertionsOwnedByCurrentProcess()
+        XCTAssertEqual(ownedAssertions.count, 1)
+        XCTAssertTrue(ownedAssertions[0].contains("PreventUserIdleSystemSleep"))
 
         try manager.transition(to: .display)
-        output = try powerAssertionOutput()
-        XCTAssertTrue(output.contains("PreventUserIdleDisplaySleep"))
-        XCTAssertTrue(output.contains("Mac Coffee active wake session"))
+        ownedAssertions = try assertionsOwnedByCurrentProcess()
+        XCTAssertEqual(ownedAssertions.count, 1)
+        XCTAssertTrue(ownedAssertions[0].contains("PreventUserIdleDisplaySleep"))
 
         try manager.transition(to: .off)
-        output = try powerAssertionOutput()
-        XCTAssertFalse(output.contains("Mac Coffee active wake session"))
+        XCTAssertTrue(try assertionsOwnedByCurrentProcess().isEmpty)
+    }
+
+    private func assertionsOwnedByCurrentProcess() throws -> [Substring] {
+        let processPrefix = "pid \(ProcessInfo.processInfo.processIdentifier)("
+        return try powerAssertionOutput()
+            .split(separator: "\n")
+            .filter {
+                $0.contains(processPrefix)
+                    && $0.contains("Mac Coffee active wake session")
+            }
     }
 
     private func powerAssertionOutput() throws -> String {

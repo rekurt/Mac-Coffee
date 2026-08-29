@@ -47,7 +47,9 @@
 "notification.lowBatteryStopped" = "Der Wachmodus wurde beendet, weil der Akku den Sicherheitswert erreicht hat.";
 "about.title" = "Mac Coffee";
 "about.description" = "Ein schlankes, privates Menüleistenprogramm, das deinen Mac auf Wunsch wach hält.";
-"about.privacy" = "Keine Analysen, Konten, Verfolgung oder Netzwerkdienste.";
+"about.privacy" = "Keine Analysen, Konten, Verfolgung oder Erfassung personenbezogener Daten.";
+"about.privacyPolicy" = "Datenschutzrichtlinie";
+"about.support" = "Support";
 "about.limitations" = "Manueller Ruhezustand, Schließen des Deckels, Wärmeschutz und Ausschalten bleiben stets unter macOS-Kontrolle.";
 "accessibility.modeValue" = "Aktueller Modus: %@";
 "accessibility.durationValue" = "Gewählte Dauer: %@";

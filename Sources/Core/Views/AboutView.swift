@@ -1,9 +1,18 @@
 import SwiftUI
 
 public struct AboutView: View {
-    @Environment(\.locale) private var locale
+    public static let privacyPolicyURL = URL(
+        string: "https://github.com/rekurt/Mac-Coffee/blob/main/PRIVACY.md"
+    )
+    public static let supportURL = URL(
+        string: "https://github.com/rekurt/Mac-Coffee/issues"
+    )
 
-    public init() {}
+    @ObservedObject private var localization: LocalizationController
+
+    public init(localization: LocalizationController) {
+        _localization = ObservedObject(wrappedValue: localization)
+    }
 
     public var body: some View {
         VStack(spacing: 12) {
@@ -20,6 +29,18 @@ public struct AboutView: View {
             Text("about.privacy")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            HStack(spacing: 14) {
+                if let privacyPolicyURL = AboutView.privacyPolicyURL {
+                    Link("about.privacyPolicy", destination: privacyPolicyURL)
+                        .accessibilityIdentifier("maccoffee.about.privacyPolicy")
+                }
+                if let supportURL = AboutView.supportURL {
+                    Link("about.support", destination: supportURL)
+                        .accessibilityIdentifier("maccoffee.about.support")
+                }
+            }
+            .font(.caption)
             Text("about.limitations")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -33,7 +54,6 @@ public struct AboutView: View {
     private var versionText: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "2.0.0"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
-        let format = String(localized: "about.versionFormat", bundle: .main, locale: locale)
-        return String(format: format, locale: locale, arguments: [version, build])
+        return localization.format("about.versionFormat", arguments: version, build)
     }
 }

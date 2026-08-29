@@ -96,6 +96,24 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: MacCoffeeDirect
 
+  MacCoffeeScreenshots:
+    type: application
+    platform: macOS
+    sources:
+      - Tools/Screenshots
+      - path: Resources/Shared
+        buildPhase: resources
+    dependencies:
+      - target: MacCoffeeCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.screenshots
+        PRODUCT_NAME: MacCoffeeScreenshots
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: YES
+        SKIP_INSTALL: YES
+        CODE_SIGNING_ALLOWED: NO
+
 schemes:
   MacCoffeeDirect:
     build:
@@ -137,3 +155,10 @@ schemes:
       macroExpansion: MacCoffeeDirect
       targets:
         - MacCoffeeUITests
+
+  MacCoffeeScreenshots:
+    build:
+      targets:
+        MacCoffeeScreenshots: all
+    run:
+      config: Release

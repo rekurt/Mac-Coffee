@@ -5,6 +5,9 @@ SCRIPT_DIR="${0:A:h}"
 ROOT_DIR="${SCRIPT_DIR:h}"
 direct_app="${MACCOFFEE_DIRECT_APP_PATH:-$ROOT_DIR/dist/local/Mac Coffee.app}"
 store_app="${MACCOFFEE_APP_STORE_APP_PATH:-$ROOT_DIR/dist/local-app-store/Mac Coffee.app}"
+bundle_locales=(de en es fr ja ko ru zh-Hans)
+
+"$SCRIPT_DIR/verify-release-assets.sh"
 
 for app_path in "$direct_app" "$store_app"; do
   [[ -d "$app_path" ]] || {
@@ -15,8 +18,12 @@ for app_path in "$direct_app" "$store_app"; do
   /usr/bin/lipo "$app_path/Contents/MacOS/Mac Coffee" -verify_arch arm64 x86_64
   /usr/bin/lipo "$app_path/Contents/Frameworks/MacCoffeeCore.framework/Versions/A/MacCoffeeCore" -verify_arch arm64 x86_64
   [[ -f "$app_path/Contents/Resources/PrivacyInfo.xcprivacy" ]]
-  [[ -f "$app_path/Contents/Resources/en.lproj/Localizable.strings" ]]
-  [[ -f "$app_path/Contents/Resources/ru.lproj/Localizable.strings" ]]
+  for locale in "$bundle_locales[@]"; do
+    [[ -f "$app_path/Contents/Resources/$locale.lproj/Localizable.strings" ]] || {
+      print -u2 "Missing $locale localization: $app_path"
+      exit 65
+    }
+  done
   [[ "$(/usr/libexec/PlistBuddy -c 'Print :LSUIElement' "$app_path/Contents/Info.plist")" == true ]]
 
   entitlements_file=$(/usr/bin/mktemp -t maccoffee-entitlements)

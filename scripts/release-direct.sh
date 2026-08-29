@@ -28,6 +28,16 @@ done
 }
 
 cd "$ROOT_DIR"
+"$SCRIPT_DIR/verify-release-assets.sh"
+marketing_version=$(/usr/bin/awk -F ' = ' '/^MARKETING_VERSION = / { print $2 }' Config/Shared.xcconfig)
+[[ -n "$marketing_version" ]] || {
+  print -u2 "MARKETING_VERSION is missing from Config/Shared.xcconfig."
+  exit 65
+}
+if [[ -n "${GITHUB_REF_NAME:-}" && "$GITHUB_REF_NAME" != "v$marketing_version" ]]; then
+  print -u2 "Release tag $GITHUB_REF_NAME does not match v$marketing_version."
+  exit 65
+fi
 xcodegen generate
 release_dir="$ROOT_DIR/dist/release"
 archive_path="$release_dir/MacCoffee.xcarchive"
@@ -40,7 +50,10 @@ public_key=$(/usr/bin/swift -e '
 import CryptoKit
 import Foundation
 let text = try String(contentsOfFile: CommandLine.arguments[1], encoding: .utf8)
-let secret = Data(base64Encoded: text.trimmingCharacters(in: .whitespacesAndNewlines))!
+guard let secret = Data(base64Encoded: text.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+    FileHandle.standardError.write(Data("Sparkle key is not valid Base64.\n".utf8))
+    exit(65)
+}
 if secret.count == 32 {
     let key = try Curve25519.Signing.PrivateKey(rawRepresentation: secret)
     print(key.publicKey.rawRepresentation.base64EncodedString())
@@ -74,6 +87,24 @@ xcodebuild -exportArchive \
 app_path="$export_dir/Mac Coffee.app"
 /usr/bin/codesign --verify --deep --strict --verbose=2 "$app_path"
 /usr/bin/lipo "$app_path/Contents/MacOS/Mac Coffee" -verify_arch arm64 x86_64
+[[ -d "$app_path/Contents/Frameworks/Sparkle.framework" ]] || {
+  print -u2 "Direct archive does not contain Sparkle."
+  exit 65
+}
+[[ -f "$app_path/Contents/Resources/PrivacyInfo.xcprivacy" ]] || {
+  print -u2 "Direct archive is missing PrivacyInfo.xcprivacy."
+  exit 65
+}
+for locale in de en es fr ja ko ru zh-Hans; do
+  [[ -f "$app_path/Contents/Resources/$locale.lproj/Localizable.strings" ]] || {
+    print -u2 "Direct archive is missing $locale localization."
+    exit 65
+  }
+done
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :SUFeedURL' "$app_path/Contents/Info.plist")" == https://* ]] || {
+  print -u2 "Direct archive does not expose an HTTPS Sparkle feed."
+  exit 65
+}
 if ! /usr/bin/codesign -dvv "$app_path" 2>&1 | /usr/bin/grep -q 'flags=.*runtime'; then
   print -u2 "Direct archive does not have Hardened Runtime enabled."
   exit 65

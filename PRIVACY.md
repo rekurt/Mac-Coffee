@@ -6,6 +6,6 @@ Mac Coffee does not collect, store, transmit, sell, or share personal data. The 
 
 Mac Coffee reads the Mac's current power-source and battery percentage locally so it can enforce the user-selected low-battery cutoff. This information remains on the device.
 
-The Direct edition contacts the configured update feed only when its signed update capability is available. The Mac App Store edition contains no third-party updater. Launch at Login is enabled only after an explicit user choice and is managed by macOS.
+The Direct edition contacts its configured HTTPS update feed only through Sparkle's signed update mechanism when an update check runs. The Mac App Store edition contains no third-party updater and receives updates through the App Store. Launch at Login is enabled only after an explicit user choice and is managed by macOS.
 
 Questions may be filed at <https://github.com/rekurt/Mac-Coffee/issues>.

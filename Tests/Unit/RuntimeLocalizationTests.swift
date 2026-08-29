@@ -34,6 +34,15 @@ final class RuntimeLocalizationTests: XCTestCase {
         XCTAssertEqual(unsupported.locale.identifier, "en")
     }
 
+    func testSystemLanguageUsesFirstSupportedEntryFromThePreferredLanguageList() {
+        let controller = LocalizationController(
+            settings: FakeSettingsStore(selectedLanguage: .system),
+            preferredLanguages: { ["pt-BR", "ru-RU", "de-DE"] }
+        )
+
+        XCTAssertEqual(controller.locale.identifier, "ru")
+    }
+
     func testSystemSimplifiedChineseIdentifiersResolveToSimplifiedChinese() {
         for identifier in ["zh_CN", "zh_SG", "zh"] {
             let controller = LocalizationController(
@@ -57,12 +66,13 @@ final class RuntimeLocalizationTests: XCTestCase {
     }
 
     func testMalformedSavedLanguageDefaultsToSystem() {
-        let suiteName = "MacCoffeeTests.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suiteName)!
-        defer { defaults.removePersistentDomain(forName: suiteName) }
-        defaults.set("pt-BR", forKey: "selectedLanguage")
+        let preferences = InMemorySettingsPreferences()
+        preferences.set("pt-BR", forKey: "selectedLanguage")
 
-        XCTAssertEqual(UserDefaultsSettingsStore(defaults: defaults).selectedLanguage, .system)
+        XCTAssertEqual(
+            UserDefaultsSettingsStore(preferences: preferences).selectedLanguage,
+            .system
+        )
     }
 
     func testSelectingLanguagePersistsAndPublishesResolvedLocaleImmediately() {
@@ -98,6 +108,7 @@ final class RuntimeLocalizationTests: XCTestCase {
 
     func testLocalizedFormattingUsesSelectedLocale() throws {
         let fixture = try LocalizationFixture.make()
+        defer { try? FileManager.default.removeItem(at: fixture.url) }
         let controller = LocalizationController(
             settings: FakeSettingsStore(selectedLanguage: .english),
             systemLocale: { Locale(identifier: "en_US") },
@@ -111,8 +122,25 @@ final class RuntimeLocalizationTests: XCTestCase {
         XCTAssertEqual(controller.format("item.count", arguments: 2), "2 предмета")
     }
 
+    func testExplicitLanguageLookupUsesTheResourcesDirectoryOfAMacOSAppBundle() throws {
+        let fixture = try AppBundleLocalizationFixture.make()
+        defer { try? FileManager.default.removeItem(at: fixture.url) }
+        let controller = LocalizationController(
+            settings: FakeSettingsStore(selectedLanguage: .german),
+            systemLocale: { Locale(identifier: "ru_RU") },
+            bundle: fixture.bundle
+        )
+
+        XCTAssertEqual(controller.localized("greeting"), "Deutsch")
+
+        controller.select(.english)
+
+        XCTAssertEqual(controller.localized("greeting"), "English")
+    }
+
     func testCountdownFormattingUsesTheControllerBundleForEveryExplicitLanguage() throws {
         let fixture = try LocalizationFixture.make()
+        defer { try? FileManager.default.removeItem(at: fixture.url) }
         let controller = LocalizationController(
             settings: FakeSettingsStore(selectedLanguage: .english),
             systemLocale: { Locale(identifier: "en_US") },
@@ -139,6 +167,7 @@ final class RuntimeLocalizationTests: XCTestCase {
 
     func testStatusNoticeIsRenderedUsingCurrentLanguageInsteadOfFrozenText() throws {
         let fixture = try LocalizationFixture.make()
+        defer { try? FileManager.default.removeItem(at: fixture.url) }
         let settings = FakeSettingsStore(selectedLanguage: .english)
         let localization = LocalizationController(
             settings: settings,
@@ -158,6 +187,7 @@ final class RuntimeLocalizationTests: XCTestCase {
 
     func testNotificationMessageUsesCurrentLocalizationAtDeliveryTime() throws {
         let fixture = try LocalizationFixture.make()
+        defer { try? FileManager.default.removeItem(at: fixture.url) }
         let settings = FakeSettingsStore(selectedLanguage: .english)
         let localization = LocalizationController(
             settings: settings,
@@ -184,6 +214,32 @@ final class RuntimeLocalizationTests: XCTestCase {
             lifecycle: FakeLifecycleObserver(),
             localization: localization
         )
+    }
+}
+
+private enum AppBundleLocalizationFixture {
+    static func make() throws -> (bundle: Bundle, url: URL) {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("MacCoffeeLocalization.\(UUID().uuidString).app")
+        let contents = url.appendingPathComponent("Contents")
+        let resources = contents.appendingPathComponent("Resources")
+        try FileManager.default.createDirectory(at: resources, withIntermediateDirectories: true)
+        try """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict><key>CFBundleIdentifier</key><string>com.rekurt.maccoffee.app-localization-tests</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleDevelopmentRegion</key><string>en</string><key>CFBundleLocalizations</key><array><string>en</string><string>de</string><string>ru</string></array></dict></plist>
+        """.write(to: contents.appendingPathComponent("Info.plist"), atomically: true, encoding: .utf8)
+        try write(["greeting": "English"], language: "en", resources: resources)
+        try write(["greeting": "Deutsch"], language: "de", resources: resources)
+        try write(["greeting": "Русский"], language: "ru", resources: resources)
+        return (try XCTUnwrap(Bundle(url: url)), url)
+    }
+
+    private static func write(_ strings: [String: String], language: String, resources: URL) throws {
+        let directory = resources.appendingPathComponent("\(language).lproj")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let contents = strings.map { "\"\($0.key)\" = \"\($0.value)\";" }.joined(separator: "\n")
+        try contents.write(to: directory.appendingPathComponent("Localizable.strings"), atomically: true, encoding: .utf8)
     }
 }
 

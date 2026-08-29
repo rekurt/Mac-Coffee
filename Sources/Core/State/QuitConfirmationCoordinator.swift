@@ -1,21 +1,11 @@
 import AppKit
 
-@MainActor
-protocol QuitShortcutMonitoring: AnyObject {
-    func stop()
-}
-
 /// Owns every user-initiated quit path so cleanup cannot be bypassed by a
 /// transient menu-bar window or the default application termination command.
 @MainActor
 public final class QuitConfirmationCoordinator {
     public typealias Presenter = @MainActor (NSAlert) -> NSApplication.ModalResponse
     public typealias Action = @MainActor () -> Void
-    typealias ShortcutHandler = @MainActor (NSEvent) -> NSEvent?
-    typealias ShortcutMonitorFactory = @MainActor (@escaping ShortcutHandler) -> any QuitShortcutMonitoring
-    static let productionShortcutMonitorFactory: ShortcutMonitorFactory = {
-        LocalKeyDownMonitor(handler: $0)
-    }
 
     private let localization: LocalizationController
     private let present: Presenter
@@ -23,7 +13,6 @@ public final class QuitConfirmationCoordinator {
     private let terminate: Action
     private var isPresenting = false
     private var didConfirmTermination = false
-    private var shortcutMonitor: (any QuitShortcutMonitoring)?
 
     public convenience init(
         model: AppModel,
@@ -36,8 +25,7 @@ public final class QuitConfirmationCoordinator {
                 return alert.runModal()
             },
             prepareForTermination: model.prepareForTermination,
-            terminate: { application.terminate(nil) },
-            shortcutMonitorFactory: Self.productionShortcutMonitorFactory
+            terminate: { application.terminate(nil) }
         )
     }
 
@@ -45,20 +33,12 @@ public final class QuitConfirmationCoordinator {
         localization: LocalizationController,
         present: @escaping Presenter,
         prepareForTermination: @escaping Action,
-        terminate: @escaping Action,
-        shortcutMonitorFactory: ShortcutMonitorFactory? = nil
+        terminate: @escaping Action
     ) {
         self.localization = localization
         self.present = present
         self.prepareForTermination = prepareForTermination
         self.terminate = terminate
-        if let shortcutMonitorFactory {
-            shortcutMonitor = shortcutMonitorFactory { [weak self] event in
-                guard let self, Self.isQuitShortcut(event) else { return event }
-                self.requestQuit()
-                return nil
-            }
-        }
     }
 
     public func requestQuit() {
@@ -70,27 +50,8 @@ public final class QuitConfirmationCoordinator {
 
         guard response == .alertFirstButtonReturn, !didConfirmTermination else { return }
         didConfirmTermination = true
-        stopShortcutMonitoring()
         prepareForTermination()
         terminate()
-    }
-
-    static func isQuitShortcut(_ event: NSEvent) -> Bool {
-        guard event.type == .keyDown,
-              !event.isARepeat,
-              event.charactersIgnoringModifiers?.lowercased() == "q"
-        else {
-            return false
-        }
-
-        let relevantFlags = event.modifierFlags.intersection([.command, .control, .option, .shift])
-        return relevantFlags == .command
-    }
-
-    private func stopShortcutMonitoring() {
-        guard let shortcutMonitor else { return }
-        shortcutMonitor.stop()
-        self.shortcutMonitor = nil
     }
 
     private func makeAlert() -> NSAlert {
@@ -112,28 +73,5 @@ public final class QuitConfirmationCoordinator {
         confirmButton.setAccessibilityIdentifier("maccoffee.quit.confirm")
         cancelButton.setAccessibilityIdentifier("maccoffee.quit.cancel")
         return alert
-    }
-}
-
-@MainActor
-private final class LocalKeyDownMonitor: QuitShortcutMonitoring, @unchecked Sendable {
-    nonisolated(unsafe) private var token: Any?
-
-    init(handler: @escaping @MainActor (NSEvent) -> NSEvent?) {
-        token = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            handler(event)
-        }
-    }
-
-    func stop() {
-        guard let token else { return }
-        NSEvent.removeMonitor(token)
-        self.token = nil
-    }
-
-    deinit {
-        if let token {
-            NSEvent.removeMonitor(token)
-        }
     }
 }

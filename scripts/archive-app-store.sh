@@ -12,6 +12,7 @@ export DEVELOPER_DIR
 }
 
 cd "$ROOT_DIR"
+"$SCRIPT_DIR/verify-release-assets.sh"
 xcodegen generate
 archive_dir="$ROOT_DIR/dist/app-store"
 archive_path="$archive_dir/MacCoffeeAppStore.xcarchive"
@@ -38,6 +39,30 @@ if /usr/bin/find "$archive_path" \( -iname '*Sparkle*' -o -iname '*Updater*' \) 
   exit 65
 fi
 app_path="$archive_path/Products/Applications/Mac Coffee.app"
+/usr/bin/codesign --verify --deep --strict --verbose=2 "$app_path"
+/usr/bin/lipo "$app_path/Contents/MacOS/Mac Coffee" -verify_arch arm64 x86_64
+[[ -f "$app_path/Contents/Resources/PrivacyInfo.xcprivacy" ]] || {
+  print -u2 "App Store archive is missing PrivacyInfo.xcprivacy."
+  exit 65
+}
+for locale in de en es fr ja ko ru zh-Hans; do
+  [[ -f "$app_path/Contents/Resources/$locale.lproj/Localizable.strings" ]] || {
+    print -u2 "App Store archive is missing $locale localization."
+    exit 65
+  }
+done
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :LSUIElement' "$app_path/Contents/Info.plist")" == true ]] || {
+  print -u2 "App Store archive is not configured as a menu-bar application."
+  exit 65
+}
+if /usr/libexec/PlistBuddy -c 'Print :SUFeedURL' "$app_path/Contents/Info.plist" >/dev/null 2>&1; then
+  print -u2 "App Store archive exposes a Sparkle feed."
+  exit 65
+fi
+if /usr/bin/otool -L "$app_path/Contents/MacOS/Mac Coffee" | /usr/bin/grep -q Sparkle; then
+  print -u2 "App Store archive links Sparkle."
+  exit 65
+fi
 if ! /usr/bin/codesign -dvv "$app_path" 2>&1 | /usr/bin/grep -q 'flags=.*runtime'; then
   print -u2 "App Store archive does not have Hardened Runtime enabled."
   exit 65
@@ -53,4 +78,8 @@ if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.get-task-allow' "$entit
   exit 65
 fi
 /bin/rm -f "$entitlements_file"
+if ! /usr/bin/find "$archive_dir/export" -maxdepth 1 -type f -name '*.pkg' -print -quit | /usr/bin/grep -q .; then
+  print -u2 "App Store export did not produce an installer package."
+  exit 65
+fi
 print "App Store archive ready: $archive_path"

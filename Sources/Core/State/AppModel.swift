@@ -177,6 +177,7 @@ public final class AppModel: ObservableObject {
         environment.lifecycle.onWake = { [weak self] in self?.revalidateDeadline() }
         environment.lifecycle.onClockChange = { [weak self] in self?.revalidateDeadline() }
         environment.lifecycle.onActivation = { [weak self] in
+            self?.environment.localization.refreshSystemLocale()
             self?.revalidateDeadline()
             self?.refreshLaunchAtLoginStatus()
         }

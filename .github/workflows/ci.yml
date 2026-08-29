@@ -13,11 +13,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pinned tools
+      - name: Dependency review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+
+      - name: Install build tools
         run: brew bundle
 
       - name: Generate project
-        run: xcodegen generate
+        run: |
+          xcodegen generate
+          git diff --exit-code -- MacCoffee.xcodeproj
+
+      - name: Verify release assets
+        run: ./scripts/verify-release-assets.sh
 
       - name: Unit tests
         run: >-
@@ -40,6 +49,15 @@ jobs:
 
       - name: Build App Store target
         run: ./scripts/build-local.sh app-store
+
+      - name: Build deterministic screenshot target
+        run: >-
+          xcodebuild build
+          -project MacCoffee.xcodeproj
+          -scheme MacCoffeeScreenshots
+          -configuration Release
+          -destination 'platform=macOS'
+          CODE_SIGNING_ALLOWED=NO
 
       - name: Verify distribution boundary
         run: ./scripts/verify-bundles.sh

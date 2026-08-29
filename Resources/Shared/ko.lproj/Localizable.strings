@@ -47,7 +47,9 @@
 "notification.lowBatteryStopped" = "배터리가 안전 임계값에 도달하여 깨우기 모드를 중지했습니다.";
 "about.title" = "Mac Coffee";
 "about.description" = "필요할 때 Mac을 깨운 상태로 유지하는 가볍고 개인적인 메뉴 막대 유틸리티입니다.";
-"about.privacy" = "분석, 계정, 추적 또는 네트워크 서비스가 없습니다.";
+"about.privacy" = "분석, 계정, 추적 또는 개인 데이터 수집이 없습니다.";
+"about.privacyPolicy" = "개인정보 처리방침";
+"about.support" = "지원";
 "about.limitations" = "수동 잠자기, 덮개 닫기, 열 보호 및 시스템 종료는 항상 macOS가 제어합니다.";
 "accessibility.modeValue" = "현재 모드: %@";
 "accessibility.durationValue" = "선택한 시간: %@";

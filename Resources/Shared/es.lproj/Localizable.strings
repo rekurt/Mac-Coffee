@@ -47,7 +47,9 @@
 "notification.lowBatteryStopped" = "El modo activo se detuvo porque la batería alcanzó el umbral de seguridad.";
 "about.title" = "Mac Coffee";
 "about.description" = "Una ligera utilidad privada de barra de menús que mantiene tu Mac activo cuando lo decides.";
-"about.privacy" = "Sin análisis, cuentas, seguimiento ni servicios de red.";
+"about.privacy" = "Sin análisis, cuentas, seguimiento ni recopilación de datos personales.";
+"about.privacyPolicy" = "Política de privacidad";
+"about.support" = "Soporte";
 "about.limitations" = "El reposo manual, cerrar la tapa, la protección térmica y el apagado siempre siguen bajo el control de macOS.";
 "accessibility.modeValue" = "Modo actual: %@";
 "accessibility.durationValue" = "Duración seleccionada: %@";

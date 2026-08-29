@@ -1,63 +1,64 @@
 # Mac Coffee 2.0 Release Checklist
 
-This checklist is both the release gate and the evidence record for version 2.0.0 (build 1). A public Direct release must be Developer ID signed, notarized, and stapled; an ad-hoc local build is for local testing only.
+Use this checklist for each candidate. Check a gate only from fresh evidence for the exact commit being released. A local ad-hoc build or DMG is never an official release artifact.
 
-## Automated verification
+## Source and automated gates
 
-- [x] Regenerate `MacCoffee.xcodeproj` with XcodeGen 2.46.0.
-- [x] Pass all `MacCoffeeTests` with code coverage enabled.
-- [x] Domain values reach 100% line coverage, `AppModel` 97.37%, and `LowBatteryPolicy` 95.45%.
-- [x] Build the eight-language `MacCoffeeUITests` bundle, including both Direct and App Store hosts.
-- [ ] Pass all system-language and explicit-language `MacCoffeeUITests`.
-- [x] Build universal Direct and App Store applications.
-- [x] Verify strict code-signing structure and release entitlements for both bundles.
-- [x] Confirm `arm64` and `x86_64` in both executables.
-- [x] Confirm Sparkle and `SUFeedURL` exist only in Direct.
-- [x] Confirm all eight localizations, PrivacyInfo, and icons in both bundles.
-- [x] Confirm source runtime contains no `pmset`, `disablesleep`, or privilege escalation.
-- [x] Generate and validate a signed Sparkle appcast with a one-time test key; confirm its DMG URL and EdDSA enclosure signature.
-- [x] Tag workflow defines temporary-keychain materialization and cleanup for its Developer ID certificate, notary profile, and Sparkle key.
+- [ ] Working tree contains only intentional release files; no credentials, logs, archives, DerivedData, agent notes, or obsolete duplicate assets.
+- [ ] `xcodegen generate` produces no unexpected project diff.
+- [ ] `./scripts/verify-release-assets.sh` passes.
+- [ ] `MacCoffeeTests` passes on the release commit.
+- [ ] `MacCoffeeUITests` passes on an unlocked interactive desktop.
+- [ ] Direct and App Store Release products build as universal `arm64`/`x86_64` applications.
+- [ ] `./scripts/verify-bundles.sh` passes for both products.
+- [ ] `zsh -n scripts/*.sh` passes.
+- [ ] CodeQL passes for the release commit.
+- [ ] Dependency review contains no unresolved release-blocking vulnerability.
 
-The final UI rerun remains unchecked until it completes in a stable, unlocked macOS GUI session. A DEBUG-only deterministic test window removes the status-item dependency in CI, but macOS can still reject synthesized UI events or expose a stale accessibility hierarchy after interrupted automation runs. Focused footer cancellation has completed successfully. AppKit integration installs the production local monitor, queues `Command-Q` through `NSApplication`, dispatches it through the real event path, and proves it is consumed before the main menu while routing to the shared coordinator. The attempted live System Events smoke launched the signed Debug app, but the secure black desktop exposed zero windows and did not deliver the synthetic shortcut, so it is not counted as live verification. The full expanded suite and live shortcut smoke must be rerun before a public release. The test-only window is absent from both Release binaries.
+## Functional matrix
 
-## Runtime verification
+- [ ] App always launches Off and leaves no assertion until explicit activation.
+- [ ] Off, Keep Mac Awake, and Keep Display Awake behave correctly.
+- [ ] 30-minute, 1-, 2-, 4-, and 8-hour sessions and indefinite sessions behave correctly.
+- [ ] Replacing a duration updates the current session; expiry releases the assertion.
+- [ ] Battery protection stops/blocks at every supported boundary and does not flap around the threshold.
+- [ ] Launch at Login is opt-in and accurately reports unavailable or approval-required states.
+- [ ] Settings, About, update action, local notifications, and error notices match each distribution product.
+- [ ] Footer Quit and `⌘Q` share one dialog; Cancel preserves state; Confirm exits after cleanup.
+- [ ] Logout, shutdown, and termination cleanup is noninteractive and idempotent.
+- [ ] `pmset -g assertions` shows the expected IOKit type while active and no Mac Coffee assertion after Off or termination.
 
-- [x] System mode appears in `pmset -g assertions` as `Mac Coffee active wake session` under `PreventUserIdleSystemSleep`.
-- [x] Display mode appears under `PreventUserIdleDisplaySleep`.
-- [x] Off and application termination leave no Mac Coffee assertion.
-- [x] AppKit integration proves the production `Command-Q` monitor consumes and routes the shortcut to the same localized confirmation used by footer Quit.
-- [ ] On an unlocked desktop, complete a live `Command-Q` Cancel/Confirm smoke and verify the same PID survives Cancel and exits after Confirm.
-- [x] Confirmed user quit prepares termination exactly once before terminating; logout and shutdown cleanup remains noninteractive.
-- [x] Low battery at the configured boundary stops or blocks a session.
-- [x] Launch always begins in Off, including after an active-session termination.
-- [x] Manual Sleep, lid close, and macOS thermal/safety decisions remain outside the app's guarantees.
+## Localization and accessibility
 
-## Packaging smoke test
+- [ ] System language works for supported languages and falls back to English otherwise.
+- [ ] English, Russian, German, French, Simplified Chinese, Japanese, Korean, and Spanish pass the same UI scenario.
+- [ ] Language changes immediately without a PID or wake-session change and persists after relaunch.
+- [ ] No panel, Settings, About, dialog, notification preview, or accessibility label is clipped or untranslated.
+- [ ] Localization keys and `%d`/`%@` placeholders are identical in all `.strings` files.
+- [ ] All 16 tracked App Store screenshots are regenerated, visually reviewed, 1280×800, and opaque.
 
-- [x] Create `dist/local/MacCoffee-2.0.0.dmg` from the verified Direct app.
-- [x] Mount the DMG read-only, copy the app to a fresh directory, and verify it again.
-- [x] Launch the copied app and confirm its menu-bar process remains running.
-- [ ] For an official Direct release, run Gatekeeper assessment after notarization and stapling.
-- [ ] Perform the first end-to-end upgrade from a previously published Developer ID-signed build after release credentials are installed.
-- [ ] Never publish the local ad-hoc DMG as an official release.
+## Direct release
 
-## Resource budget
+- [ ] Developer ID certificate, notarization profile, HTTPS appcast URL, and Sparkle EdDSA private key are provided through secure release credentials.
+- [ ] `./scripts/release-direct.sh` produces a Developer ID-signed, Hardened Runtime app and DMG.
+- [ ] Apple notarization succeeds and tickets are stapled to both app and DMG.
+- [ ] Gatekeeper accepts the app and DMG on a clean Mac.
+- [ ] Sparkle appcast signature, version, minimum macOS version, URL, and SHA-256 are independently checked.
+- [ ] Installed previous official version upgrades successfully to this candidate.
 
-Measure the Release Direct process with its panel closed for five idle minutes. Record five one-minute samples and compute the mean.
+## App Store release
 
-| Metric | Acceptance | Result |
-| --- | ---: | ---: |
-| Average CPU | ≤ 0.1% | 0.00008% — pass |
-| Physical footprint | < 50 MB | 16.34 MB — pass |
-| Resident memory (shared mappings included) | Informational | 71.54 MB average (63.03–76.09 MB) |
-| Idle wakeups | Event-driven; no polling timer | 0 package-idle and 17 interrupt wakeups over 5 minutes |
+- [ ] Apple Distribution identity, Mac App Store profile, Team ID, and App Store Connect access are valid.
+- [ ] `MACCOFFEE_APP_STORE_TEAM=… ./scripts/archive-app-store.sh` passes.
+- [ ] Xcode Organizer validation succeeds with no unresolved warning.
+- [ ] App Store privacy answers state no data collected and match `PrivacyInfo.xcprivacy` and `PRIVACY.md`.
+- [ ] Localized metadata and screenshots are uploaded for all eight locales.
+- [ ] TestFlight smoke passes on Apple silicon and Intel hardware when available.
+- [ ] App Review notes accurately describe IOKit, battery protection, language switching, quit behavior, and the absence of Sparkle.
 
-Measurements were taken on macOS 26.5.2 from five consecutive one-minute `proc_pid_rusage` intervals with the Release Direct panel closed. Resident size includes mapped shared AppKit/SwiftUI pages; the process-owned physical footprint stayed near 16 MB and is the resource acceptance metric. CPU time is derived from cumulative user and system nanoseconds, not a rounded Activity Monitor snapshot.
+## Publication record
 
-## Store and release metadata
-
-- [x] Privacy policy says that no data is collected.
-- [x] Store copy accurately describes the battery cutoff and wake-session modes.
-- [x] Review notes document IOKit and `SMAppService` use.
-- [x] Copy does not claim that Mac Coffee defeats lid-close, manual, or thermal sleep.
-- [x] Direct-release secrets remain outside the repository.
+- [ ] Version and build numbers match source, archive, metadata, tag, and release notes.
+- [ ] Tag points to the verified commit and is created only after all applicable gates pass.
+- [ ] Published checksums match downloaded artifacts.
+- [ ] Known limitations and any skipped hardware matrix are documented in the release record.

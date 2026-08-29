@@ -47,7 +47,9 @@
 "notification.lowBatteryStopped" = "Wake mode stopped because the battery reached the safety threshold.";
 "about.title" = "Mac Coffee";
 "about.description" = "A lightweight, private menu bar utility that keeps your Mac awake when you choose.";
-"about.privacy" = "No analytics, accounts, tracking, or network service.";
+"about.privacy" = "No analytics, accounts, tracking, or personal data collection.";
+"about.privacyPolicy" = "Privacy Policy";
+"about.support" = "Support";
 "about.limitations" = "Manual sleep, lid closure, thermal protection, and shutdown always remain under macOS control.";
 "accessibility.modeValue" = "Current mode: %@";
 "accessibility.durationValue" = "Selected duration: %@";

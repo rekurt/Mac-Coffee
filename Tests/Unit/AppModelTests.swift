@@ -162,6 +162,21 @@ final class AppModelTests: XCTestCase {
         XCTAssertEqual(harness.scheduler.scheduleCount, 3)
     }
 
+    func testActivationRefreshesSystemLanguageWithoutReplacingWakeSession() throws {
+        let locale = TestLocaleBox(Locale(identifier: "en-US"))
+        let harness = Harness(systemLocale: { locale.current })
+        harness.model.selectDuration(.hours2)
+        try harness.model.setMode(.system)
+        let originalSession = harness.model.session
+
+        locale.current = Locale(identifier: "ru-RU")
+        harness.lifecycle.onActivation?()
+
+        XCTAssertEqual(harness.localization.locale.language.languageCode?.identifier, "ru")
+        XCTAssertEqual(harness.model.session, originalSession)
+        XCTAssertEqual(harness.power.transitions, [.system])
+    }
+
     func testTimerReleaseFailureKeepsConfirmedModeAndShowsError() throws {
         let harness = Harness(now: Date(timeIntervalSince1970: 1_000))
         harness.model.selectDuration(.minutes30)
@@ -241,16 +256,19 @@ private final class Harness {
     let launchAtLogin = FakeLaunchAtLoginManager()
     let notifications = FakeNotificationSender()
     let lifecycle = FakeLifecycleObserver()
+    let localization: LocalizationController
     let model: AppModel
 
     init(
         now: Date = Date(timeIntervalSince1970: 1_000),
         savedDuration: SessionDuration = .hours1,
-        batteryState: BatteryState = .acDesktop
+        batteryState: BatteryState = .acDesktop,
+        systemLocale: @escaping () -> Locale = { Locale(identifier: "en-US") }
     ) {
         clock = TestClock(now: now)
         battery = FakeBatteryMonitor(state: batteryState)
         settings = FakeSettingsStore(savedDuration: savedDuration)
+        localization = LocalizationController(settings: settings, systemLocale: systemLocale)
         model = AppModel(environment: AppEnvironment(
             powerAssertions: power,
             battery: battery,
@@ -259,8 +277,17 @@ private final class Harness {
             launchAtLogin: launchAtLogin,
             notifications: notifications,
             lifecycle: lifecycle,
+            localization: localization,
             now: { [clock] in clock.now }
         ))
+    }
+}
+
+private final class TestLocaleBox {
+    var current: Locale
+
+    init(_ current: Locale) {
+        self.current = current
     }
 }
 

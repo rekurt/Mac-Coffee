@@ -25,12 +25,8 @@ case "$variant" in
 esac
 
 command -v xcodegen >/dev/null || {
-  print -u2 "XcodeGen 2.46.0 is required. Run: brew bundle"
+  print -u2 "XcodeGen 2.46.0 or later is required. Run: brew bundle"
   exit 69
-}
-[[ "$(xcodegen --version)" == "Version: 2.46.0" ]] || {
-  print -u2 "Expected XcodeGen 2.46.0, found: $(xcodegen --version)"
-  exit 65
 }
 
 cd "$ROOT_DIR"

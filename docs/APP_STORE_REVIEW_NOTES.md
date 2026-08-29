@@ -1,31 +1,36 @@
-# Mac Coffee 2.0 — App Store Review Notes
+# Mac Coffee 2.0 — App Review Notes
 
 ## Purpose
 
-Mac Coffee is a menu-bar utility that prevents idle sleep while the user explicitly enables a wake session. It supports keeping the Mac awake or keeping both the Mac and display awake for 30 minutes, 1, 2, 4, or 8 hours, or indefinitely.
+Mac Coffee is a native menu-bar utility that prevents idle sleep only while the user explicitly enables a wake session. It can keep the Mac awake or keep both the Mac and display awake for 30 minutes, 1, 2, 4, or 8 hours, or indefinitely.
 
-The utility does not override manual Sleep, lid-close sleep, shutdown, restart, thermal protection, or other macOS safety decisions.
+It does not override manual Sleep, lid closure, shutdown, restart, thermal protection, low-level system policy, or other macOS safety decisions.
 
-## Review flow
+## Suggested review flow
 
-1. Launch Mac Coffee. It appears only in the menu bar and starts in Off mode.
-2. Open its coffee-cup menu-bar item.
-3. Select **Keep Mac Awake** or **Keep Display Awake** and a duration.
-4. Select **Off** to release the power assertion immediately.
-5. Open **Settings…** to adjust the 10–30% battery cutoff (15% by default) or explicitly enable Launch at Login.
+1. Launch Mac Coffee. It appears in the menu bar and always starts Off.
+2. Open the menu-bar panel and choose **Keep Mac Awake** or **Keep Display Awake**.
+3. Select a finite duration and observe the remaining-time label; select another duration to replace it without restarting the app.
+4. Select **Off** and observe that the wake request ends immediately.
+5. Open **Settings…**. Change the language; the panel, Settings, About, errors, accessibility labels, dialogs, and later notifications update immediately without changing the process or active wake session.
+6. Adjust the battery cutoff between 10% and 30% (15% by default). A wake session stops at or below the threshold while on battery and must be re-enabled manually after recovery.
+7. Enable Launch at Login if desired; this setting is opt-in.
+8. Choose Quit or press `⌘Q`. Cancel preserves the active session; confirmation releases the assertion and exits.
+
+System language follows the first supported macOS preferred language and falls back to English. Explicit languages are English, Russian, German, French, Simplified Chinese, Japanese, Korean, and Spanish.
 
 ## Platform APIs and privileges
 
-- Wake sessions use public, process-owned IOKit power assertions (`IOPMAssertionCreateWithName`). Assertions disappear when the app exits or crashes.
-- Battery state is read locally through IOPowerSources notifications.
-- Launch at Login uses `SMAppService` and is changed only after an explicit user action.
-- Local notifications report session expiry and low-battery shutdown. Assertion errors remain local, appear as readable in-app status, and record technical details in the system log.
-- The app does not request administrator privileges and includes no privileged helper, daemon, shell command, or activity simulation.
+- Wake sessions use the public process-owned `IOPMAssertionCreateWithName` API.
+- Battery changes come from local IOPowerSources notifications.
+- Launch at Login uses public `SMAppService` and changes only after an explicit user action.
+- Local notifications report session expiry and low-battery stops.
+- The app requests no administrator privileges and includes no helper, daemon, shell command, activity simulation, analytics, advertising, account, or backend.
 
-## App Store distribution boundary
+## App Store boundary
 
-The `com.rekurt.maccoffee` App Store target does not link or bundle Sparkle, does not declare an update feed, and presents no alternate update action. The separate Direct target is not submitted to App Review.
+The submitted `com.rekurt.maccoffee` product is sandboxed. It does not link or bundle Sparkle, declare `SUFeedURL`, or expose any alternate update action. A separate Direct product exists in source but is not submitted to App Review.
 
 ## Privacy
 
-No data is collected or transmitted. Battery state and preferences remain on device. There is no account, analytics, tracking, advertising, or backend. See <https://github.com/rekurt/Mac-Coffee/blob/main/PRIVACY.md>.
+No data is collected or transmitted. Battery state and preferences remain on device. See <https://github.com/rekurt/Mac-Coffee/blob/main/PRIVACY.md>.

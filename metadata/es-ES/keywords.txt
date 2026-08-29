@@ -1,0 +1,1 @@
+activo,reposo,pantalla,barra de menús,batería,temporizador

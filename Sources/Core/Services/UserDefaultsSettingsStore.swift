@@ -1,5 +1,15 @@
 import Foundation
 
+protocol SettingsPreferences: AnyObject {
+    func object(forKey defaultName: String) -> Any?
+    func string(forKey defaultName: String) -> String?
+    func integer(forKey defaultName: String) -> Int
+    func bool(forKey defaultName: String) -> Bool
+    func set(_ value: Any?, forKey defaultName: String)
+}
+
+extension UserDefaults: SettingsPreferences {}
+
 public final class UserDefaultsSettingsStore: SettingsStoring {
     private enum Key {
         static let selectedLanguage = "selectedLanguage"
@@ -9,10 +19,14 @@ public final class UserDefaultsSettingsStore: SettingsStoring {
         static let notificationAuthorizationRequested = "notificationAuthorizationRequested"
     }
 
-    private let defaults: UserDefaults
+    private let defaults: any SettingsPreferences
 
-    public init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
+    public convenience init(defaults: UserDefaults = .standard) {
+        self.init(preferences: defaults)
+    }
+
+    init(preferences: any SettingsPreferences) {
+        defaults = preferences
     }
 
     public var selectedLanguage: SupportedLanguage {

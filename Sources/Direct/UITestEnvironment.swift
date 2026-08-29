@@ -14,9 +14,7 @@ enum UITestEnvironment {
             percentage: percentage,
             hasInternalBattery: true
         ))
-        let defaults = UserDefaults(suiteName: "MacCoffee.UITests.\(ProcessInfo.processInfo.processIdentifier)")!
-        defaults.removePersistentDomain(forName: "MacCoffee.UITests.\(ProcessInfo.processInfo.processIdentifier)")
-        let settings = UserDefaultsSettingsStore(defaults: defaults)
+        let settings = UITestSettingsStore()
         if let threshold = CommandLine.arguments
             .first(where: { $0.hasPrefix("--ui-battery-threshold=") })
             .flatMap({ Int($0.split(separator: "=").last ?? "") }) {
@@ -34,6 +32,14 @@ enum UITestEnvironment {
             updater: updater
         )
     }
+}
+
+private final class UITestSettingsStore: SettingsStoring {
+    var selectedLanguage: SupportedLanguage = .system
+    var selectedDuration: SessionDuration = .hours1
+    var batteryThreshold = 15
+    var launchAtLoginRequested = false
+    var notificationAuthorizationRequested = false
 }
 
 private final class UITestPowerAssertionManager: PowerAssertionManaging {

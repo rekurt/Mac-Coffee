@@ -47,7 +47,9 @@
 "notification.lowBatteryStopped" = "Le mode éveil a été arrêté car la batterie a atteint le seuil de sécurité.";
 "about.title" = "Mac Coffee";
 "about.description" = "Un utilitaire de barre des menus, léger et privé, qui garde votre Mac éveillé à votre demande.";
-"about.privacy" = "Aucune analyse, aucun compte, suivi ou service réseau.";
+"about.privacy" = "Aucune analyse, aucun compte, suivi ou collecte de données personnelles.";
+"about.privacyPolicy" = "Politique de confidentialité";
+"about.support" = "Assistance";
 "about.limitations" = "La veille manuelle, la fermeture du capot, la protection thermique et l’arrêt restent sous le contrôle de macOS.";
 "accessibility.modeValue" = "Mode actuel : %@";
 "accessibility.durationValue" = "Durée sélectionnée : %@";

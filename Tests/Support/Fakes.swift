@@ -5,6 +5,30 @@ enum FakeServiceError: Error {
     case failed
 }
 
+final class InMemorySettingsPreferences: SettingsPreferences {
+    private var values: [String: Any] = [:]
+
+    func object(forKey defaultName: String) -> Any? {
+        values[defaultName]
+    }
+
+    func string(forKey defaultName: String) -> String? {
+        values[defaultName] as? String
+    }
+
+    func integer(forKey defaultName: String) -> Int {
+        (values[defaultName] as? NSNumber)?.intValue ?? 0
+    }
+
+    func bool(forKey defaultName: String) -> Bool {
+        (values[defaultName] as? NSNumber)?.boolValue ?? false
+    }
+
+    func set(_ value: Any?, forKey defaultName: String) {
+        values[defaultName] = value
+    }
+}
+
 final class FakeSettingsStore: SettingsStoring {
     var selectedLanguage: SupportedLanguage
     var selectedDuration: SessionDuration

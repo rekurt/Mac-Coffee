@@ -37,8 +37,36 @@ jobs:
           test -n "$NOTARY_TEAM_ID"
           test -n "$SPARKLE_KEY"
 
-      - name: Install pinned tools
+      - name: Install build tools
         run: brew bundle
+
+      - name: Generate and verify canonical Xcode project
+        run: |
+          xcodegen generate
+          git diff --exit-code -- MacCoffee.xcodeproj
+
+      - name: Verify source release assets
+        run: ./scripts/verify-release-assets.sh
+
+      - name: Verify release tag matches product version
+        run: |
+          version=$(/usr/bin/awk -F ' = ' '/^MARKETING_VERSION = / { print $2 }' Config/Shared.xcconfig)
+          test -n "$version"
+          test "$GITHUB_REF_NAME" = "v$version"
+
+      - name: Unit and integration tests
+        run: >-
+          xcodebuild test
+          -project MacCoffee.xcodeproj
+          -scheme MacCoffeeTests
+          -destination 'platform=macOS'
+          CODE_SIGNING_ALLOWED=NO
+
+      - name: Verify Direct and App Store boundaries
+        run: |
+          ./scripts/build-local.sh direct
+          ./scripts/build-local.sh app-store
+          ./scripts/verify-bundles.sh
 
       - name: Materialize signing and notarization credentials
         env:

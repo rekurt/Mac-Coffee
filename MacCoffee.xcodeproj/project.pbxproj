@@ -12,6 +12,7 @@
 		08013D6C7A447E02B5E80772 /* MCPSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2338B232010CF19E9CC0B0EF /* MCPSettings.swift */; };
 		09D89609C61A47FAA59FAAE8 /* MacCoffeeCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; };
 		0B1B2F3642ED5E8AC616D872 /* BatteryMonitoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FB2117A03163E6CD6FEE95 /* BatteryMonitoring.swift */; };
+		0CCC61E24922909400F78737 /* MCPBrokerReplyGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723EB3BB017111A364F1B3A7 /* MCPBrokerReplyGate.swift */; };
 		0DF483BE7BCF9C91C5AD69D5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 78033B85BB961A3E0A2572CE /* Localizable.strings */; };
 		0E5FE45B7978AF2BC1F3618F /* QuitConfirmationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97FB72D5D792B637F69C005 /* QuitConfirmationCoordinator.swift */; };
 		0EBB711100D2BE796069EA4C /* SparkleUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D76E91559DD558AEF50FB2C /* SparkleUpdater.swift */; };
@@ -29,6 +30,7 @@
 		1F55DC033F9AECCE3C9996CA /* MCPBrokerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 616CC216EBEDBABE1C895313 /* MCPBrokerConnection.swift */; };
 		1F810B88B4234FE1B6BC7D9A /* MacCoffeeCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82A246A0DCF736C0A7ACD7F /* MacCoffeeCore.swift */; };
 		200D7069170B4E298DADC3A8 /* SupportedLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBF74D49B9B0C8B6711E9729 /* SupportedLanguage.swift */; };
+		2055F4DC626092A5883760CD /* DirectMCPEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CE9C6FA7AA0DCB6282BEB0 /* DirectMCPEnvironment.swift */; };
 		20572595C4849F54243931C9 /* MacCoffeeCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		20EAE6E562FC77B2B4D5585C /* MCPBrokerListenerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5C5AD5B7A7266E78FAB681B /* MCPBrokerListenerDelegate.swift */; };
 		21048DCEE6A4A9AFC7AC68DD /* MacCoffeeDirectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5941C5C1AC867972C6CCCFDD /* MacCoffeeDirectApp.swift */; };
@@ -53,6 +55,7 @@
 		3CAACC033C6DA555D0765367 /* MacCoffeeMCPBroker.xpc in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1624E485C6B6183008DABF7C /* MacCoffeeMCPBroker.xpc */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3CCE9A035CD0DF25AD64231B /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749A9D399B970FA6EE86214F /* main.swift */; };
 		428CCF82B0F86A3947EDC0D6 /* MenuBarLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D644690E4909F3FDA025EB /* MenuBarLabel.swift */; };
+		42C81BE7731BC3BBD74EC30D /* MCPBrokerRegistrar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F22EA2EF839BAF110B9EC4 /* MCPBrokerRegistrar.swift */; };
 		463BBB4179D3C12F2599A36E /* KeychainMCPCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E30C11B6C469C0F0B82B58A /* KeychainMCPCredentialStore.swift */; };
 		46FCE77E0EEDF57EC3925C06 /* SessionScheduling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A8E5AB1F8946894D4337E5 /* SessionScheduling.swift */; };
 		4719032049DB4CA225369594 /* MCPBrokerPeerValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FADE88BC93C602F5634567E /* MCPBrokerPeerValidator.swift */; };
@@ -87,6 +90,7 @@
 		6E07640D54C038E063BD6B5C /* MCPBrokerReplyGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723EB3BB017111A364F1B3A7 /* MCPBrokerReplyGate.swift */; };
 		6E84B9A4C80A40833E25D93E /* MCPControlServicing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A96709DF02D8BE5EFDB2F49 /* MCPControlServicing.swift */; };
 		7265B62E4C200CC6BAD50927 /* MCPCredentialStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = E50790ED55039BB2DE33F6DA /* MCPCredentialStoring.swift */; };
+		7387543754837C1B040C43C3 /* MCPBrokerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AD5C1ADA3838BD5AA57525 /* MCPBrokerProtocol.swift */; };
 		73F15697F88374EB55C0D806 /* MCPXPCConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8976851A0B6C1CA05AEA98A /* MCPXPCConnection.swift */; };
 		748B3532C37B8F8410B25B92 /* LifecycleObserving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C309CF2C5EE4A3ED2DE8EF3 /* LifecycleObserving.swift */; };
 		765676B50EF880383C5184BA /* MCPResourceAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19EA48CAD1A18C6A650C9F0A /* MCPResourceAdapter.swift */; };
@@ -128,6 +132,7 @@
 		9E07AA5E9D70C778B391538E /* MCPControlService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A308CE4C796B02EC46564A55 /* MCPControlService.swift */; };
 		9F1B8E0162F7E41D463F35E7 /* MCPStatusPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034394AA53CA25C6520FCCB5 /* MCPStatusPublisher.swift */; };
 		9FB9A0FE985A1881F1DC38F1 /* MacCoffeeCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A01DA6E217D0DF0EE5D50E63 /* DirectMCPEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CE9C6FA7AA0DCB6282BEB0 /* DirectMCPEnvironment.swift */; };
 		A12B7AE32804896121B52A71 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 78033B85BB961A3E0A2572CE /* Localizable.strings */; };
 		A4B2112261CF752742543BE5 /* MCPBrokerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AD5C1ADA3838BD5AA57525 /* MCPBrokerProtocol.swift */; };
 		A4B2EB070773DB085FF6F773 /* UserNotificationSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29C0A82FFD24B1BF810A1E4 /* UserNotificationSender.swift */; };
@@ -159,9 +164,11 @@
 		C8A9C94E7F77FD32F4E17FD5 /* QuitConfirmationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97FB72D5D792B637F69C005 /* QuitConfirmationCoordinator.swift */; };
 		C9F491262B5B61D7C2F9775D /* MCPRequestCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24711E37717F84C9BC4F8764 /* MCPRequestCache.swift */; };
 		CBAD792583F0E25E68A74A0D /* MCPBrokerRegistrar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F22EA2EF839BAF110B9EC4 /* MCPBrokerRegistrar.swift */; };
+		CE953248A103202C5B563B00 /* MCPXPCListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A75B78FF9008269B541AE5 /* MCPXPCListener.swift */; };
 		CEBF5D7C577758011771DFBF /* MCPXPCListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A75B78FF9008269B541AE5 /* MCPXPCListener.swift */; };
 		D05516C41E282C47FA24792E /* MCPActivityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B02A4FAD8A5BDF9B18AA04 /* MCPActivityStore.swift */; };
 		D2D26835DE48FDB8BAB3C9BF /* MCPPairingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC33B70A75BC321EB0ACEB0 /* MCPPairingCoordinator.swift */; };
+		D34E1E7F1DE30B00272C0B02 /* MCPXPCConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8976851A0B6C1CA05AEA98A /* MCPXPCConnection.swift */; };
 		D359AC96C98CB5E7BAD57550 /* DomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7FC0CED383B614B3C223EF /* DomainTests.swift */; };
 		D6864AA8E1376F9FF96A4B97 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A7BB528782F50E32C7F3EAF8 /* PrivacyInfo.xcprivacy */; };
 		D6D0D8A1D683DB420E64C52F /* MCPBrokerRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 510AD568BE63B778A861ED1E /* MCPBrokerRegistry.swift */; };
@@ -377,6 +384,7 @@
 		3CF0FCEF7F60B545BF37C6AD /* LowBatteryPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowBatteryPolicy.swift; sourceTree = "<group>"; };
 		3E7FC0CED383B614B3C223EF /* DomainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainTests.swift; sourceTree = "<group>"; };
 		41DB617796F0EB3E60CBBDEB /* IOKitBatteryMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOKitBatteryMonitor.swift; sourceTree = "<group>"; };
+		43CE9C6FA7AA0DCB6282BEB0 /* DirectMCPEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMCPEnvironment.swift; sourceTree = "<group>"; };
 		4634EF20BE0718DB6BA7B949 /* Direct.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Direct.xcconfig; sourceTree = "<group>"; };
 		470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MacCoffeeCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		47C256390BEE444053ABAA65 /* CompositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompositionTests.swift; sourceTree = "<group>"; };
@@ -806,6 +814,7 @@
 		D840643868607221D06A2296 /* MCP */ = {
 			isa = PBXGroup;
 			children = (
+				43CE9C6FA7AA0DCB6282BEB0 /* DirectMCPEnvironment.swift */,
 				F4F22EA2EF839BAF110B9EC4 /* MCPBrokerRegistrar.swift */,
 				C8976851A0B6C1CA05AEA98A /* MCPXPCConnection.swift */,
 				48A75B78FF9008269B541AE5 /* MCPXPCListener.swift */,
@@ -1273,6 +1282,7 @@
 			files = (
 				898C373B9AF81550F661E011 /* AppModelTests.swift in Sources */,
 				DFC9C6B53DEA1B171F7BCC2D /* CompositionTests.swift in Sources */,
+				2055F4DC626092A5883760CD /* DirectMCPEnvironment.swift in Sources */,
 				D359AC96C98CB5E7BAD57550 /* DomainTests.swift in Sources */,
 				F338D94CFEEB20C359DDBE82 /* FakePowerAssertionDriver.swift in Sources */,
 				5147B8BBD924833635924A3D /* Fakes.swift in Sources */,
@@ -1280,6 +1290,9 @@
 				053669E35DA0DCCB8C47336D /* KeychainMCPCredentialStore.swift in Sources */,
 				81C4CB580EF5D873DC1DFBE3 /* LocalizationTests.swift in Sources */,
 				79CF3F2DC3CBC656772B6A98 /* LowBatteryPolicyTests.swift in Sources */,
+				7387543754837C1B040C43C3 /* MCPBrokerProtocol.swift in Sources */,
+				42C81BE7731BC3BBD74EC30D /* MCPBrokerRegistrar.swift in Sources */,
+				0CCC61E24922909400F78737 /* MCPBrokerReplyGate.swift in Sources */,
 				38A3C9D571B414BC7549FED7 /* MCPContractTests.swift in Sources */,
 				398E20AF741EC0211E4FFC6B /* MCPControlServiceTests.swift in Sources */,
 				5A38CC55EE17422219F4AD80 /* MCPPairingTests.swift in Sources */,
@@ -1288,6 +1301,8 @@
 				164427508F994A64320666B5 /* MCPSettingsTests.swift in Sources */,
 				54194740CF3D8780436D2646 /* MCPSnapshotTests.swift in Sources */,
 				79176B75611B7A5084A373C7 /* MCPTrustStoreTests.swift in Sources */,
+				D34E1E7F1DE30B00272C0B02 /* MCPXPCConnection.swift in Sources */,
+				CE953248A103202C5B563B00 /* MCPXPCListener.swift in Sources */,
 				846D1AF880014FDBEB074D56 /* MCPXPCTests.swift in Sources */,
 				8C1DF9D22EFF5FBC89FB09DD /* ParentProcessIdentity.swift in Sources */,
 				B843C8577EA694BE4A0FC0FA /* PlatformAdapterTests.swift in Sources */,
@@ -1444,6 +1459,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A01DA6E217D0DF0EE5D50E63 /* DirectMCPEnvironment.swift in Sources */,
 				463BBB4179D3C12F2599A36E /* KeychainMCPCredentialStore.swift in Sources */,
 				2E7F309EDE6B1CF48CCEF0E3 /* MCPBrokerProtocol.swift in Sources */,
 				FED5736A75DF0C2077BC3DDF /* MCPBrokerRegistrar.swift in Sources */,

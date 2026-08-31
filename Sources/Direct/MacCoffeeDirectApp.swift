@@ -8,6 +8,7 @@ struct MacCoffeeDirectApp: App {
     @StateObject private var model: AppModel
     @ObservedObject private var localization: LocalizationController
     private let updater: SparkleUpdater
+    private let mcpEnvironment: DirectMCPEnvironment
     private let quitCoordinator: QuitConfirmationCoordinator
 #if DEBUG
     private static var uiTestWindowController: NSWindowController?
@@ -22,11 +23,23 @@ struct MacCoffeeDirectApp: App {
         environment = .live(updater: updater)
 #endif
         let model = AppModel(environment: environment)
+        guard let mcpSettingsStore = environment.settings as? MCPSettingsStoring else {
+            preconditionFailure("Direct settings store must support MCP preferences")
+        }
+        let mcpEnvironment = DirectMCPEnvironment.live(
+            model: model,
+            settingsStore: mcpSettingsStore
+        )
+        environment.termination.register { [weak mcpEnvironment] in
+            mcpEnvironment?.prepareForTermination()
+        }
         self.updater = updater
+        self.mcpEnvironment = mcpEnvironment
         let quitCoordinator = QuitConfirmationCoordinator(model: model)
         self.quitCoordinator = quitCoordinator
         _model = StateObject(wrappedValue: model)
         _localization = ObservedObject(wrappedValue: environment.localization)
+        mcpEnvironment.startIfEnabled()
 #if DEBUG
         Self.openUITestWindowIfRequested(
             model: model,

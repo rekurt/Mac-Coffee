@@ -79,6 +79,7 @@ final class FakePowerAssertionManager: PowerAssertionManaging {
     var failNextTransition = false
     var failEveryTransition = false
     var confirmedModeOnFailure: WakeMode?
+    var onReleaseAll: (() -> Void)?
     private(set) var transitions: [WakeMode] = []
     private(set) var releaseAllCalled = false
 
@@ -96,6 +97,7 @@ final class FakePowerAssertionManager: PowerAssertionManaging {
     }
 
     func releaseAll() {
+        onReleaseAll?()
         releaseAllCalled = true
         activeMode = .off
     }

@@ -181,6 +181,7 @@ public final class AppModel: ObservableObject {
     }
 
     public func prepareForTermination() {
+        environment.termination.prepare()
         environment.scheduler.cancel()
         environment.battery.stop()
         environment.lifecycle.stop()

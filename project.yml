@@ -101,10 +101,12 @@ targets:
     sources:
       - Tests/Unit
       - Tests/Support
+      - Sources/Direct/MCP
       - Sources/Direct/Security/KeychainMCPCredentialStore.swift
       - Sources/Direct/Security/SecurityClientIdentityVerifier.swift
       - Sources/MCPHelper/Security/KeychainClientKeyStore.swift
       - Sources/MCPHelper/Security/ParentProcessIdentity.swift
+      - Sources/MCPBrokerShared
     dependencies:
       - target: MacCoffeeCore
     settings:
@@ -131,7 +133,9 @@ targets:
     sources:
       - Tests/Integration
       - Tests/Support
-      - Sources/Direct/MCP
+      - path: Sources/Direct/MCP
+        excludes:
+          - DirectMCPEnvironment.swift
       - Sources/MCPHelper/XPC
       - Sources/MCPBrokerShared
       - path: Sources/MCPBroker

@@ -244,6 +244,17 @@ final class AppModelTests: XCTestCase {
         XCTAssertFalse(harness.battery.started)
         XCTAssertFalse(harness.lifecycle.started)
     }
+
+    func testTerminationPreparesIntegrationsBeforeReleasingAssertions() {
+        let harness = Harness()
+        var events: [String] = []
+        harness.termination.register { events.append("integration") }
+        harness.power.onReleaseAll = { events.append("assertions") }
+
+        harness.model.prepareForTermination()
+
+        XCTAssertEqual(events, ["integration", "assertions"])
+    }
 }
 
 @MainActor
@@ -256,6 +267,7 @@ private final class Harness {
     let launchAtLogin = FakeLaunchAtLoginManager()
     let notifications = FakeNotificationSender()
     let lifecycle = FakeLifecycleObserver()
+    let termination = TerminationPreparationCoordinator()
     let localization: LocalizationController
     let model: AppModel
 
@@ -277,6 +289,7 @@ private final class Harness {
             launchAtLogin: launchAtLogin,
             notifications: notifications,
             lifecycle: lifecycle,
+            termination: termination,
             localization: localization,
             now: { [clock] in clock.now }
         ))

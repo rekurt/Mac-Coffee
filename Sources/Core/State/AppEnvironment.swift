@@ -1,6 +1,32 @@
 import Foundation
 
 @MainActor
+public final class TerminationPreparationCoordinator {
+    public typealias Action = @MainActor () -> Void
+
+    private var actions: [Action] = []
+    private var didPrepare = false
+
+    public init() {}
+
+    public func register(_ action: @escaping Action) {
+        if didPrepare {
+            action()
+        } else {
+            actions.append(action)
+        }
+    }
+
+    public func prepare() {
+        guard !didPrepare else { return }
+        didPrepare = true
+        let pending = actions
+        actions.removeAll()
+        pending.forEach { $0() }
+    }
+}
+
+@MainActor
 public struct AppEnvironment {
     public let powerAssertions: PowerAssertionManaging
     public let battery: BatteryMonitoring
@@ -10,6 +36,7 @@ public struct AppEnvironment {
     public let launchAtLogin: LaunchAtLoginManaging
     public let notifications: NotificationSending
     public let lifecycle: LifecycleObserving
+    public let termination: TerminationPreparationCoordinator
     public let updater: UpdaterProviding?
     public let now: () -> Date
 
@@ -21,6 +48,7 @@ public struct AppEnvironment {
         launchAtLogin: LaunchAtLoginManaging,
         notifications: NotificationSending,
         lifecycle: LifecycleObserving,
+        termination: TerminationPreparationCoordinator = TerminationPreparationCoordinator(),
         localization: LocalizationController? = nil,
         updater: UpdaterProviding? = nil,
         now: @escaping () -> Date = Date.init
@@ -33,6 +61,7 @@ public struct AppEnvironment {
         self.launchAtLogin = launchAtLogin
         self.notifications = notifications
         self.lifecycle = lifecycle
+        self.termination = termination
         self.updater = updater
         self.now = now
     }

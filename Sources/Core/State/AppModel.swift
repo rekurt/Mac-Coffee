@@ -3,11 +3,14 @@ import Foundation
 
 public enum AppModelError: LocalizedError {
     case batteryBlocked
+    case invalidWakeMode
 
     public var errorDescription: String? {
         switch self {
         case .batteryBlocked:
             String(localized: "battery.blocked", bundle: .main)
+        case .invalidWakeMode:
+            String(localized: "error.generic", bundle: .main)
         }
     }
 }
@@ -118,6 +121,23 @@ public final class AppModel: ObservableObject {
         let newSession = WakeSession(mode: mode, startedAt: environment.now(), duration: duration)
         session = newSession
         schedule(newSession)
+    }
+
+    public func applySession(mode requestedMode: WakeMode, duration: SessionDuration) throws {
+        guard requestedMode != .off else {
+            throw AppModelError.invalidWakeMode
+        }
+
+        if requestedMode != mode {
+            try setMode(requestedMode)
+        }
+        if duration != selectedDuration {
+            selectDuration(duration)
+        }
+    }
+
+    public func stopSession() throws {
+        try setMode(.off)
     }
 
     public func setBatteryThreshold(_ threshold: Int) {

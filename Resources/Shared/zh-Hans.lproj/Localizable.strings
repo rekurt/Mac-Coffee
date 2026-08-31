@@ -67,3 +67,6 @@
 "about.versionFormat" = "版本 %@（%@）";
 "error.launchAtLogin" = "Mac Coffee 无法更新登录时启动设置。请重试。";
 "error.generic" = "发生错误。请重试。";
+"mcp.status.off" = "Mac Coffee 已关闭。";
+"mcp.status.system" = "Mac Coffee 正在防止 Mac 进入睡眠。";
+"mcp.status.display" = "Mac Coffee 正在防止 Mac 和显示器进入睡眠。";

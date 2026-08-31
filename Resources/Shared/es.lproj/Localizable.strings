@@ -67,3 +67,6 @@
 "about.versionFormat" = "Versión %@ (%@)";
 "error.launchAtLogin" = "Mac Coffee no pudo actualizar la apertura al iniciar sesión. Inténtalo de nuevo.";
 "error.generic" = "Algo salió mal. Inténtalo de nuevo.";
+"mcp.status.off" = "Mac Coffee está desactivado.";
+"mcp.status.system" = "Mac Coffee mantiene activo el Mac.";
+"mcp.status.display" = "Mac Coffee mantiene activos el Mac y la pantalla.";

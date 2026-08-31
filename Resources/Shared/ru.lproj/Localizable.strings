@@ -67,3 +67,6 @@
 "about.versionFormat" = "Версия %@ (%@)";
 "error.launchAtLogin" = "Mac Coffee не удалось настроить запуск при входе. Попробуйте ещё раз.";
 "error.generic" = "Что-то пошло не так. Попробуйте ещё раз.";
+"mcp.status.off" = "Mac Coffee выключен.";
+"mcp.status.system" = "Mac Coffee не даёт вашему Mac уснуть.";
+"mcp.status.display" = "Mac Coffee не даёт Mac и экрану уснуть.";

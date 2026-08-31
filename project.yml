@@ -76,6 +76,7 @@ targets:
     sources:
       - Tests/Unit
       - Tests/Support
+      - Sources/Direct/Security/KeychainMCPCredentialStore.swift
     dependencies:
       - target: MacCoffeeCore
     settings:

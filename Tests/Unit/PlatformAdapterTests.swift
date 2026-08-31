@@ -4,6 +4,11 @@ import XCTest
 @testable import MacCoffeeCore
 
 final class PlatformAdapterTests: XCTestCase {
+    @MainActor
+    func testMissingMainAppRegistrationIsTreatedAsDisabledSoItCanBeRegistered() {
+        XCTAssertEqual(SMAppLaunchAtLoginManager().status, .disabled)
+    }
+
     func testBatteryDescriptionUsesCurrentOverMaximumCapacity() {
         let description: [String: Any] = [
             kIOPSTransportTypeKey: kIOPSInternalType,

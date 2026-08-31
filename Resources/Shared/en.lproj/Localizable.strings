@@ -67,3 +67,6 @@
 "about.versionFormat" = "Version %@ (%@)";
 "error.launchAtLogin" = "Mac Coffee could not update launch at login. Try again.";
 "error.generic" = "Something went wrong. Try again.";
+"mcp.status.off" = "Mac Coffee is off.";
+"mcp.status.system" = "Mac Coffee is keeping your Mac awake.";
+"mcp.status.display" = "Mac Coffee is keeping your Mac and display awake.";

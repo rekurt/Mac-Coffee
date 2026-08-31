@@ -335,6 +335,7 @@ private final class ScreenshotSettingsStore: SettingsStoring {
     var batteryThreshold = 15
     var launchAtLoginRequested = false
     var notificationAuthorizationRequested = false
+    var mcpEnabled = false
 
     init(selectedLanguage: SupportedLanguage) {
         self.selectedLanguage = selectedLanguage

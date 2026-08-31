@@ -35,19 +35,42 @@ final class FakeSettingsStore: SettingsStoring {
     var batteryThreshold: Int
     var launchAtLoginRequested: Bool
     var notificationAuthorizationRequested: Bool
+    var mcpEnabled: Bool
 
     init(
         selectedLanguage: SupportedLanguage = .system,
         savedDuration: SessionDuration = .hours1,
         batteryThreshold: Int = 15,
         launchAtLoginRequested: Bool = false,
-        notificationAuthorizationRequested: Bool = false
+        notificationAuthorizationRequested: Bool = false,
+        mcpEnabled: Bool = false
     ) {
         self.selectedLanguage = selectedLanguage
         self.selectedDuration = savedDuration
         self.batteryThreshold = batteryThreshold
         self.launchAtLoginRequested = launchAtLoginRequested
         self.notificationAuthorizationRequested = notificationAuthorizationRequested
+        self.mcpEnabled = mcpEnabled
+    }
+}
+
+final class FakeMCPCredentialStore: MCPCredentialStoring {
+    var values: [String: Data] = [:]
+    private(set) var writeCount = 0
+    private(set) var removedKeys: [String] = []
+
+    func data(for key: String) throws -> Data? {
+        values[key]
+    }
+
+    func setData(_ data: Data, for key: String) throws {
+        writeCount += 1
+        values[key] = data
+    }
+
+    func removeData(for key: String) throws {
+        removedKeys.append(key)
+        values.removeValue(forKey: key)
     }
 }
 

@@ -1,3 +1,4 @@
+import CoreFoundation
 import Foundation
 
 protocol SettingsPreferences: AnyObject {
@@ -17,6 +18,7 @@ public final class UserDefaultsSettingsStore: SettingsStoring {
         static let batteryThreshold = "batteryThreshold"
         static let launchAtLoginRequested = "launchAtLoginRequested"
         static let notificationAuthorizationRequested = "notificationAuthorizationRequested"
+        static let mcpEnabled = "mcpEnabled"
     }
 
     private let defaults: any SettingsPreferences
@@ -77,6 +79,17 @@ public final class UserDefaultsSettingsStore: SettingsStoring {
     public var notificationAuthorizationRequested: Bool {
         get { defaults.bool(forKey: Key.notificationAuthorizationRequested) }
         set { defaults.set(newValue, forKey: Key.notificationAuthorizationRequested) }
+    }
+
+    public var mcpEnabled: Bool {
+        get {
+            guard let value = defaults.object(forKey: Key.mcpEnabled) as? NSNumber,
+                  CFGetTypeID(value) == CFBooleanGetTypeID() else {
+                return false
+            }
+            return value.boolValue
+        }
+        set { defaults.set(newValue, forKey: Key.mcpEnabled) }
     }
 
     private static func clampedThreshold(_ threshold: Int) -> Int {

@@ -67,3 +67,6 @@
 "about.versionFormat" = "Version %@ (%@)";
 "error.launchAtLogin" = "Mac Coffee konnte „Beim Anmelden öffnen“ nicht aktualisieren. Versuche es erneut.";
 "error.generic" = "Etwas ist schiefgelaufen. Versuche es erneut.";
+"mcp.status.off" = "Mac Coffee ist ausgeschaltet.";
+"mcp.status.system" = "Mac Coffee hält deinen Mac wach.";
+"mcp.status.display" = "Mac Coffee hält deinen Mac und das Display wach.";

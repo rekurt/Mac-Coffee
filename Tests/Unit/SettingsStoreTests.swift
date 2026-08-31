@@ -23,6 +23,7 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(store.batteryThreshold, 15)
         XCTAssertFalse(store.launchAtLoginRequested)
         XCTAssertFalse(store.notificationAuthorizationRequested)
+        XCTAssertFalse(store.mcpEnabled)
     }
 
     func testValuesRoundTripAndThresholdIsClamped() {
@@ -33,6 +34,7 @@ final class SettingsStoreTests: XCTestCase {
         store.batteryThreshold = 50
         store.launchAtLoginRequested = true
         store.notificationAuthorizationRequested = true
+        store.mcpEnabled = true
 
         let reloaded = UserDefaultsSettingsStore(preferences: preferences)
         XCTAssertEqual(reloaded.selectedLanguage, .german)
@@ -40,6 +42,7 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(reloaded.batteryThreshold, 30)
         XCTAssertTrue(reloaded.launchAtLoginRequested)
         XCTAssertTrue(reloaded.notificationAuthorizationRequested)
+        XCTAssertTrue(reloaded.mcpEnabled)
     }
 
     func testStoreNeverDefinesActiveModeOrSessionKeys() {

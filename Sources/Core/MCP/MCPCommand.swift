@@ -41,7 +41,7 @@ public enum MCPCommand: Equatable, Sendable {
         return requestID
     }
 
-    fileprivate static func validatedOptionalRequestID(_ requestID: String?) throws -> String? {
+    static func validatedOptionalRequestID(_ requestID: String?) throws -> String? {
         try validatedRequestID(requestID)
     }
 }

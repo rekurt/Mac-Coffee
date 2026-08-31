@@ -19,3 +19,8 @@ public enum MCPResourceURI: String, CaseIterable, Sendable {
     case capabilities = "maccoffee://capabilities"
     case activity = "maccoffee://activity"
 }
+
+public enum MCPXPCAction: String, Sendable {
+    case readStatus = "read:maccoffee://status"
+    case readActivity = "read:maccoffee://activity"
+}

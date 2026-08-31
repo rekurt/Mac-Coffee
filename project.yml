@@ -11,6 +11,9 @@ configs:
   Release: release
 
 packages:
+  MCP:
+    url: https://github.com/modelcontextprotocol/swift-sdk
+    exactVersion: 0.12.1
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle
     exactVersion: 2.9.4
@@ -136,6 +139,38 @@ targets:
         PRODUCT_NAME: MacCoffeeMCPBroker
         SKIP_INSTALL: YES
 
+  MacCoffeeMCP:
+    type: tool
+    platform: macOS
+    sources:
+      - Sources/MCPHelper/main.swift
+      - Sources/MCPHelper/MCPServerAdapter.swift
+      - Sources/MCPHelper/MCPToolAdapter.swift
+      - Sources/MCPHelper/MCPResourceAdapter.swift
+      - Sources/MCPHelper/MCPHelperRuntime.swift
+      - Sources/MCPHelper/Diagnostics.swift
+      - Sources/MCPHelper/Security
+      - Sources/MCPHelper/XPC
+      - Sources/MCPBrokerShared
+      - Sources/Direct/Security/SecurityClientIdentityVerifier.swift
+    dependencies:
+      - target: MacCoffeeCore
+      - package: MCP
+        product: MCP
+    configFiles:
+      Debug: Config/Shared.xcconfig
+      Release: Config/Shared.xcconfig
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.mcp-helper
+        PRODUCT_NAME: MacCoffeeMCP
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path @executable_path/../Frameworks"
+        GENERATE_INFOPLIST_FILE: YES
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        INFOPLIST_KEY_CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        INFOPLIST_KEY_CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+
   MacCoffeeScreenshots:
     type: application
     platform: macOS
@@ -200,6 +235,7 @@ schemes:
     build:
       targets:
         MacCoffeeCore: all
+        MacCoffeeMCP: all
         MacCoffeeIntegrationTests: [test]
     test:
       config: Debug
@@ -213,3 +249,8 @@ schemes:
         MacCoffeeScreenshots: all
     run:
       config: Release
+
+  MacCoffeeMCP:
+    build:
+      targets:
+        MacCoffeeMCP: all

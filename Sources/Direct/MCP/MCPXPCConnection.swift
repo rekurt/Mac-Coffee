@@ -137,21 +137,33 @@ public final class MCPXPCConnection: NSObject, MCPXPCAppService, @unchecked Send
             guard let self else { return }
             guard self.consumePendingRequest(requestIdentifier) else { return }
             do {
-                let command = try MCPCommandParser.parse(
-                    toolName: action,
-                    argumentsJSON: payloadJSON
+                let clientContext = MCPClientContext(
+                    identifier: client.identifier,
+                    displayName: client.displayName
                 )
-                let envelope = try controlService.execute(
-                    command,
-                    client: MCPClientContext(
-                        identifier: client.identifier,
-                        displayName: client.displayName
+                let responsePayload: Data
+                switch MCPXPCAction(rawValue: action) {
+                case .readStatus:
+                    responsePayload = try JSONEncoder().encode(
+                        controlService.readStatus(client: clientContext)
                     )
-                )
+                case .readActivity:
+                    responsePayload = try JSONEncoder().encode(
+                        controlService.readActivity(client: clientContext)
+                    )
+                case nil:
+                    let command = try MCPCommandParser.parse(
+                        toolName: action,
+                        argumentsJSON: payloadJSON
+                    )
+                    responsePayload = try JSONEncoder().encode(
+                        try controlService.execute(command, client: clientContext)
+                    )
+                }
                 let response = MCPXPCResponse(
                     schemaVersion: MCPContract.schemaVersion,
                     requestIdentifier: requestIdentifier,
-                    payloadJSON: try JSONEncoder().encode(envelope),
+                    payloadJSON: responsePayload,
                     error: nil
                 )
                 try MCPXPCCodec.validate(response)

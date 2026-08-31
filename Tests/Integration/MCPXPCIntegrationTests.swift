@@ -285,6 +285,40 @@ final class MCPXPCIntegrationTests: XCTestCase {
         )
     }
 
+    func testAuthenticatedClientReadsStatusAndBoundedActivityResources() async throws {
+        let credentials = TestClientCredentials()
+        let system = try makeSystem(credentials: credentials, pretrusted: true)
+        system.start()
+        defer { system.stop(reason: .appTermination) }
+        let client = makeClient(endpointProvider: system.provider, credentials: credentials)
+        _ = try await client.connect()
+
+        _ = try await client.perform(
+            action: MCPToolName.setBatteryThreshold.rawValue,
+            payloadJSON: Data("{\"percent\":23}".utf8)
+        )
+        let statusData = try await client.perform(
+            action: "read:maccoffee://status",
+            payloadJSON: Data("{}".utf8)
+        )
+        let status = try JSONDecoder().decode(
+            MCPEnvelope<MCPStatusSnapshot>.self,
+            from: statusData
+        )
+        XCTAssertEqual(status.data.battery.threshold, 23)
+
+        let activityData = try await client.perform(
+            action: "read:maccoffee://activity",
+            payloadJSON: Data("{}".utf8)
+        )
+        let activity = try JSONDecoder().decode(MCPActivitySnapshot.self, from: activityData)
+        XCTAssertEqual(activity.schemaVersion, 1)
+        XCTAssertEqual(
+            activity.entries.map(\.action),
+            [.setBatteryThreshold, .readStatus, .readActivity]
+        )
+    }
+
     private func makeClient(
         endpointProvider: MCPXPCAppEndpointProviding,
         credentials: TestClientCredentials,

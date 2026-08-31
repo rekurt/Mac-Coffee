@@ -26,7 +26,8 @@ public enum ParentProcessIdentity {
         guard length > 0 else {
             throw ParentProcessIdentityError.executablePathUnavailable
         }
-        let path = String(cString: buffer)
+        let bytes = buffer.prefix(Int(length)).map(UInt8.init(bitPattern:))
+        let path = String(decoding: bytes, as: UTF8.self)
         return try verifier.identity(forExecutableAt: path)
     }
 }

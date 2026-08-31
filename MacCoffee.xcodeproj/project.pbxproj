@@ -27,6 +27,7 @@
 		377A8929707A28B303CE9BAA /* TaskSessionScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB31B714F40A174B90DD7622 /* TaskSessionScheduler.swift */; };
 		38A3C9D571B414BC7549FED7 /* MCPContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A673FBACFD506A880990899 /* MCPContractTests.swift */; };
 		38D2DA11D7967D82CF3061AF /* RuntimeLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBECE1EBECCC6116C200421 /* RuntimeLocalizationTests.swift */; };
+		398E20AF741EC0211E4FFC6B /* MCPControlServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DC7DF7700F935B5CCBB96E5 /* MCPControlServiceTests.swift */; };
 		39D58A9447339964C81CA991 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9358E95FF4C20DF0FA97F82D /* Assets.xcassets */; };
 		3A7F19B201ED57CE847ADE6F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9358E95FF4C20DF0FA97F82D /* Assets.xcassets */; };
 		3B3EA9C36D3965A429445999 /* NotificationSending.swift in Sources */ = {isa = PBXBuildFile; fileRef = C969EF5E001651BE0474D10A /* NotificationSending.swift */; };
@@ -45,6 +46,7 @@
 		62449F7EE636ADF82468613B /* UserDefaultsSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621BA2020D7E00925D4251DA /* UserDefaultsSettingsStore.swift */; };
 		657B7B6B1B73BE043F62D3FE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9358E95FF4C20DF0FA97F82D /* Assets.xcassets */; };
 		6BB9FA00674B08127BF7A8CF /* SettingsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5C8ECBEAAF29972964CE15 /* SettingsStoreTests.swift */; };
+		6E84B9A4C80A40833E25D93E /* MCPControlServicing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A96709DF02D8BE5EFDB2F49 /* MCPControlServicing.swift */; };
 		748B3532C37B8F8410B25B92 /* LifecycleObserving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C309CF2C5EE4A3ED2DE8EF3 /* LifecycleObserving.swift */; };
 		7836BBF80996BDE1844DE6E9 /* MacCoffeeCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; };
 		783FFC771E685CE54BA2A390 /* LowBatteryPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF0FCEF7F60B545BF37C6AD /* LowBatteryPolicy.swift */; };
@@ -62,6 +64,7 @@
 		901BAB0FD1A8F144D088A213 /* SupportedLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBF74D49B9B0C8B6711E9729 /* SupportedLanguage.swift */; };
 		955AFC31665DABBCFE310CF1 /* MacCoffeeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125DB0E365F9BB3DCE223D75 /* MacCoffeeUITests.swift */; };
 		9BAA614B51B2E799B6A5BE76 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D698D77A2FD5F0B873AC6A /* SettingsView.swift */; };
+		9E07AA5E9D70C778B391538E /* MCPControlService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A308CE4C796B02EC46564A55 /* MCPControlService.swift */; };
 		A12B7AE32804896121B52A71 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 78033B85BB961A3E0A2572CE /* Localizable.strings */; };
 		AF923D52E64190829CE51444 /* MacCoffeeCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82A246A0DCF736C0A7ACD7F /* MacCoffeeCore.swift */; };
 		B1FED5159FB7DFB9F15ACCC3 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C887D4BEB03D4C79748A9B3 /* AppModel.swift */; };
@@ -184,6 +187,7 @@
 		1B256B54921413DBF44BB34E /* SMAppLaunchAtLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMAppLaunchAtLoginManager.swift; sourceTree = "<group>"; };
 		1C309CF2C5EE4A3ED2DE8EF3 /* LifecycleObserving.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifecycleObserving.swift; sourceTree = "<group>"; };
 		2236725F78C3DBCE9C9DB151 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		2DC7DF7700F935B5CCBB96E5 /* MCPControlServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPControlServiceTests.swift; sourceTree = "<group>"; };
 		34FEB1454B31E2357E123DE2 /* MacCoffeeScreenshots.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacCoffeeScreenshots.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37D722A2CD1809F7EC89DF67 /* IOKitPowerAssertionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOKitPowerAssertionManager.swift; sourceTree = "<group>"; };
 		38D698D77A2FD5F0B873AC6A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -204,6 +208,7 @@
 		68CC44D26FE932D1B3B26B05 /* LocalizationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationController.swift; sourceTree = "<group>"; };
 		6A3AB23774EE6FDE8AA3572C /* SettingsStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStoring.swift; sourceTree = "<group>"; };
 		6A673FBACFD506A880990899 /* MCPContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPContractTests.swift; sourceTree = "<group>"; };
+		6A96709DF02D8BE5EFDB2F49 /* MCPControlServicing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPControlServicing.swift; sourceTree = "<group>"; };
 		6D7BAFA8B19547A68010116F /* MCPError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPError.swift; sourceTree = "<group>"; };
 		757AAEC2D42FE71C35BA4B2A /* UpdaterProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterProviding.swift; sourceTree = "<group>"; };
 		7D47105CD7F05419F0A41E4F /* MacCoffeeAppStoreApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacCoffeeAppStoreApp.swift; sourceTree = "<group>"; };
@@ -219,6 +224,7 @@
 		9AF11C2D6753C36C41368C85 /* SessionDuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDuration.swift; sourceTree = "<group>"; };
 		9C887D4BEB03D4C79748A9B3 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		A29C0A82FFD24B1BF810A1E4 /* UserNotificationSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNotificationSender.swift; sourceTree = "<group>"; };
+		A308CE4C796B02EC46564A55 /* MCPControlService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPControlService.swift; sourceTree = "<group>"; };
 		A5F73A00FC58C259FCC0A62A /* AppLifecycleObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleObserver.swift; sourceTree = "<group>"; };
 		A7BB528782F50E32C7F3EAF8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A8B6125894284D725E2B32B9 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -301,6 +307,7 @@
 				FFECE2A717D4F71AABE8C36D /* LocalizationTests.swift */,
 				5BC452DF0E5C8DF5FE3AFCDC /* LowBatteryPolicyTests.swift */,
 				6A673FBACFD506A880990899 /* MCPContractTests.swift */,
+				2DC7DF7700F935B5CCBB96E5 /* MCPControlServiceTests.swift */,
 				B0F067F550A7077E82AC694F /* MCPSnapshotTests.swift */,
 				AB165D15D8DE850D6BBA56CC /* PlatformAdapterTests.swift */,
 				BCCF65F6050BB0DD681FEF98 /* PowerAssertionManagerTests.swift */,
@@ -433,6 +440,8 @@
 			children = (
 				147E6F9D0C38BB65F8C94C3F /* MCPCommand.swift */,
 				833CD5AFC2EC7CFDA80CFC73 /* MCPContract.swift */,
+				A308CE4C796B02EC46564A55 /* MCPControlService.swift */,
+				6A96709DF02D8BE5EFDB2F49 /* MCPControlServicing.swift */,
 				6D7BAFA8B19547A68010116F /* MCPError.swift */,
 				893FC488FD80F4D8DFD64B9D /* MCPSnapshot.swift */,
 				F7F6E81B5AA5FF9DE8A5EFFE /* MCPSnapshotFactory.swift */,
@@ -772,6 +781,7 @@
 				81C4CB580EF5D873DC1DFBE3 /* LocalizationTests.swift in Sources */,
 				79CF3F2DC3CBC656772B6A98 /* LowBatteryPolicyTests.swift in Sources */,
 				38A3C9D571B414BC7549FED7 /* MCPContractTests.swift in Sources */,
+				398E20AF741EC0211E4FFC6B /* MCPControlServiceTests.swift in Sources */,
 				54194740CF3D8780436D2646 /* MCPSnapshotTests.swift in Sources */,
 				B843C8577EA694BE4A0FC0FA /* PlatformAdapterTests.swift in Sources */,
 				E97F170C6A2FDF527534B215 /* PowerAssertionManagerTests.swift in Sources */,
@@ -811,6 +821,8 @@
 				783FFC771E685CE54BA2A390 /* LowBatteryPolicy.swift in Sources */,
 				F3F417BD75C042999504C4C5 /* MCPCommand.swift in Sources */,
 				D9DE7813048BC1983445693D /* MCPContract.swift in Sources */,
+				9E07AA5E9D70C778B391538E /* MCPControlService.swift in Sources */,
+				6E84B9A4C80A40833E25D93E /* MCPControlServicing.swift in Sources */,
 				B7E19372890442C7DA7B3A03 /* MCPError.swift in Sources */,
 				30465B02ACB6A3406AE9D26D /* MCPSnapshot.swift in Sources */,
 				4E1482DAE72FDE1FEC537AE7 /* MCPSnapshotFactory.swift in Sources */,

@@ -5,9 +5,9 @@ import Foundation
 public final class MCPSettings: ObservableObject {
     @Published public private(set) var isEnabled: Bool
 
-    private let store: SettingsStoring
+    private let store: MCPSettingsStoring
 
-    public init(store: SettingsStoring) {
+    public init(store: MCPSettingsStoring) {
         self.store = store
         isEnabled = store.mcpEnabled
     }

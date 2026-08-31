@@ -6,5 +6,4 @@ public protocol SettingsStoring: AnyObject {
     var batteryThreshold: Int { get set }
     var launchAtLoginRequested: Bool { get set }
     var notificationAuthorizationRequested: Bool { get set }
-    var mcpEnabled: Bool { get set }
 }

@@ -29,7 +29,7 @@ final class InMemorySettingsPreferences: SettingsPreferences {
     }
 }
 
-final class FakeSettingsStore: SettingsStoring {
+final class FakeSettingsStore: MCPSettingsStoring {
     var selectedLanguage: SupportedLanguage
     var selectedDuration: SessionDuration
     var batteryThreshold: Int

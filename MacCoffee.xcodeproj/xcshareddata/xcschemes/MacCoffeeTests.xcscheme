@@ -15,9 +15,37 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D2ADA9BDAE25C4AFF6405A80"
+               BuildableName = "MacCoffeeAppStore.app"
+               BlueprintName = "MacCoffeeAppStore"
+               ReferencedContainer = "container:MacCoffee.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "75BB45C9B49C9CEB8446A30B"
                BuildableName = "MacCoffeeCore.framework"
                BlueprintName = "MacCoffeeCore"
+               ReferencedContainer = "container:MacCoffee.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "8312A6E6223341D60ECBEC53"
+               BuildableName = "MacCoffeeDirect.app"
+               BlueprintName = "MacCoffeeDirect"
                ReferencedContainer = "container:MacCoffee.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -47,9 +75,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "75BB45C9B49C9CEB8446A30B"
-            BuildableName = "MacCoffeeCore.framework"
-            BlueprintName = "MacCoffeeCore"
+            BlueprintIdentifier = "D2ADA9BDAE25C4AFF6405A80"
+            BuildableName = "MacCoffeeAppStore.app"
+            BlueprintName = "MacCoffeeAppStore"
             ReferencedContainer = "container:MacCoffee.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -79,15 +107,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "75BB45C9B49C9CEB8446A30B"
-            BuildableName = "MacCoffeeCore.framework"
-            BlueprintName = "MacCoffeeCore"
+            BlueprintIdentifier = "D2ADA9BDAE25C4AFF6405A80"
+            BuildableName = "MacCoffeeAppStore.app"
+            BlueprintName = "MacCoffeeAppStore"
             ReferencedContainer = "container:MacCoffee.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -95,15 +124,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "75BB45C9B49C9CEB8446A30B"
-            BuildableName = "MacCoffeeCore.framework"
-            BlueprintName = "MacCoffeeCore"
+            BlueprintIdentifier = "D2ADA9BDAE25C4AFF6405A80"
+            BuildableName = "MacCoffeeAppStore.app"
+            BlueprintName = "MacCoffeeAppStore"
             ReferencedContainer = "container:MacCoffee.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

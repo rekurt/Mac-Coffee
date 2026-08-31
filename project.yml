@@ -38,6 +38,19 @@ targets:
         PRODUCT_NAME: MacCoffeeCore
         GENERATE_INFOPLIST_FILE: YES
 
+  MacCoffeeAppStoreCore:
+    type: framework
+    platform: macOS
+    sources:
+      - path: Sources/Core
+        excludes:
+          - MCP
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.app-store-core
+        PRODUCT_NAME: MacCoffeeAppStoreCore
+        GENERATE_INFOPLIST_FILE: YES
+
   MacCoffeeDirect:
     type: application
     platform: macOS
@@ -54,6 +67,12 @@ targets:
       - target: MacCoffeeCore
       - target: MacCoffeeMCPBroker
         embed: true
+      - target: MacCoffeeMCP
+        embed: true
+        codeSign: true
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
       - package: Sparkle
     configFiles:
       Debug: Config/Direct.xcconfig
@@ -71,7 +90,7 @@ targets:
           - Info.plist
         buildPhase: resources
     dependencies:
-      - target: MacCoffeeCore
+      - target: MacCoffeeAppStoreCore
     configFiles:
       Debug: Config/AppStore.xcconfig
       Release: Config/AppStore.xcconfig
@@ -212,6 +231,8 @@ schemes:
     build:
       targets:
         MacCoffeeCore: all
+        MacCoffeeDirect: all
+        MacCoffeeAppStore: all
         MacCoffeeTests: [test]
     test:
       config: Debug

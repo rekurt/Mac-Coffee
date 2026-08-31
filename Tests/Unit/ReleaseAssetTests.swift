@@ -164,6 +164,55 @@ final class ReleaseAssetTests: XCTestCase {
         )
     }
 
+    func testMCPBuildConfigurationIsDirectOnly() throws {
+        let source = try text(at: repositoryRoot.appendingPathComponent("project.yml"))
+
+        XCTAssertTrue(source.contains("MacCoffeeAppStoreCore:"))
+        XCTAssertTrue(source.contains("PRODUCT_NAME: MacCoffeeAppStoreCore"))
+        XCTAssertTrue(source.contains("- MCP"))
+        XCTAssertTrue(source.contains("- target: MacCoffeeAppStoreCore"))
+        XCTAssertTrue(source.contains("- target: MacCoffeeMCP\n        embed: true"))
+        XCTAssertTrue(source.contains("destination: wrapper\n          subpath: Contents/Helpers"))
+    }
+
+    func testBuiltDistributionsKeepMCPArtifactsAndSymbolsDirectOnly() throws {
+        let productsDirectory = Bundle(for: Self.self).bundleURL.deletingLastPathComponent()
+        let directApp = productsDirectory.appendingPathComponent("Mac Coffee.app")
+        let appStoreApp = productsDirectory.appendingPathComponent("Mac Coffee App Store Test.app")
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: directApp.path), directApp.path)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: appStoreApp.path), appStoreApp.path)
+
+        let directHelper = directApp.appendingPathComponent("Contents/Helpers/MacCoffeeMCP")
+        let directBroker = directApp.appendingPathComponent(
+            "Contents/XPCServices/MacCoffeeMCPBroker.xpc"
+        )
+        XCTAssertTrue(FileManager.default.isExecutableFile(atPath: directHelper.path), directHelper.path)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: directBroker.path), directBroker.path)
+
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: appStoreApp.appendingPathComponent("Contents/Helpers/MacCoffeeMCP").path
+            )
+        )
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: appStoreApp.appendingPathComponent(
+                    "Contents/XPCServices/MacCoffeeMCPBroker.xpc"
+                ).path
+            )
+        )
+
+        let directCore = directApp.appendingPathComponent(
+            "Contents/Frameworks/MacCoffeeCore.framework/Versions/A/MacCoffeeCore"
+        )
+        let appStoreCore = appStoreApp.appendingPathComponent(
+            "Contents/Frameworks/MacCoffeeAppStoreCore.framework/Versions/A/MacCoffeeAppStoreCore"
+        )
+        XCTAssertTrue(try symbols(in: directCore).contains("MCPControlService"), directCore.path)
+        XCTAssertFalse(try symbols(in: appStoreCore).contains("MCP"), appStoreCore.path)
+    }
+
     func testLegacyCleanupRestoresTheCompleteLegacyBatterySignature() throws {
         let source = try text(
             at: repositoryRoot.appendingPathComponent("scripts/uninstall-legacy-helper.sh")
@@ -184,5 +233,26 @@ final class ReleaseAssetTests: XCTestCase {
     private func text(at url: URL) throws -> String {
         try String(contentsOf: url, encoding: .utf8)
             .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func symbols(in executable: URL) throws -> String {
+        let process = Process()
+        let standardOutput = Pipe()
+        let standardError = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/nm")
+        process.arguments = ["-gj", executable.path]
+        process.standardOutput = standardOutput
+        process.standardError = standardError
+        try process.run()
+
+        let output = standardOutput.fileHandleForReading.readDataToEndOfFile()
+        let error = standardError.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        XCTAssertEqual(
+            process.terminationStatus,
+            0,
+            String(decoding: error, as: UTF8.self)
+        )
+        return String(decoding: output, as: UTF8.self)
     }
 }

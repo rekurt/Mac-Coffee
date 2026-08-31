@@ -40,6 +40,7 @@ private final class UITestSettingsStore: SettingsStoring {
     var batteryThreshold = 15
     var launchAtLoginRequested = false
     var notificationAuthorizationRequested = false
+    var mcpEnabled = false
 }
 
 private final class UITestPowerAssertionManager: PowerAssertionManaging {

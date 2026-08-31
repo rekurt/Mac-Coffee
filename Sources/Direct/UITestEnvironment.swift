@@ -15,6 +15,7 @@ enum UITestEnvironment {
             hasInternalBattery: true
         ))
         let settings = UITestSettingsStore()
+        settings.mcpEnabled = CommandLine.arguments.contains("--ui-mcp-enabled")
         if let threshold = CommandLine.arguments
             .first(where: { $0.hasPrefix("--ui-battery-threshold=") })
             .flatMap({ Int($0.split(separator: "=").last ?? "") }) {
@@ -34,12 +35,13 @@ enum UITestEnvironment {
     }
 }
 
-private final class UITestSettingsStore: SettingsStoring {
+private final class UITestSettingsStore: MCPSettingsStoring {
     var selectedLanguage: SupportedLanguage = .system
     var selectedDuration: SessionDuration = .hours1
     var batteryThreshold = 15
     var launchAtLoginRequested = false
     var notificationAuthorizationRequested = false
+    var lastAnnouncedUpdateVersion: String?
     var mcpEnabled = false
 }
 

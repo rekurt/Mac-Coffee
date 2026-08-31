@@ -8,12 +8,7 @@ import UniformTypeIdentifiers
 struct MacCoffeeScreenshotGenerator {
     private static let canvasSize = CGSize(width: 1_280, height: 800)
     private static let locales: [(directory: String, language: SupportedLanguage)] = [
-        ("de-DE", .german),
         ("en-US", .english),
-        ("es-ES", .spanish),
-        ("fr-FR", .french),
-        ("ja", .japanese),
-        ("ko", .korean),
         ("ru", .russian),
         ("zh-Hans", .simplifiedChinese)
     ]
@@ -39,6 +34,7 @@ struct MacCoffeeScreenshotGenerator {
                 PanelScreenshot(
                     model: fixture.model,
                     localization: fixture.localization,
+                    updater: fixture.updater,
                     quitCoordinator: fixture.quitCoordinator
                 )
             }
@@ -54,7 +50,7 @@ struct MacCoffeeScreenshotGenerator {
         }
 
         try copyRepositoryPreviews(from: root)
-        print("Generated 16 localized App Store screenshots and 2 repository previews.")
+        print("Generated 6 localized App Store screenshots and 2 repository previews.")
     }
 
     private static func write<V: View>(_ view: V, to url: URL) throws {
@@ -142,6 +138,7 @@ struct MacCoffeeScreenshotGenerator {
 private struct PanelScreenshot: View {
     @ObservedObject var model: AppModel
     let localization: LocalizationController
+    let updater: ScreenshotUpdater
     let quitCoordinator: QuitConfirmationCoordinator
 
     var body: some View {
@@ -158,6 +155,7 @@ private struct PanelScreenshot: View {
                     WindowChrome(title: localization.localized("app.name"))
                     MenuBarPanel(
                         model: model,
+                        updater: updater,
                         quitCoordinator: quitCoordinator,
                         panelWidth: 420
                     )
@@ -306,6 +304,7 @@ private struct WindowChrome: View {
 private final class ScreenshotFixture {
     let localization: LocalizationController
     let model: AppModel
+    let updater: ScreenshotUpdater
     let quitCoordinator: QuitConfirmationCoordinator
 
     init(language: SupportedLanguage) throws {
@@ -324,9 +323,24 @@ private final class ScreenshotFixture {
         let model = AppModel(environment: environment)
         self.localization = localization
         self.model = model
+        let updater = ScreenshotUpdater()
+        self.updater = updater
+        if let version = ProcessInfo.processInfo.environment["MACCOFFEE_SCREENSHOT_UPDATE_VERSION"] {
+            updater.state.present(version: version)
+        }
         quitCoordinator = QuitConfirmationCoordinator(model: model)
         try model.setMode(.system)
     }
+}
+
+@MainActor
+private final class ScreenshotUpdater: UpdaterProviding {
+    let state = UpdateStateController()
+    var canCheckForUpdates = true
+
+    func checkForUpdates() {}
+    func showAvailableUpdate() {}
+    func dismissAvailableUpdate() { state.dismiss() }
 }
 
 private final class ScreenshotSettingsStore: SettingsStoring {
@@ -335,6 +349,7 @@ private final class ScreenshotSettingsStore: SettingsStoring {
     var batteryThreshold = 15
     var launchAtLoginRequested = false
     var notificationAuthorizationRequested = false
+    var lastAnnouncedUpdateVersion: String?
     var mcpEnabled = false
 
     init(selectedLanguage: SupportedLanguage) {

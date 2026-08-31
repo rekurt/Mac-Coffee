@@ -35,6 +35,7 @@ final class FakeSettingsStore: MCPSettingsStoring {
     var batteryThreshold: Int
     var launchAtLoginRequested: Bool
     var notificationAuthorizationRequested: Bool
+    var lastAnnouncedUpdateVersion: String?
     var mcpEnabled: Bool
 
     init(
@@ -43,6 +44,7 @@ final class FakeSettingsStore: MCPSettingsStoring {
         batteryThreshold: Int = 15,
         launchAtLoginRequested: Bool = false,
         notificationAuthorizationRequested: Bool = false,
+        lastAnnouncedUpdateVersion: String? = nil,
         mcpEnabled: Bool = false
     ) {
         self.selectedLanguage = selectedLanguage
@@ -50,6 +52,7 @@ final class FakeSettingsStore: MCPSettingsStoring {
         self.batteryThreshold = batteryThreshold
         self.launchAtLoginRequested = launchAtLoginRequested
         self.notificationAuthorizationRequested = notificationAuthorizationRequested
+        self.lastAnnouncedUpdateVersion = lastAnnouncedUpdateVersion
         self.mcpEnabled = mcpEnabled
     }
 }

@@ -21,7 +21,9 @@ final class CompositionTests: XCTestCase {
         XCTAssertEqual(FooterLayoutMetrics.panelMaximumWidth(panelWidth: 280), 280)
         XCTAssertNil(FooterLayoutMetrics.footerMaximumWidth(panelWidth: nil))
         XCTAssertEqual(FooterLayoutMetrics.footerMaximumWidth(panelWidth: 280), 280)
-        XCTAssertEqual(FooterLayoutMetrics.gridMinimumWidth, 388)
+        XCTAssertEqual(FooterLayoutMetrics.toolbarMinimumWidth, 340)
+        XCTAssertEqual(FooterLayoutMetrics.compactActionWidth, 36)
+        XCTAssertEqual(FooterLayoutMetrics.minimumActionHeight, 36)
     }
 
     func testMCPStartsDisabledAndUsesTheExistingAppModel() async {
@@ -104,6 +106,35 @@ final class CompositionTests: XCTestCase {
         XCTAssertEqual(system.power.transitions, [.display])
     }
 
+    func testMCPSettingsViewModelRevokesTrustAndClosesTheClientImmediately() throws {
+        let system = makeMCPSystem(enabled: true)
+        let client = makeTrustedClient(identifier: "codex-client")
+        try system.mcp.trustStore.trust(client)
+        let viewModel = MCPSettingsViewModel(environment: system.mcp)
+
+        viewModel.revoke(client)
+
+        XCTAssertEqual(viewModel.trustedClients.count, 1)
+        XCTAssertTrue(viewModel.trustedClients[0].isRevoked)
+        XCTAssertEqual(system.listener.closedClientIdentifier, client.identifier)
+        XCTAssertEqual(system.listener.closedReason, .clientRevoked)
+    }
+
+    func testMCPSettingsViewModelForgetsOnlyTheSelectedClient() throws {
+        let system = makeMCPSystem(enabled: true)
+        let first = makeTrustedClient(identifier: "codex-client")
+        let second = makeTrustedClient(identifier: "claude-client")
+        try system.mcp.trustStore.trust(first)
+        try system.mcp.trustStore.trust(second)
+        let viewModel = MCPSettingsViewModel(environment: system.mcp)
+
+        viewModel.forget(first)
+
+        XCTAssertEqual(viewModel.trustedClients.map(\.identifier), [second.identifier])
+        XCTAssertEqual(system.listener.closedClientIdentifier, first.identifier)
+        XCTAssertEqual(system.listener.closedReason, .clientRevoked)
+    }
+
     private func makeEnvironment(updater: UpdaterProviding?) -> AppEnvironment {
         AppEnvironment(
             powerAssertions: FakePowerAssertionManager(),
@@ -160,6 +191,25 @@ final class CompositionTests: XCTestCase {
             mcp: mcp
         )
     }
+
+    private func makeTrustedClient(identifier: String) -> MCPTrustedClient {
+        MCPTrustedClient(
+            identifier: identifier,
+            displayName: identifier,
+            publicKey: Data([4, 1, 2, 3]),
+            codeIdentity: MCPCodeIdentity(
+                executablePath: "/Applications/Client.app/Contents/MacOS/Client",
+                bundleIdentifier: "com.example.client",
+                teamIdentifier: "TEAMID1234",
+                signingIdentifier: "com.example.client",
+                codeDirectoryHash: nil,
+                isSigned: true
+            ),
+            createdAt: Date(timeIntervalSince1970: 100),
+            lastSeenAt: Date(timeIntervalSince1970: 200),
+            revokedAt: nil
+        )
+    }
 }
 
 @MainActor
@@ -192,6 +242,8 @@ private final class FakeMCPListener: MCPListenerLifecycle {
     private let listener = NSXPCListener.anonymous()
     private let events: EventLog
     private(set) var startCount = 0
+    private(set) var closedClientIdentifier: String?
+    private(set) var closedReason: MCPXPCCloseReason?
 
     init(events: EventLog) {
         self.events = events
@@ -206,7 +258,10 @@ private final class FakeMCPListener: MCPListenerLifecycle {
         events.values.append("listener.\(reason.rawValue)")
     }
 
-    func closeConnections(clientIdentifier: String, reason: MCPXPCCloseReason) {}
+    func closeConnections(clientIdentifier: String, reason: MCPXPCCloseReason) {
+        closedClientIdentifier = clientIdentifier
+        closedReason = reason
+    }
 }
 
 @MainActor
@@ -232,6 +287,9 @@ private final class FakeMCPBroker: MCPBrokerRegistration {
 
 @MainActor
 private final class FakeUpdater: UpdaterProviding {
+    let state = UpdateStateController()
     var canCheckForUpdates = true
     func checkForUpdates() {}
+    func showAvailableUpdate() {}
+    func dismissAvailableUpdate() { state.dismiss() }
 }

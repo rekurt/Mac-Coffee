@@ -57,6 +57,11 @@ public final class UserNotificationSender: NotificationSending {
             bodyKey = "notification.timerCompleted"
         case .lowBatteryStopped:
             bodyKey = "notification.lowBatteryStopped"
+        case let .updateAvailable(version):
+            return LocalizedNotificationMessage(
+                title: localization.localized("notification.title"),
+                body: localization.format("notification.updateAvailable", arguments: version)
+            )
         }
         return LocalizedNotificationMessage(
             title: localization.localized("notification.title"),

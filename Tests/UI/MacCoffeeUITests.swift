@@ -70,6 +70,7 @@ final class MacCoffeeUITests: XCTestCase {
         let processID = try XCTUnwrap(runningAppProcessID())
         let session = try XCTUnwrap(sessionMarker())
 
+        testWindow.click()
         app.typeKey("q", modifierFlags: .command)
 
         let confirmation = waitForQuitConfirmation()
@@ -109,6 +110,109 @@ final class MacCoffeeUITests: XCTestCase {
         XCTAssertEqual(integerValue(of: maximumStepper), 30)
     }
 
+    func testDirectSettingsExposeFunctionalMCPMasterSwitch() {
+        launch(language: "en", batteryPercentage: 80, mcpFixture: true)
+        testWindow.buttons["maccoffee.action.settings"].click()
+
+        let toggle = app.switches["mcp.settings.enabled"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 3))
+        XCTAssertEqual(integerValue(of: toggle), 0)
+
+        toggle.click()
+
+        XCTAssertEqual(integerValue(of: toggle), 1)
+        XCTAssertTrue(
+            app.descendants(matching: .any)["mcp.settings.status"].waitForExistence(timeout: 3)
+        )
+    }
+
+    func testDirectMCPPairingTrustAndActivityControlsAreAccessible() {
+        launch(
+            language: "en",
+            batteryPercentage: 80,
+            mcpFixture: true,
+            mcpInitiallyEnabled: true
+        )
+        testWindow.buttons["maccoffee.action.settings"].click()
+
+        let settingsScrollView = app.scrollViews.firstMatch
+        XCTAssertTrue(settingsScrollView.waitForExistence(timeout: 3))
+        let codexApprove = app.buttons["mcp.pairing.approve.fixture-codex"]
+        let localReject = app.buttons["mcp.pairing.reject.fixture-local"]
+        scrollToMakeHittable(codexApprove, in: settingsScrollView)
+        XCTAssertTrue(codexApprove.isHittable)
+        scrollToMakeHittable(localReject, in: settingsScrollView)
+        XCTAssertTrue(localReject.isHittable)
+        XCTAssertTrue(
+            app.descendants(matching: .any)["mcp.pairing.warning"]
+                .waitForExistence(timeout: 3)
+        )
+        XCTAssertTrue(
+            app.descendants(matching: .any)["mcp.client.fixture-claude"]
+                .waitForExistence(timeout: 3)
+        )
+        XCTAssertTrue(app.descendants(matching: .any)["mcp.activity"].exists)
+
+        localReject.click()
+        XCTAssertFalse(localReject.exists)
+
+        scrollToMakeHittable(codexApprove, in: settingsScrollView)
+        codexApprove.click()
+        XCTAssertTrue(
+            app.buttons["mcp.pairing.confirm.approve.fixture-codex"]
+                .waitForExistence(timeout: 2)
+        )
+        app.buttons["mcp.pairing.confirm.approve.fixture-codex"].click()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["mcp.client.fixture-codex"]
+                .waitForExistence(timeout: 2)
+        )
+    }
+
+    func testDirectMCPSetupWizardShowsReviewedPathsBeforeAnyInstallAction() {
+        launch(language: "en", batteryPercentage: 80, mcpFixture: true)
+        testWindow.buttons["maccoffee.action.settings"].click()
+
+        let settingsWindow = app.windows["Mac Coffee Settings"]
+        XCTAssertTrue(settingsWindow.waitForExistence(timeout: 3))
+        let settingsScrollView = settingsWindow.scrollViews.firstMatch
+        XCTAssertTrue(settingsScrollView.exists)
+        let setupButton = app.buttons["mcp.settings.setup"]
+        scrollToMakeHittable(setupButton, in: settingsScrollView)
+        XCTAssertTrue(setupButton.isHittable)
+
+        setupButton.click()
+
+        XCTAssertTrue(
+            app.descendants(matching: .any)["mcp.setup.wizard"]
+                .waitForExistence(timeout: 3)
+        )
+        XCTAssertTrue(app.descendants(matching: .any)["mcp.setup.path"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["mcp.setup.helper"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["mcp.setup.installed"].exists)
+    }
+
+    func testAppStoreSettingsDoNotContainMCPIntegration() {
+        app = XCUIApplication(bundleIdentifier: "com.rekurt.maccoffee.debug")
+        app.launchArguments = [
+            "--ui-testing-window",
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US"
+        ]
+        app.launch()
+        openMenuBarPanel()
+
+        testWindow.buttons["maccoffee.action.settings"].click()
+
+        XCTAssertTrue(
+            app.switches["maccoffee.settings.launchAtLogin"].waitForExistence(timeout: 3)
+        )
+        XCTAssertFalse(app.descendants(matching: .any)["mcp.settings.section"].exists)
+        XCTAssertFalse(app.switches["mcp.settings.enabled"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["maccoffee.settings.updates"].exists)
+        XCTAssertFalse(app.buttons["maccoffee.settings.checkUpdates"].exists)
+    }
+
     func testRussianLocalizationAndAppStoreHasNoUpdateAction() {
         app = XCUIApplication(bundleIdentifier: "com.rekurt.maccoffee.debug")
         app.launchArguments = [
@@ -123,41 +227,46 @@ final class MacCoffeeUITests: XCTestCase {
         XCTAssertTrue(testWindow.radioButtons["maccoffee.mode.system"].exists)
         XCTAssertTrue(app.staticTexts["Длительность"].exists)
         XCTAssertFalse(app.buttons["maccoffee.action.update"].exists)
-        assertAppStoreFooterGrid()
+        assertAppStoreFooterToolbar()
     }
 
-    func testNormalWidthDirectFooterUsesFourActionGrid() {
-        launch(language: "en", batteryPercentage: 80, forceUpdateAction: true)
+    func testNormalWidthDirectFooterUsesCompactActionToolbar() {
+        launch(language: "en", batteryPercentage: 80)
 
-        assertFooterContainer(layout: "grid")
+        assertFooterContainer(layout: "toolbar")
         XCTAssertFalse(footerList.exists, "A 420 pt Direct footer must not use its narrow list")
         XCTAssertGreaterThanOrEqual(testWindow.frame.width, 400, "The deterministic host must expose its 420 pt width")
+        XCTAssertTrue(
+            testWindow.descendants(matching: .any)["maccoffee.mode.segmented"].exists,
+            "English mode labels must fit the compact segmented control at 420 pt"
+        )
 
-        let identifiers = ["settings", "about", "update", "quit"]
+        let identifiers = ["settings", "about", "quit"]
         assertFooterActionTargets(identifiers, labels: [
-            "Settings…", "About Mac Coffee", "Check for Updates…", "Quit Mac Coffee"
+            "Settings…", "About Mac Coffee", "Quit Mac Coffee"
         ])
 
         let settings = footerAction("settings")
         let about = footerAction("about")
-        let update = footerAction("update")
         let quit = footerAction("quit")
-        assertEqualFooterRow(settings, about)
-        assertEqualFooterRow(update, quit)
-        XCTAssertGreaterThan(update.frame.minY, settings.frame.minY)
+        assertSameFooterRow([settings, about, quit])
+        XCTAssertGreaterThan(about.frame.minX, settings.frame.minX)
+        XCTAssertGreaterThan(quit.frame.minX, about.frame.minX)
+        XCTAssertLessThan(quit.frame.width, settings.frame.width)
+        XCTAssertFalse(footerAction("update").exists)
     }
 
     func testNarrowFooterUsesSingleColumnActionList() {
-        launch(language: "en", batteryPercentage: 80, windowWidth: 280, forceUpdateAction: true)
+        launch(language: "en", batteryPercentage: 80, windowWidth: 280)
 
         assertFooterContainer(layout: "list")
-        XCTAssertFalse(footerGrid.exists, "A 280 pt Direct footer must not keep its fixed-width grid")
+        XCTAssertFalse(footerToolbar.exists, "A 280 pt Direct footer must not keep its horizontal toolbar")
         XCTAssertGreaterThanOrEqual(testWindow.frame.width, 270, "The deterministic host must expose its 280 pt width")
 
-        let identifiers = ["settings", "about", "update", "quit"]
+        let identifiers = ["settings", "about", "quit"]
         assertFooterActionTargets(
             identifiers,
-            labels: ["Settings…", "About Mac Coffee", "Check for Updates…", "Quit Mac Coffee"]
+            labels: ["Settings…", "About Mac Coffee", "Quit Mac Coffee"]
         )
 
         let buttons = identifiers.map(footerAction)
@@ -178,18 +287,51 @@ final class MacCoffeeUITests: XCTestCase {
             launch(
                 language: expectation.languageCode,
                 batteryPercentage: 80,
-                forceUpdateAction: true
+                forceUpdateCapability: true
             )
 
-            assertFooterContainer(layout: "grid")
-            XCTAssertFalse(footerList.exists, "\(expectation.nativeName) unexpectedly used the narrow footer")
+            assertAdaptiveFooterContainer()
             assertFooterActionTargets(
-                ["settings", "about", "update", "quit"],
+                ["settings", "about", "quit"],
                 labels: expectation.footerLabels
             )
 
             app.terminate()
         }
+    }
+
+    func testDirectSettingsOwnsTheManualUpdateCheckInsteadOfTheFooter() {
+        launch(language: "en", batteryPercentage: 80, forceUpdateCapability: true)
+
+        XCTAssertFalse(footerAction("update").exists)
+        testWindow.buttons["maccoffee.action.settings"].click()
+
+        let section = app.descendants(matching: .any)["maccoffee.settings.updates"].firstMatch
+        let checkButton = app.buttons["maccoffee.settings.checkUpdates"]
+        XCTAssertTrue(section.waitForExistence(timeout: 3))
+        XCTAssertTrue(checkButton.exists)
+        XCTAssertTrue(checkButton.isEnabled)
+        XCTAssertEqual(checkButton.label, "Check for Updates…")
+    }
+
+    func testAvailableUpdateNoteOffersLaterWithoutChangingTheWakeSession() throws {
+        launch(language: "en", batteryPercentage: 80, updateVersion: "9.9.9")
+        testWindow.radioButtons["maccoffee.mode.system"].click()
+        testWindow.radioButtons["maccoffee.duration.hours2"].click()
+        let processID = try XCTUnwrap(runningAppProcessID())
+        let session = try XCTUnwrap(sessionMarker())
+
+        let note = testWindow.descendants(matching: .any)["maccoffee.update.note"].firstMatch
+        XCTAssertTrue(note.waitForExistence(timeout: 3))
+        XCTAssertTrue(testWindow.staticTexts["Mac Coffee 9.9.9 is available"].exists)
+        XCTAssertTrue(testWindow.buttons["maccoffee.update.install"].exists)
+
+        testWindow.buttons["maccoffee.update.later"].click()
+
+        XCTAssertFalse(note.exists)
+        XCTAssertEqual(try XCTUnwrap(runningAppProcessID()), processID)
+        XCTAssertEqual(try XCTUnwrap(sessionMarker()), session)
+        XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.mode.system"]), 1)
     }
 
     func testExplicitLanguageSwitchPreservesActiveWakeSessionAndKeepsPanelControlsVisible() throws {
@@ -201,11 +343,11 @@ final class MacCoffeeUITests: XCTestCase {
         let initialSessionMarker = try XCTUnwrap(sessionMarker(), "Active wake session has no deterministic marker")
 
         testWindow.buttons["maccoffee.action.settings"].click()
-        let languagePicker = app.descendants(matching: .any)["maccoffee.settings.language"].firstMatch
         XCTAssertTrue(languagePicker.waitForExistence(timeout: 2))
 
         for expectation in explicitLanguageExpectations {
-            languagePicker.click()
+            let picker = languagePicker
+            picker.click()
             app.menuItems[expectation.nativeName].click()
 
             XCTAssertEqual(try XCTUnwrap(runningAppProcessID(), "Mac Coffee process disappeared"), processID)
@@ -213,14 +355,16 @@ final class MacCoffeeUITests: XCTestCase {
             XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.mode.system"]), 1)
             XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.duration.hours2"]), 1)
             XCTAssertTrue(testWindow.staticTexts[expectation.activeStatus].exists)
+            let countdown = testWindow.descendants(matching: .any)["maccoffee.session.countdown"]
+                .firstMatch
             assertCountdown(
-                testWindow.staticTexts["maccoffee.session.countdown"].label,
+                countdown.label,
                 matches: expectation.countdownPattern,
                 language: expectation.nativeName
             )
             XCTAssertTrue(String(describing: testWindow.radioGroups["maccoffee.mode.picker"].value).contains(expectation.modeTitle))
             XCTAssertTrue(app.staticTexts[expectation.settingsTitle].exists)
-            XCTAssertTrue(String(describing: languagePicker.value).contains(expectation.nativeName))
+            XCTAssertTrue(String(describing: picker.value).contains(expectation.nativeName))
 
             app.typeKey("w", modifierFlags: .command)
             openMenuBarPanel()
@@ -242,21 +386,21 @@ final class MacCoffeeUITests: XCTestCase {
         // it exercises the same ViewThatFits fallback a small display would use.
         launch(language: "en", batteryPercentage: 80, windowWidth: 280)
 
-        let fallbackTitle = testWindow.descendants(matching: .any)["maccoffee.mode.fallback.title"].firstMatch
         XCTAssertTrue(fallbackTitle.waitForExistence(timeout: 2))
         XCTAssertFalse(testWindow.descendants(matching: .any)["maccoffee.mode.segmented"].exists)
 
         testWindow.buttons["maccoffee.action.settings"].click()
-        let languagePicker = app.descendants(matching: .any)["maccoffee.settings.language"].firstMatch
         XCTAssertTrue(languagePicker.waitForExistence(timeout: 2))
 
         for expectation in explicitLanguageExpectations {
-            languagePicker.click()
+            let picker = languagePicker
+            picker.click()
             app.menuItems[expectation.nativeName].click()
             app.typeKey("w", modifierFlags: .command)
 
-            XCTAssertTrue(fallbackTitle.waitForExistence(timeout: 2))
-            XCTAssertEqual(fallbackTitle.label, expectation.modeSectionTitle)
+            let currentFallbackTitle = fallbackTitle
+            XCTAssertTrue(currentFallbackTitle.waitForExistence(timeout: 2))
+            XCTAssertEqual(currentFallbackTitle.label, expectation.modeSectionTitle)
             XCTAssertFalse(testWindow.descendants(matching: .any)["maccoffee.mode.segmented"].exists)
 
             for (mode, expectedSubtitle) in zip(["off", "system", "display"], expectation.modeSubtitles) {
@@ -267,7 +411,7 @@ final class MacCoffeeUITests: XCTestCase {
                 XCTAssertGreaterThan(subtitle.frame.width, 0)
                 XCTAssertGreaterThanOrEqual(
                     subtitle.frame.height,
-                    fallbackTitle.frame.height * 0.9,
+                    currentFallbackTitle.frame.height * 0.9,
                     "Subtitle layout is too short to render a full caption"
                 )
                 XCTAssertTrue(testWindow.frame.contains(subtitle.frame), "Subtitle is clipped outside the narrow window")
@@ -283,7 +427,10 @@ final class MacCoffeeUITests: XCTestCase {
         batteryPercentage: Int,
         batteryThreshold: Int? = nil,
         windowWidth: Int? = nil,
-        forceUpdateAction: Bool = false
+        forceUpdateCapability: Bool = false,
+        updateVersion: String? = nil,
+        mcpFixture: Bool = false,
+        mcpInitiallyEnabled: Bool = false
     ) {
         app = XCUIApplication()
         app.launchArguments = [
@@ -298,8 +445,17 @@ final class MacCoffeeUITests: XCTestCase {
         if let windowWidth {
             app.launchArguments.append("--ui-testing-window-width=\(windowWidth)")
         }
-        if forceUpdateAction {
-            app.launchArguments.append("--ui-testing-force-update-action")
+        if forceUpdateCapability {
+            app.launchArguments.append("--ui-testing-force-update-capability")
+        }
+        if let updateVersion {
+            app.launchArguments.append("--ui-testing-update-version=\(updateVersion)")
+        }
+        if mcpFixture {
+            app.launchArguments.append("--ui-mcp-fixture")
+        }
+        if mcpInitiallyEnabled {
+            app.launchArguments.append("--ui-mcp-enabled")
         }
         app.launch()
         openMenuBarPanel()
@@ -320,6 +476,18 @@ final class MacCoffeeUITests: XCTestCase {
             return Int(string)
         }
         return nil
+    }
+
+    private func scrollToMakeHittable(
+        _ element: XCUIElement,
+        in window: XCUIElement,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        for _ in 0..<10 where !element.isHittable {
+            window.scroll(byDeltaX: 0, deltaY: -220)
+        }
+        XCTAssertTrue(element.exists, "Element did not enter the Settings viewport", file: file, line: line)
     }
 
     private func assertPanelControlsFitInsideTestWindow(
@@ -348,16 +516,6 @@ final class MacCoffeeUITests: XCTestCase {
             XCTAssertTrue(element.isHittable, "\(identifier) is not hittable", file: file, line: line)
         }
 
-        // The App Store variant deliberately omits its updater; when the control is
-        // present in the Direct variant, it must satisfy the same panel bounds.
-        let update = testWindow.buttons["maccoffee.action.update"]
-        if update.exists {
-            XCTAssertGreaterThan(update.frame.width, 0, "Update has no width", file: file, line: line)
-            XCTAssertGreaterThan(update.frame.height, 0, "Update has no height", file: file, line: line)
-            XCTAssertTrue(windowFrame.contains(update.frame), "Update is outside the test window", file: file, line: line)
-            XCTAssertTrue(update.isHittable, "Update is not hittable", file: file, line: line)
-        }
-
         for identifier in ["off", "system", "display"] {
             let element = testWindow.radioButtons["maccoffee.mode.\(identifier)"]
             XCTAssertGreaterThan(element.frame.width, 0, "Mode \(identifier) is clipped", file: file, line: line)
@@ -384,11 +542,11 @@ final class MacCoffeeUITests: XCTestCase {
         }
     }
 
-    private func assertAppStoreFooterGrid(
+    private func assertAppStoreFooterToolbar(
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        assertFooterContainer(layout: "grid", file: file, line: line)
+        assertFooterContainer(layout: "toolbar", file: file, line: line)
         XCTAssertFalse(footerList.exists, "A 420 pt App Store footer must not use its narrow list", file: file, line: line)
         XCTAssertFalse(footerAction("update").exists, "The App Store footer must never expose an updater", file: file, line: line)
         assertFooterActionTargets(
@@ -401,10 +559,22 @@ final class MacCoffeeUITests: XCTestCase {
         let settings = footerAction("settings")
         let about = footerAction("about")
         let quit = footerAction("quit")
-        assertEqualFooterRow(settings, about, file: file, line: line)
-        XCTAssertGreaterThan(quit.frame.minY, settings.frame.minY, file: file, line: line)
-        XCTAssertEqual(quit.frame.minX, settings.frame.minX, accuracy: 1, file: file, line: line)
-        XCTAssertEqual(quit.frame.maxX, about.frame.maxX, accuracy: 1, file: file, line: line)
+        assertSameFooterRow([settings, about, quit], file: file, line: line)
+        XCTAssertGreaterThan(about.frame.minX, settings.frame.minX, file: file, line: line)
+        XCTAssertGreaterThan(quit.frame.minX, about.frame.minX, file: file, line: line)
+        XCTAssertLessThan(quit.frame.width, settings.frame.width, file: file, line: line)
+    }
+
+    private func assertAdaptiveFooterContainer(
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertTrue(footer.exists, "Missing maccoffee.footer container", file: file, line: line)
+        let toolbarExists = footerToolbar.exists
+        let listExists = footerList.exists
+        XCTAssertNotEqual(toolbarExists, listExists, "Exactly one adaptive footer layout must be active", file: file, line: line)
+        let activeLayout = toolbarExists ? "toolbar" : "list"
+        assertFooterContainer(layout: activeLayout, file: file, line: line)
     }
 
     private func assertFooterActionTargets(
@@ -420,7 +590,7 @@ final class MacCoffeeUITests: XCTestCase {
             let button = footerAction(identifier)
             XCTAssertTrue(button.exists, "Missing \(identifier) action", file: file, line: line)
             XCTAssertGreaterThan(button.frame.width, 0, "\(identifier) has no width", file: file, line: line)
-            XCTAssertGreaterThanOrEqual(button.frame.height, 38, "\(identifier) has no full hit target", file: file, line: line)
+            XCTAssertGreaterThanOrEqual(button.frame.height, 36, "\(identifier) has no full hit target", file: file, line: line)
             XCTAssertTrue(container.frame.contains(button.frame), "\(identifier) is outside the footer", file: file, line: line)
             XCTAssertTrue(testWindow.frame.contains(button.frame), "\(identifier) is outside the test window", file: file, line: line)
             XCTAssertTrue(button.isHittable, "\(identifier) is not hittable", file: file, line: line)
@@ -438,7 +608,7 @@ final class MacCoffeeUITests: XCTestCase {
         XCTAssertGreaterThan(footer.frame.width, 0, "Footer container has no width", file: file, line: line)
         XCTAssertGreaterThan(footer.frame.height, 0, "Footer container has no height", file: file, line: line)
         XCTAssertTrue(testWindow.frame.contains(footer.frame), "Footer is outside the test window", file: file, line: line)
-        let activeLayout = layout == "grid" ? footerGrid : footerList
+        let activeLayout = layout == "toolbar" ? footerToolbar : footerList
         XCTAssertTrue(activeLayout.exists, "Missing maccoffee.footer.\(layout) container", file: file, line: line)
         XCTAssertTrue(footer.frame.contains(activeLayout.frame), "Footer \(layout) is outside maccoffee.footer", file: file, line: line)
         XCTAssertFalse(
@@ -455,16 +625,16 @@ final class MacCoffeeUITests: XCTestCase {
         )
     }
 
-    private func assertEqualFooterRow(
-        _ leading: XCUIElement,
-        _ trailing: XCUIElement,
+    private func assertSameFooterRow(
+        _ actions: [XCUIElement],
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        XCTAssertEqual(leading.frame.minY, trailing.frame.minY, accuracy: 1, file: file, line: line)
-        XCTAssertEqual(leading.frame.width, trailing.frame.width, accuracy: 1, file: file, line: line)
-        XCTAssertEqual(leading.frame.height, trailing.frame.height, accuracy: 1, file: file, line: line)
-        XCTAssertGreaterThan(trailing.frame.minX, leading.frame.minX, "Footer actions must occupy two columns", file: file, line: line)
+        guard let first = actions.first else { return }
+        for action in actions.dropFirst() {
+            XCTAssertEqual(first.frame.minY, action.frame.minY, accuracy: 1, file: file, line: line)
+            XCTAssertEqual(first.frame.height, action.frame.height, accuracy: 1, file: file, line: line)
+        }
     }
 
     private func footerAction(_ identifier: String) -> XCUIElement {
@@ -475,12 +645,20 @@ final class MacCoffeeUITests: XCTestCase {
         testWindow.groups["maccoffee.footer"]
     }
 
-    private var footerGrid: XCUIElement {
-        testWindow.groups["maccoffee.footer.grid"]
+    private var footerToolbar: XCUIElement {
+        testWindow.groups["maccoffee.footer.toolbar"]
     }
 
     private var footerList: XCUIElement {
         testWindow.groups["maccoffee.footer.list"]
+    }
+
+    private var languagePicker: XCUIElement {
+        app.descendants(matching: .any)["maccoffee.settings.language"].firstMatch
+    }
+
+    private var fallbackTitle: XCUIElement {
+        testWindow.descendants(matching: .any)["maccoffee.mode.fallback.title"].firstMatch
     }
 
     private func localeIdentifier(for language: String) -> String {
@@ -546,14 +724,14 @@ final class MacCoffeeUITests: XCTestCase {
 
     private var explicitLanguageExpectations: [LanguageExpectation] {
         [
-            .init("ru", "Русский", "Mac Coffee работает", "^Осталось: \\d+ ч \\d+ мин$", "Язык", "Режим", "Не усыплять Mac", "Версия", ["Обычный режим сна macOS", "Предотвращает сон Mac из-за бездействия", "Предотвращает выключение экрана и сон Mac"], ["Настройки…", "О Mac Coffee", "Проверить обновления…", "Выйти из Mac Coffee"]),
-            .init("en", "English", "Mac Coffee is active", "^\\d+h \\d+m remaining$", "Language", "Mode", "Keep Mac awake", "Version", ["Normal macOS sleep behavior", "Prevents idle system sleep", "Prevents idle display and system sleep"], ["Settings…", "About Mac Coffee", "Check for Updates…", "Quit Mac Coffee"]),
-            .init("de", "Deutsch", "Mac Coffee ist aktiv", "^\\d+ Std\\. \\d+ Min\\. verbleibend$", "Sprache", "Modus", "Mac wach halten", "Version", ["Normales macOS-Ruheverhalten", "Verhindert Ruhezustand bei Inaktivität", "Verhindert Ruhezustand von Display und Mac"], ["Einstellungen…", "Über Mac Coffee", "Nach Updates suchen…", "Mac Coffee beenden"]),
-            .init("fr", "Français", "Mac Coffee est actif", "^Temps restant : \\d+ h \\d+ min$", "Langue", "Mode", "Garder le Mac éveillé", "Version", ["Comportement de veille normal de macOS", "Empêche la veille du système en cas d’inactivité", "Empêche la veille de l’écran et du système"], ["Réglages…", "À propos de Mac Coffee", "Rechercher des mises à jour…", "Quitter Mac Coffee"]),
-            .init("zh-Hans", "简体中文", "Mac Coffee 正在运行", "^剩余 \\d+ 小时 \\d+ 分钟$", "语言", "模式", "保持 Mac 唤醒", "版本", ["使用 macOS 正常睡眠行为", "防止 Mac 因闲置而睡眠", "防止显示器和 Mac 因闲置而睡眠"], ["设置…", "关于 Mac Coffee", "检查更新…", "退出 Mac Coffee"]),
-            .init("ja", "日本語", "Mac Coffee は有効です", "^残り \\d+時間\\d+分$", "言語", "モード", "Mac をスリープさせない", "バージョン", ["通常の macOS のスリープ動作", "操作していないときの Mac のスリープを防ぎます", "ディスプレイと Mac のスリープを防ぎます"], ["設定…", "Mac Coffee について", "アップデートを確認…", "Mac Coffee を終了"]),
-            .init("ko", "한국어", "Mac Coffee가 활성화되어 있습니다", "^\\d+시간 \\d+분 남음$", "언어", "모드", "Mac 깨우기 유지", "버전", ["일반적인 macOS 잠자기 동작", "유휴 상태에서 Mac이 잠자지 않도록 합니다", "디스플레이와 Mac이 잠자지 않도록 합니다"], ["설정…", "Mac Coffee 정보", "업데이트 확인…", "Mac Coffee 종료"]),
-            .init("es", "Español", "Mac Coffee está activo", "^Tiempo restante: \\d+ h \\d+ min$", "Idioma", "Modo", "Mantener el Mac activo", "Versión", ["Comportamiento de reposo normal de macOS", "Evita que el Mac entre en reposo por inactividad", "Evita que la pantalla y el Mac entren en reposo"], ["Ajustes…", "Acerca de Mac Coffee", "Buscar actualizaciones…", "Salir de Mac Coffee"])
+            .init("ru", "Русский", "Mac Coffee работает", "^Осталось: \\d+ ч \\d+ мин$", "Язык", "Режим", "Не усыплять Mac", "Версия", ["Обычный режим сна macOS", "Предотвращает сон Mac из-за бездействия", "Предотвращает выключение экрана и сон Mac"], ["Настройки…", "О Mac Coffee", "Выйти из Mac Coffee"]),
+            .init("en", "English", "Mac Coffee is active", "^\\d+h \\d+m remaining$", "Language", "Mode", "Keep Mac awake", "Version", ["Normal macOS sleep behavior", "Prevents idle system sleep", "Prevents idle display and system sleep"], ["Settings…", "About Mac Coffee", "Quit Mac Coffee"]),
+            .init("de", "Deutsch", "Mac Coffee ist aktiv", "^\\d+ Std\\. \\d+ Min\\. verbleibend$", "Sprache", "Modus", "Mac wach halten", "Version", ["Normales macOS-Ruheverhalten", "Verhindert Ruhezustand bei Inaktivität", "Verhindert Ruhezustand von Display und Mac"], ["Einstellungen…", "Über Mac Coffee", "Mac Coffee beenden"]),
+            .init("fr", "Français", "Mac Coffee est actif", "^Temps restant : \\d+ h \\d+ min$", "Langue", "Mode", "Garder le Mac éveillé", "Version", ["Comportement de veille normal de macOS", "Empêche la veille du système en cas d’inactivité", "Empêche la veille de l’écran et du système"], ["Réglages…", "À propos de Mac Coffee", "Quitter Mac Coffee"]),
+            .init("zh-Hans", "简体中文", "Mac Coffee 正在运行", "^剩余 \\d+ 小时 \\d+ 分钟$", "语言", "模式", "保持 Mac 唤醒", "版本", ["使用 macOS 正常睡眠行为", "防止 Mac 因闲置而睡眠", "防止显示器和 Mac 因闲置而睡眠"], ["设置…", "关于 Mac Coffee", "退出 Mac Coffee"]),
+            .init("ja", "日本語", "Mac Coffee は有効です", "^残り \\d+時間\\d+分$", "言語", "モード", "Mac をスリープさせない", "バージョン", ["通常の macOS のスリープ動作", "操作していないときの Mac のスリープを防ぎます", "ディスプレイと Mac のスリープを防ぎます"], ["設定…", "Mac Coffee について", "Mac Coffee を終了"]),
+            .init("ko", "한국어", "Mac Coffee가 활성화되어 있습니다", "^\\d+시간 \\d+분 남음$", "언어", "모드", "Mac 깨우기 유지", "버전", ["일반적인 macOS 잠자기 동작", "유휴 상태에서 Mac이 잠자지 않도록 합니다", "디스플레이와 Mac이 잠자지 않도록 합니다"], ["설정…", "Mac Coffee 정보", "Mac Coffee 종료"]),
+            .init("es", "Español", "Mac Coffee está activo", "^Tiempo restante: \\d+ h \\d+ min$", "Idioma", "Modo", "Mantener el Mac activo", "Versión", ["Comportamiento de reposo normal de macOS", "Evita que el Mac entre en reposo por inactividad", "Evita que la pantalla y el Mac entren en reposo"], ["Ajustes…", "Acerca de Mac Coffee", "Salir de Mac Coffee"])
         ]
     }
 }

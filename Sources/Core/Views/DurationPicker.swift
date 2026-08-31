@@ -12,19 +12,16 @@ public struct DurationPicker: View {
     }
 
     public var body: some View {
-        Picker(
-            "duration.title",
-            selection: $selection
-        ) {
-            ForEach(SessionDuration.allCases, id: \.self) { duration in
-                Text(verbatim: duration.localizedTitle(using: localization))
-                    .tag(duration)
-                    .accessibilityIdentifier("maccoffee.duration.\(duration.rawValue)")
-            }
+        ViewThatFits(in: .horizontal) {
+            picker
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(minWidth: 340)
+            picker
+                .frame(maxWidth: .infinity)
         }
         .pickerStyle(.segmented)
         .labelsHidden()
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .center)
         .accessibilityIdentifier("maccoffee.duration.picker")
         .accessibilityValue(Text(verbatim: localization.format(
             "accessibility.durationValue",
@@ -38,6 +35,19 @@ public struct DurationPicker: View {
         }
         .onChange(of: model.selectedDuration) { duration in
             selection = duration
+        }
+    }
+
+    private var picker: some View {
+        Picker(
+            "duration.title",
+            selection: $selection
+        ) {
+            ForEach(SessionDuration.allCases, id: \.self) { duration in
+                Text(verbatim: duration.localizedTitle(using: localization))
+                    .tag(duration)
+                    .accessibilityIdentifier("maccoffee.duration.\(duration.rawValue)")
+            }
         }
     }
 }

@@ -130,11 +130,14 @@ public enum MCPPairingCoordinatorError: Error, Equatable, Sendable {
     case invalidPresentation
     case invalidNonce
     case nonceReuseDetected
+    case authenticationCapacityExceeded
     case unknownChallenge
     case replayedChallenge
+    case challengeExpired
     case invalidSignature
     case clientRevoked
     case pendingRequestNotFound
+    case pairingCapacityExceeded
 }
 
 public enum MCPAuthenticationTranscript {

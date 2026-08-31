@@ -13,7 +13,7 @@ public struct ModePicker: View {
 
     public var body: some View {
         ViewThatFits(in: .horizontal) {
-            picker
+            segmentedPicker
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .fixedSize(horizontal: true, vertical: false)
@@ -21,6 +21,7 @@ public struct ModePicker: View {
                 // labels; ViewThatFits selects the native vertical picker below it.
                 .frame(minWidth: 340)
                 .accessibilityIdentifier("maccoffee.mode.segmented")
+                .background(segmentedLayoutMarker)
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("mode.title")
@@ -28,7 +29,7 @@ public struct ModePicker: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("maccoffee.mode.fallback.title")
-                picker
+                fallbackPicker
                     .pickerStyle(.radioGroup)
                     .labelsHidden()
                 Text(selection.localizedSubtitle(using: localization))
@@ -42,6 +43,7 @@ public struct ModePicker: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("maccoffee.mode.fallback")
         }
+        .frame(maxWidth: .infinity, alignment: .center)
         .disabled(model.isBusy)
         .accessibilityIdentifier("maccoffee.mode.picker")
         .accessibilityValue(Text(verbatim: localization.format(
@@ -59,7 +61,34 @@ public struct ModePicker: View {
         }
     }
 
-    private var picker: some View {
+    @ViewBuilder
+    private var segmentedLayoutMarker: some View {
+#if DEBUG
+        Text(verbatim: "maccoffee.mode.segmented")
+            .font(.system(size: 1))
+            .lineLimit(1)
+            .fixedSize()
+            .opacity(0.01)
+            .allowsHitTesting(false)
+            .accessibilityIdentifier("maccoffee.mode.segmented")
+#endif
+    }
+
+    private var segmentedPicker: some View {
+        Picker("mode.title", selection: $selection) {
+            Text("mode.off")
+                .tag(WakeMode.off)
+                .accessibilityIdentifier("maccoffee.mode.off")
+            Text("mode.system")
+                .tag(WakeMode.system)
+                .accessibilityIdentifier("maccoffee.mode.system")
+            Text("mode.display")
+                .tag(WakeMode.display)
+                .accessibilityIdentifier("maccoffee.mode.display")
+        }
+    }
+
+    private var fallbackPicker: some View {
         Picker("mode.title", selection: $selection) {
             Label("mode.off", systemImage: "moon.zzz")
                 .tag(WakeMode.off)

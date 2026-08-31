@@ -17,6 +17,7 @@ public final class UserDefaultsSettingsStore: SettingsStoring {
         static let batteryThreshold = "batteryThreshold"
         static let launchAtLoginRequested = "launchAtLoginRequested"
         static let notificationAuthorizationRequested = "notificationAuthorizationRequested"
+        static let lastAnnouncedUpdateVersion = "lastAnnouncedUpdateVersion"
     }
 
     let defaults: any SettingsPreferences
@@ -77,6 +78,11 @@ public final class UserDefaultsSettingsStore: SettingsStoring {
     public var notificationAuthorizationRequested: Bool {
         get { defaults.bool(forKey: Key.notificationAuthorizationRequested) }
         set { defaults.set(newValue, forKey: Key.notificationAuthorizationRequested) }
+    }
+
+    public var lastAnnouncedUpdateVersion: String? {
+        get { defaults.string(forKey: Key.lastAnnouncedUpdateVersion) }
+        set { defaults.set(newValue, forKey: Key.lastAnnouncedUpdateVersion) }
     }
 
     private static func clampedThreshold(_ threshold: Int) -> Int {

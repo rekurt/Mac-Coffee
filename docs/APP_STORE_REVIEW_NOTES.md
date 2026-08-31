@@ -29,7 +29,7 @@ System language follows the first supported macOS preferred language and falls b
 
 ## App Store boundary
 
-The submitted `com.rekurt.maccoffee` product is sandboxed. It does not link or bundle Sparkle, declare `SUFeedURL`, or expose any alternate update action. A separate Direct product exists in source but is not submitted to App Review.
+The submitted `com.rekurt.maccoffee` product is sandboxed. It does not link or bundle Sparkle, declare `SUFeedURL`, expose any alternate update action, or contain the Direct edition's optional MCP helper, broker, settings, or symbols. A separate Direct product exists in source but is not submitted to App Review.
 
 ## Privacy
 

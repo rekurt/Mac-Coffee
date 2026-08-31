@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 
 /// Supplies one runtime-selected locale to an entire SwiftUI root.
@@ -22,7 +21,6 @@ public struct LocalizedRootView<Content: View>: View {
 public struct MenuBarPanel: View {
     @ObservedObject private var model: AppModel
     @ObservedObject private var localization: LocalizationController
-    @Environment(\.openWindow) private var openWindow
     private let updater: UpdaterProviding?
     private let quitCoordinator: QuitConfirmationCoordinator
     private let panelWidth: CGFloat?
@@ -41,18 +39,19 @@ public struct MenuBarPanel: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             header
 
             ModePicker(model: model)
-                .frame(width: panelWidth)
+                .frame(maxWidth: .infinity)
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text("duration.title")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 DurationPicker(model: model)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             statusCard
 
@@ -72,13 +71,22 @@ public struct MenuBarPanel: View {
                     .accessibilityLabel(Text("action.dismiss"))
                 }
                 .padding(10)
-                .background(.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 9))
+                .background(.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .accessibilityIdentifier("maccoffee.status.banner")
             }
 
+            if let updater {
+                UpdateAvailableNote(updater: updater, localization: localization)
+            }
+
             Divider()
-            footer
+
+            MenuBarFooter(
+                quitCoordinator: quitCoordinator,
+                panelWidth: panelWidth
+            )
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         // A deterministic UI-test host supplies an explicit panel width. Keep all
         // three constraints equal in that case so the hosted AppKit window and
@@ -88,164 +96,104 @@ public struct MenuBarPanel: View {
             idealWidth: panelWidth ?? 420,
             maxWidth: FooterLayoutMetrics.panelMaximumWidth(panelWidth: panelWidth)
         )
+        .onAppear { updater?.state.panelDidAppear() }
+        .onDisappear { updater?.state.panelDidDisappear() }
     }
 
     private var header: some View {
         HStack(spacing: 10) {
-            Image(systemName: model.mode.systemImage)
-                .font(.title2)
-                .symbolVariant(model.mode == .off ? .none : .fill)
-                .foregroundStyle(model.mode == .off ? Color.secondary : Color.accentColor)
+            ZStack {
+                Circle()
+                    .fill(
+                        model.mode == .off
+                            ? Color.secondary.opacity(0.10)
+                            : Color.accentColor.opacity(0.13)
+                    )
+                Image(systemName: model.mode.systemImage)
+                    .font(.system(size: 16, weight: .semibold))
+                    .symbolVariant(model.mode == .off ? .none : .fill)
+                    .foregroundStyle(model.mode == .off ? Color.secondary : Color.accentColor)
+            }
+            .frame(width: 32, height: 32)
+
             VStack(alignment: .leading, spacing: 2) {
-                Text("app.name").font(.headline)
+                Text("app.name")
+                    .font(.headline)
                 Text(model.mode == .off ? "status.off" : "status.active")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            Spacer()
+
+            Spacer(minLength: 8)
+
             if model.isBusy {
-                ProgressView().controlSize(.small)
+                ProgressView()
+                    .controlSize(.small)
             }
         }
+        .frame(minHeight: 36)
     }
 
     private var statusCard: some View {
-        HStack(spacing: 10) {
-            Image(systemName: batterySymbol)
-                .foregroundStyle(model.isBatteryBlocked ? .orange : .secondary)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(batteryText)
-                    .font(.callout)
-                if model.mode != .off {
-                    CountdownText(deadline: model.session?.expiresAt, localization: localization)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Spacer()
+        ViewThatFits(in: .horizontal) {
+            horizontalStatus
+            compactStatus
         }
-        .padding(10)
-        .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 9))
+        .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
+        .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay(alignment: .topLeading) {
             uiTestSessionMarker
         }
         .accessibilityIdentifier("maccoffee.status.card")
     }
 
-    private var footer: some View {
-        ViewThatFits(in: .horizontal) {
-            actionGrid
-                .frame(minWidth: FooterLayoutMetrics.gridMinimumWidth)
-            actionList
+    private var horizontalStatus: some View {
+        HStack(spacing: 9) {
+            Image(systemName: batterySymbol)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(model.isBatteryBlocked ? .orange : .secondary)
+                .frame(width: 18)
+
+            Text(batteryText)
+                .font(.callout.weight(.medium))
+                .fixedSize(horizontal: true, vertical: false)
+
+            if model.mode != .off {
+                Divider()
+                    .frame(height: 16)
+
+                CountdownText(deadline: model.session?.expiresAt, localization: localization)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+
+            Spacer(minLength: 0)
         }
-        .frame(
-            maxWidth: FooterLayoutMetrics.footerMaximumWidth(panelWidth: panelWidth),
-            alignment: .leading
-        )
-        .font(.caption)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("maccoffee.footer")
     }
 
-    private var actionGrid: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                settingsAction
-                    .frame(maxWidth: .infinity)
-                aboutAction
-                    .frame(maxWidth: .infinity)
-            }
-            if hasUpdateAction {
-                HStack(spacing: 8) {
-                    updateAction
-                        .frame(maxWidth: .infinity)
-                    quitAction
-                        .frame(maxWidth: .infinity)
+    private var compactStatus: some View {
+        HStack(spacing: 10) {
+            Image(systemName: batterySymbol)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(model.isBatteryBlocked ? .orange : .secondary)
+                .frame(width: 18)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(batteryText)
+                    .font(.callout.weight(.medium))
+                if model.mode != .off {
+                    CountdownText(deadline: model.session?.expiresAt, localization: localization)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-            } else {
-                quitAction
-                    .frame(maxWidth: .infinity)
             }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("maccoffee.footer.grid")
-        .background(footerLayoutMarker("maccoffee.footer.grid.marker"))
-    }
 
-    private var actionList: some View {
-        VStack(spacing: 8) {
-            settingsAction
-            aboutAction
-            if hasUpdateAction {
-                updateAction
-            }
-            quitAction
+            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("maccoffee.footer.list")
-        .background(footerLayoutMarker("maccoffee.footer.list.marker"))
-    }
-
-    private var hasUpdateAction: Bool {
-        if updater?.canCheckForUpdates == true {
-            return true
-        }
-#if DEBUG
-        // Sparkle has no feed in the deterministic host. Expose the real Direct
-        // action there so UI tests can verify the four-action production layout.
-        return updater != nil && CommandLine.arguments.contains("--ui-testing-force-update-action")
-#else
-        return false
-#endif
-    }
-
-    @ViewBuilder
-    private var settingsAction: some View {
-        if #available(macOS 14.0, *) {
-            SettingsLink {
-                FooterActionLabel(title: "action.settings", symbol: "gearshape")
-            }
-            .buttonStyle(FooterActionButtonStyle())
-            .accessibilityIdentifier("maccoffee.action.settings")
-        } else {
-            Button(action: openLegacySettings) {
-                FooterActionLabel(title: "action.settings", symbol: "gearshape")
-            }
-            .buttonStyle(FooterActionButtonStyle())
-            .accessibilityIdentifier("maccoffee.action.settings")
-        }
-    }
-
-    private var aboutAction: some View {
-        Button {
-            openWindow(id: "maccoffee.about")
-        } label: {
-            FooterActionLabel(title: "action.about", symbol: "info.circle")
-        }
-        .buttonStyle(FooterActionButtonStyle())
-        .accessibilityIdentifier("maccoffee.action.about")
-    }
-
-    private var updateAction: some View {
-        Button {
-            updater?.checkForUpdates()
-        } label: {
-            FooterActionLabel(title: "action.checkUpdates", symbol: "arrow.triangle.2.circlepath")
-        }
-        .buttonStyle(FooterActionButtonStyle())
-        .accessibilityIdentifier("maccoffee.action.update")
-    }
-
-    private var quitAction: some View {
-        Button {
-            quitCoordinator.requestQuit()
-        } label: {
-            FooterActionLabel(title: "action.quit", symbol: "power", isDestructive: true)
-        }
-        .buttonStyle(FooterActionButtonStyle())
-        .accessibilityIdentifier("maccoffee.action.quit")
     }
 
     private var batteryText: String {
@@ -256,21 +204,6 @@ public struct MenuBarPanel: View {
             return localization.localized("battery.unknown")
         }
         return localization.format("battery.percent", arguments: percentage)
-    }
-
-    /// Gives UI automation a frame-bearing layout node without changing the
-    /// visual size or hit-testing of the footer itself.
-    @ViewBuilder
-    private func footerLayoutMarker(_ identifier: String) -> some View {
-#if DEBUG
-        Text(verbatim: identifier)
-            .font(.system(size: 1))
-            .lineLimit(1)
-            .fixedSize()
-            .opacity(0.01)
-            .allowsHitTesting(false)
-            .accessibilityIdentifier(identifier)
-#endif
     }
 
     private var batterySymbol: String {
@@ -289,66 +222,5 @@ public struct MenuBarPanel: View {
                 .accessibilityIdentifier("maccoffee.session.marker")
         }
 #endif
-    }
-
-    private func openLegacySettings() {
-        NSApplication.shared.activate(ignoringOtherApps: true)
-        NSApplication.shared.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-    }
-}
-
-enum FooterLayoutMetrics {
-    static let gridMinimumWidth: CGFloat = 388
-
-    static func panelMaximumWidth(panelWidth: CGFloat?) -> CGFloat {
-        panelWidth ?? 420
-    }
-
-    /// `nil` preserves the parent proposal so ViewThatFits can select the list
-    /// candidate when a production menu-bar panel is constrained by the screen.
-    static func footerMaximumWidth(panelWidth: CGFloat?) -> CGFloat? {
-        panelWidth
-    }
-}
-
-private struct FooterActionLabel: View {
-    let title: LocalizedStringKey
-    let symbol: String
-    var isDestructive = false
-    @State private var isHovering = false
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: symbol)
-                .font(.system(size: 15, weight: .medium))
-                .frame(width: 16)
-            Text(title)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .minimumScaleFactor(0.85)
-            Spacer(minLength: 0)
-        }
-        .frame(maxWidth: .infinity, minHeight: 38)
-        .padding(.horizontal, 10)
-        .foregroundStyle(isDestructive ? Color.red : Color.primary)
-        .background(
-            Color.secondary.opacity(isHovering ? 0.16 : 0.09),
-            in: RoundedRectangle(cornerRadius: 9, style: .continuous)
-        )
-        .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
-        .onHover { hover in
-            withAnimation(.easeOut(duration: 0.14)) {
-                isHovering = hover
-            }
-        }
-    }
-}
-
-private struct FooterActionButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.985 : 1)
-            .brightness(configuration.isPressed ? -0.03 : 0)
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }

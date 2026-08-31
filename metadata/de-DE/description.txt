@@ -1,9 +1,0 @@
-Mac Coffee ist ein schlankes, natives Menüleistenprogramm, das deinen Mac auf Wunsch wach hält.
-
-Wähle „Mac wach halten“ oder „Display wach halten“ und nutze die Sitzung für 30 Minuten, 1, 2, 4 oder 8 Stunden – oder unbegrenzt. Mac Coffee startet immer im ausgeschalteten Modus und gibt die Wachanforderung frei, wenn du den Modus ausschaltest oder die App beendest.
-
-Schütze den Akku eines MacBook mit einem einstellbaren Grenzwert von 10–30 % (standardmäßig 15 %), starte Mac Coffee bei Bedarf beim Anmelden und erhalte klare lokale Statusmitteilungen. Die Oberfläche ist in acht Sprachen verfügbar.
-
-Mac Coffee verwendet öffentliche, prozesseigene Energieverwaltungsfunktionen von macOS. Es benötigt keinen Administratorhelfer, kein Konto, keine Analysen und kein Backend und sammelt keine Daten.
-
-Mac Coffee verhindert nur den Ruhezustand bei Inaktivität. Manueller Ruhezustand, Schließen des MacBook-Deckels, Ausschalten sowie thermische oder Sicherheitsentscheidungen von macOS bleiben wirksam.

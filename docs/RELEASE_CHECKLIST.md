@@ -23,7 +23,8 @@ Use this checklist for each candidate. Check a gate only from fresh evidence for
 - [ ] Replacing a duration updates the current session; expiry releases the assertion.
 - [ ] Battery protection stops/blocks at every supported boundary and does not flap around the threshold.
 - [ ] Launch at Login is opt-in and accurately reports unavailable or approval-required states.
-- [ ] Settings, About, update action, local notifications, and error notices match each distribution product.
+- [ ] Settings, About, local notifications, and error notices match each distribution product.
+- [ ] Direct manual update check appears only in Settings; an available version shows one localized panel card and at most one system notification per version when the panel is closed.
 - [ ] Footer Quit and `⌘Q` share one dialog; Cancel preserves state; Confirm exits after cleanup.
 - [ ] Logout, shutdown, and termination cleanup is noninteractive and idempotent.
 - [ ] `pmset -g assertions` shows the expected IOKit type while active and no Mac Coffee assertion after Off or termination.
@@ -35,7 +36,7 @@ Use this checklist for each candidate. Check a gate only from fresh evidence for
 - [ ] Language changes immediately without a PID or wake-session change and persists after relaunch.
 - [ ] No panel, Settings, About, dialog, notification preview, or accessibility label is clipped or untranslated.
 - [ ] Localization keys and `%d`/`%@` placeholders are identical in all `.strings` files.
-- [ ] All 16 tracked App Store screenshots are regenerated, visually reviewed, 1280×800, and opaque.
+- [ ] All 6 tracked EN/RU/ZH-Hans App Store screenshots are regenerated, visually reviewed, 1280×800, and opaque.
 
 ## Direct release
 
@@ -45,6 +46,9 @@ Use this checklist for each candidate. Check a gate only from fresh evidence for
 - [ ] Gatekeeper accepts the app and DMG on a clean Mac.
 - [ ] Sparkle appcast signature, version, minimum macOS version, URL, and SHA-256 are independently checked.
 - [ ] Installed previous official version upgrades successfully to this candidate.
+- [ ] MCP is disabled by default; Codex, Claude Desktop, and generic stdio setup paths are reviewed without overwriting unrelated client configuration.
+- [ ] Pairing approval, trusted-client revoke/forget, idempotent request replay, status subscription, disable, and termination cleanup pass.
+- [ ] Direct bundle contains the signed `MacCoffeeMCP` helper and `MacCoffeeMCPBroker.xpc`; both have the expected Team identity in an official build.
 
 ## App Store release
 
@@ -52,9 +56,9 @@ Use this checklist for each candidate. Check a gate only from fresh evidence for
 - [ ] `MACCOFFEE_APP_STORE_TEAM=… ./scripts/archive-app-store.sh` passes.
 - [ ] Xcode Organizer validation succeeds with no unresolved warning.
 - [ ] App Store privacy answers state no data collected and match `PrivacyInfo.xcprivacy` and `PRIVACY.md`.
-- [ ] Localized metadata and screenshots are uploaded for all eight locales.
+- [ ] Localized metadata and screenshots are uploaded for en-US, ru, and zh-Hans; English is the default locale.
 - [ ] TestFlight smoke passes on Apple silicon and Intel hardware when available.
-- [ ] App Review notes accurately describe IOKit, battery protection, language switching, quit behavior, and the absence of Sparkle.
+- [ ] App Review notes accurately describe IOKit, battery protection, language switching, quit behavior, and the absence of Sparkle and MCP.
 
 ## Publication record
 

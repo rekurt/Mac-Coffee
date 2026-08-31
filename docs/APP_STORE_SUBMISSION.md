@@ -32,7 +32,7 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
 ./scripts/verify-bundles.sh
 ```
 
-Run `MacCoffeeUITests` on an unlocked interactive desktop. Check all eight explicit languages plus System mode, long strings, `⌘Q` cancellation/confirmation, timers, and both wake modes.
+Run `MacCoffeeUITests` on an unlocked interactive desktop. Check all eight explicit UI languages plus System mode, long strings, `⌘Q` cancellation/confirmation, timers, and both wake modes. App Store metadata and screenshots are maintained for English, Russian, and Simplified Chinese.
 
 ## Archive and inspect
 
@@ -40,11 +40,11 @@ Run `MacCoffeeUITests` on an unlocked interactive desktop. Check all eight expli
 MACCOFFEE_APP_STORE_TEAM=YOUR_TEAM_ID ./scripts/archive-app-store.sh
 ```
 
-The archive script rejects Sparkle, `SUFeedURL`, missing sandbox entitlement, `get-task-allow`, missing localizations, a non-universal executable, invalid signatures, or missing Hardened Runtime. Inspect the resulting archive in Xcode Organizer, validate it, and upload only after every local gate passes.
+The archive script rejects Sparkle, `SUFeedURL`, MCP helpers/brokers/symbols, missing sandbox entitlement, `get-task-allow`, missing UI localizations, a non-universal executable, invalid signatures, or missing Hardened Runtime. Inspect the resulting archive in Xcode Organizer, validate it, and upload only after every local gate passes.
 
 ## App Store Connect
 
-1. Copy the localized files under `metadata/<locale>/` into the matching App Store Connect locale.
+1. Copy the localized files under `metadata/en-US`, `metadata/ru`, and `metadata/zh-Hans` into the matching App Store Connect locales. English is the default storefront language.
 2. Upload the two 1280×800 opaque PNG files from each locale's `screenshots` directory in their numbered order.
 3. Use [`APP_STORE_REVIEW_NOTES.md`](APP_STORE_REVIEW_NOTES.md) as the basis for Review Notes.
 4. Confirm the version, build number, age rating, category, privacy URL, support URL, and encryption/export-compliance answers.

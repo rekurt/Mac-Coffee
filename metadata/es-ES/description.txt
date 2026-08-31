@@ -1,9 +1,0 @@
-Mac Coffee es una ligera utilidad nativa de barra de menús que mantiene tu Mac activo cuando tú lo eliges.
-
-Elige «Mantener el Mac activo» o «Mantener activa la pantalla» y ejecuta la sesión durante 30 minutos, 1, 2, 4 u 8 horas, o sin límite. Mac Coffee siempre se inicia desactivado y libera su solicitud de actividad al desactivar el modo o salir de la app.
-
-Protege la batería de un MacBook con un límite ajustable del 10% al 30% (15% de forma predeterminada), inicia Mac Coffee al iniciar sesión si lo deseas y recibe claras notificaciones de estado locales. La interfaz está disponible en ocho idiomas.
-
-Mac Coffee utiliza las aserciones de energía públicas de macOS, asociadas al proceso de la app. No necesita un asistente de administrador, cuenta, análisis ni backend, y no recopila datos.
-
-Mac Coffee solo evita el reposo por inactividad. El reposo manual, cerrar la tapa de un MacBook, el apagado y las decisiones térmicas o de seguridad de macOS siempre siguen vigentes.

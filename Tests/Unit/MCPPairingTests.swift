@@ -43,6 +43,130 @@ final class MCPPairingTests: XCTestCase {
         }
     }
 
+    func testAuthenticationCapacityIsBoundedUntilOldChallengesExpire() throws {
+        let clock = MutablePairingClock(now: Date(timeIntervalSince1970: 10_000))
+        let nonces = (1...3).map { Data(repeating: UInt8($0), count: 32) }
+        let harness = makeHarness(
+            nonces: nonces,
+            now: { clock.now },
+            authenticationCapacity: 2,
+            challengeLifetime: 10
+        )
+        let presentation = makePresentation()
+
+        _ = try harness.coordinator.beginAuthentication(
+            presentation,
+            connectionIdentifier: "connection-1"
+        )
+        _ = try harness.coordinator.beginAuthentication(
+            presentation,
+            connectionIdentifier: "connection-2"
+        )
+
+        XCTAssertThrowsError(
+            try harness.coordinator.beginAuthentication(
+                presentation,
+                connectionIdentifier: "connection-3"
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? MCPPairingCoordinatorError,
+                .authenticationCapacityExceeded
+            )
+        }
+
+        clock.now.addTimeInterval(11)
+        XCTAssertNoThrow(
+            try harness.coordinator.beginAuthentication(
+                presentation,
+                connectionIdentifier: "connection-3"
+            )
+        )
+    }
+
+    func testExpiredChallengeCannotBeCompleted() throws {
+        let clock = MutablePairingClock(now: Date(timeIntervalSince1970: 10_000))
+        let harness = makeHarness(
+            now: { clock.now },
+            challengeLifetime: 10
+        )
+        let challenge = try harness.coordinator.beginAuthentication(
+            makePresentation(),
+            connectionIdentifier: "connection-1"
+        )
+        harness.verifier.acceptedMessage = challenge.transcript
+        harness.verifier.acceptedSignature = Data([4])
+        clock.now.addTimeInterval(11)
+
+        XCTAssertThrowsError(
+            try harness.coordinator.completeAuthentication(
+                MCPAuthenticationProof(
+                    challengeIdentifier: challenge.identifier,
+                    signature: Data([4])
+                )
+            )
+        ) { error in
+            XCTAssertEqual(error as? MCPPairingCoordinatorError, .challengeExpired)
+        }
+        XCTAssertTrue(harness.coordinator.pendingRequests.isEmpty)
+    }
+
+    func testPendingPairingRequestCapacityIsBounded() throws {
+        let harness = makeHarness(
+            nonces: [Data(repeating: 1, count: 32), Data(repeating: 2, count: 32)],
+            pendingRequestCapacity: 1
+        )
+        let firstPresentation = makePresentation()
+        let firstChallenge = try harness.coordinator.beginAuthentication(
+            firstPresentation,
+            connectionIdentifier: "connection-1"
+        )
+        harness.verifier.acceptedMessage = firstChallenge.transcript
+        harness.verifier.acceptedSignature = Data([1])
+        _ = try harness.coordinator.completeAuthentication(
+            MCPAuthenticationProof(
+                challengeIdentifier: firstChallenge.identifier,
+                signature: Data([1])
+            )
+        )
+
+        let secondPresentation = MCPAuthenticationPresentation(
+            clientIdentifier: "second-client",
+            displayName: "Second client",
+            publicKey: Data(repeating: 3, count: 65),
+            parentIdentity: makeIdentity(
+                executablePath: "/Applications/Second.app/Contents/MacOS/Second",
+                teamIdentifier: "SECONDTEAM",
+                signingIdentifier: "com.example.second",
+                hash: "second-hash"
+            )
+        )
+        let secondChallenge = try harness.coordinator.beginAuthentication(
+            secondPresentation,
+            connectionIdentifier: "connection-2"
+        )
+        harness.verifier.acceptedMessage = secondChallenge.transcript
+        harness.verifier.acceptedSignature = Data([2])
+
+        XCTAssertThrowsError(
+            try harness.coordinator.completeAuthentication(
+                MCPAuthenticationProof(
+                    challengeIdentifier: secondChallenge.identifier,
+                    signature: Data([2])
+                )
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? MCPPairingCoordinatorError,
+                .pairingCapacityExceeded
+            )
+        }
+        XCTAssertEqual(
+            harness.coordinator.pendingRequests.map(\.presentation.clientIdentifier),
+            [firstPresentation.clientIdentifier]
+        )
+    }
+
     func testValidProofCreatesPendingRequestAndApprovalPersistsTrust() throws {
         let harness = makeHarness()
         let presentation = makePresentation()
@@ -71,8 +195,8 @@ final class MCPPairingTests: XCTestCase {
         XCTAssertEqual(approved.identifier, presentation.clientIdentifier)
         XCTAssertEqual(approved.publicKey, presentation.publicKey)
         XCTAssertEqual(approved.codeIdentity, presentation.parentIdentity)
-        XCTAssertEqual(approved.createdAt, harness.now)
-        XCTAssertEqual(approved.lastSeenAt, harness.now)
+        XCTAssertEqual(approved.createdAt, harness.now())
+        XCTAssertEqual(approved.lastSeenAt, harness.now())
         XCTAssertFalse(approved.isRevoked)
         XCTAssertEqual(try harness.trustStore.clients(), [approved])
         XCTAssertTrue(harness.coordinator.pendingRequests.isEmpty)
@@ -201,8 +325,8 @@ final class MCPPairingTests: XCTestCase {
         guard case let .authenticated(client) = result else {
             return XCTFail("Expected authenticated result")
         }
-        XCTAssertEqual(client.lastSeenAt, harness.now)
-        XCTAssertEqual(try harness.trustStore.client(identifier: client.identifier)?.lastSeenAt, harness.now)
+        XCTAssertEqual(client.lastSeenAt, harness.now())
+        XCTAssertEqual(try harness.trustStore.client(identifier: client.identifier)?.lastSeenAt, harness.now())
         XCTAssertTrue(harness.coordinator.pendingRequests.isEmpty)
     }
 
@@ -380,7 +504,11 @@ final class MCPPairingTests: XCTestCase {
     }
 
     private func makeHarness(
-        nonces: [Data] = [Data(repeating: 1, count: 32)]
+        nonces: [Data] = [Data(repeating: 1, count: 32)],
+        now: @escaping () -> Date = { Date(timeIntervalSince1970: 10_000) },
+        authenticationCapacity: Int = 64,
+        pendingRequestCapacity: Int = 32,
+        challengeLifetime: TimeInterval = 120
     ) -> MCPPairingHarness {
         let credentials = FakeMCPCredentialStore()
         let trustStore = MCPTrustStore(credentials: credentials)
@@ -390,7 +518,10 @@ final class MCPPairingTests: XCTestCase {
             trustStore: trustStore,
             nonceGenerator: nonceGenerator,
             verifier: verifier,
-            now: Date(timeIntervalSince1970: 10_000)
+            now: now,
+            authenticationCapacity: authenticationCapacity,
+            pendingRequestCapacity: pendingRequestCapacity,
+            challengeLifetime: challengeLifetime
         )
     }
 
@@ -429,14 +560,17 @@ private struct MCPPairingHarness {
     let trustStore: MCPTrustStore
     let nonceGenerator: SequenceNonceGenerator
     let verifier: RecordingSignatureVerifier
-    let now: Date
+    let now: () -> Date
     let coordinator: MCPPairingCoordinator
 
     init(
         trustStore: MCPTrustStore,
         nonceGenerator: SequenceNonceGenerator,
         verifier: RecordingSignatureVerifier,
-        now: Date
+        now: @escaping () -> Date,
+        authenticationCapacity: Int,
+        pendingRequestCapacity: Int,
+        challengeLifetime: TimeInterval
     ) {
         self.trustStore = trustStore
         self.nonceGenerator = nonceGenerator
@@ -446,8 +580,19 @@ private struct MCPPairingHarness {
             trustStore: trustStore,
             nonceGenerator: nonceGenerator,
             signatureVerifier: verifier,
-            now: { now }
+            now: now,
+            authenticationCapacity: authenticationCapacity,
+            pendingRequestCapacity: pendingRequestCapacity,
+            challengeLifetime: challengeLifetime
         )
+    }
+}
+
+private final class MutablePairingClock {
+    var now: Date
+
+    init(now: Date) {
+        self.now = now
     }
 }
 

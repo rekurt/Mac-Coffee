@@ -136,6 +136,11 @@ targets:
       - path: Sources/Direct/MCP
         excludes:
           - DirectMCPEnvironment.swift
+          - MCPActivityView.swift
+          - MCPPairingView.swift
+          - MCPSettingsView.swift
+          - MCPSettingsViewModel.swift
+          - Setup
       - Sources/MCPHelper/XPC
       - Sources/MCPBrokerShared
       - path: Sources/MCPBroker

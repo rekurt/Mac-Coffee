@@ -1,1 +1,0 @@
-Mac Coffee 2.0 se ha reescrito por completo como app nativa. Incluye modos independientes para mantener activos el Mac o la pantalla, sesiones temporizadas o ilimitadas, protección de batería ajustable, inicio de sesión, notificaciones locales y cambio instantáneo entre ocho idiomas. La versión de App Store usa sandbox, no incluye actualizaciones alternativas y no recopila datos.

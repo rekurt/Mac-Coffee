@@ -1,1 +1,0 @@
-Mac Coffee 2.0 wurde vollständig nativ neu entwickelt. Neu sind getrennte Wachmodi für Mac und Display, zeitlich begrenzte und unbegrenzte Sitzungen, einstellbarer Akkuschutz, Start bei der Anmeldung, lokale Mitteilungen und der sofortige Wechsel zwischen acht Sprachen. Der App-Store-Build läuft in der Sandbox, enthält keinen alternativen Updater und sammelt keine Daten.

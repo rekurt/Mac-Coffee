@@ -4,7 +4,7 @@ import XCTest
 
 final class ReleaseAssetTests: XCTestCase {
     private let localeDirectories = [
-        "de-DE", "en-US", "es-ES", "fr-FR", "ja", "ko", "ru", "zh-Hans"
+        "en-US", "ru", "zh-Hans"
     ]
     private let bundleLocalizations = ["de", "en", "es", "fr", "ja", "ko", "ru", "zh-Hans"]
     private let metadataFiles = [
@@ -25,6 +25,17 @@ final class ReleaseAssetTests: XCTestCase {
     }
 
     func testEveryLocaleHasCompleteValidAppStoreMetadata() throws {
+        let metadataDirectory = repositoryRoot.appendingPathComponent("metadata")
+        let shippedDirectories = try FileManager.default.contentsOfDirectory(
+            at: metadataDirectory,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        )
+        .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
+        .map(\.lastPathComponent)
+        .sorted()
+        XCTAssertEqual(shippedDirectories, localeDirectories)
+
         for locale in localeDirectories {
             let directory = repositoryRoot.appendingPathComponent("metadata/\(locale)")
             for filename in metadataFiles {
@@ -66,10 +77,17 @@ final class ReleaseAssetTests: XCTestCase {
     }
 
     func testLocalizedReadmesExistAndPrimaryReadmeEndsWithUpstreamAttribution() throws {
-        for filename in [
-            "README.md", "README.ru.md", "README.de.md", "README.fr.md",
-            "README.zh-Hans.md", "README.ja.md", "README.ko.md", "README.es.md"
-        ] {
+        let readmes = try FileManager.default.contentsOfDirectory(
+            at: repositoryRoot,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        )
+        .map(\.lastPathComponent)
+        .filter { $0 == "README.md" || ($0.hasPrefix("README.") && $0.hasSuffix(".md")) }
+        .sorted()
+        XCTAssertEqual(readmes, ["README.md", "README.ru.md", "README.zh-Hans.md"])
+
+        for filename in readmes {
             XCTAssertTrue(
                 FileManager.default.fileExists(atPath: repositoryRoot.appendingPathComponent(filename).path),
                 filename
@@ -80,6 +98,20 @@ final class ReleaseAssetTests: XCTestCase {
         XCTAssertEqual(
             readme.split(separator: "\n").last.map(String.init),
             "Forked from [Elliotwu-7/Mac-Coffee](https://github.com/Elliotwu-7/Mac-Coffee)."
+        )
+    }
+
+    func testReleaseRepositoryContainsNoInternalAgentPlanningArtifacts() {
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: repositoryRoot.appendingPathComponent("docs/superpowers").path
+            )
+        )
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: repositoryRoot.appendingPathComponent(".superdesign").path
+            ),
+            "Ignored design workspaces must be removed before the release branch is published"
         )
     }
 
@@ -173,6 +205,19 @@ final class ReleaseAssetTests: XCTestCase {
         XCTAssertTrue(source.contains("- target: MacCoffeeAppStoreCore"))
         XCTAssertTrue(source.contains("- target: MacCoffeeMCP\n        embed: true"))
         XCTAssertTrue(source.contains("destination: wrapper\n          subpath: Contents/Helpers"))
+    }
+
+    func testMCPSettingsLinkTargetsPublishedSecurityPolicy() throws {
+        let source = try text(
+            at: repositoryRoot.appendingPathComponent(
+                "Sources/Direct/MCP/MCPSettingsView.swift"
+            )
+        )
+        XCTAssertTrue(
+            source.contains(
+                "https://github.com/rekurt/Mac-Coffee/blob/main/docs/SECURITY.md"
+            )
+        )
     }
 
     func testBuiltDistributionsKeepMCPArtifactsAndSymbolsDirectOnly() throws {

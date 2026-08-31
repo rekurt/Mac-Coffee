@@ -1,1 +1,0 @@
-wache,ruhezustand,display,menüleiste,akku,timer

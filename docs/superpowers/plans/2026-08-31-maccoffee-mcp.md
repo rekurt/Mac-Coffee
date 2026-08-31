@@ -4,7 +4,7 @@
 
 **Goal:** Ship a secure, Direct-only local MCP helper that controls the running Mac Coffee app through its single `AppModel`, while completing the three-language documentation and deterministic screenshot overhaul.
 
-**Architecture:** The bundled `MacCoffeeMCP` executable speaks MCP over stdio and connects to the running Direct app through an authenticated anonymous NSXPC endpoint. `MCPControlService` serializes validated commands onto `@MainActor` and maps `AppModel` state to versioned snapshots. The helper owns MCP SDK adaptation and its client private key; the app owns trust decisions, UI, and all application state.
+**Architecture:** The bundled `MacCoffeeMCP` executable speaks MCP over stdio, obtains the running Direct app's anonymous endpoint from a minimal bundled XPC rendezvous broker, and then connects directly to the app through authenticated NSXPC. `MCPControlService` serializes validated commands onto `@MainActor` and maps `AppModel` state to versioned snapshots. The broker owns no application data or secrets; the helper owns MCP SDK adaptation and its client private key; the app owns trust decisions, UI, and all application state.
 
 **Tech Stack:** Swift 6, SwiftUI/AppKit, Combine, Foundation NSXPC, CryptoKit P-256, Security/Keychain, official MCP Swift SDK 0.12.1, XCTest/XCUITest, XcodeGen, shell release validation.
 
@@ -240,31 +240,25 @@ Define app service, helper callback, authentication, request, response, subscrip
 
 Commit as `feat(mcp): define hardened xpc contract`.
 
-## Task 8: Publish and consume the anonymous XPC endpoint
+## Task 8: Establish and verify the direct anonymous XPC channel
 
 **Files:**
 
 - Create: `Sources/Direct/MCP/MCPXPCListener.swift`
 - Create: `Sources/Direct/MCP/MCPXPCConnection.swift`
-- Create: `Sources/Core/MCP/XPC/MCPEndpointFile.swift`
 - Create: `Sources/MCPHelper/XPC/MCPXPCClient.swift`
-- Test: `Tests/Unit/MCPEndpointFileTests.swift`
 - Test: `Tests/Integration/MCPXPCIntegrationTests.swift`
 - Modify: `project.yml`
 
 **Step 1: Add an integration test target and failing tests**
 
-Prove endpoint archive/unarchive, atomic replace, `0700` directory, `0600` file, stale endpoint handling, no app launch, authentication-before-status, timeout/cancellation, reconnect, and active connection closure on revoke/disable.
+Prove absent/invalidated endpoint handling, no app launch, authentication-before-status, timeout/cancellation, reconnect with a fresh endpoint, and active connection closure on revoke/disable.
 
-**Step 2: Implement endpoint file helper**
+**Step 2: Implement listener/client**
 
-Use Application Support with an injected base URL in tests. Write to a same-directory temporary file, set permissions, fsync, then rename atomically.
+The anonymous listener delegates authentication to `MCPPairingCoordinator` and commands to `MCPControlService`. The client accepts an endpoint provider, maps absent/invalidated state to `APP_NOT_RUNNING`, and reconnects only with a freshly obtained endpoint. A bundled broker endpoint provider is added in Task 9 because Apple only permits `NSXPCListenerEndpoint` transfer over an existing XPC connection.
 
-**Step 3: Implement listener/client**
-
-The listener delegates authentication to `MCPPairingCoordinator` and commands to `MCPControlService`. The helper watches for endpoint changes and maps absent/unreachable state to `APP_NOT_RUNNING`.
-
-**Step 4: Run integration tests and commit**
+**Step 3: Run integration tests and commit**
 
 Commit as `feat(mcp): bridge helper with authenticated xpc`.
 
@@ -334,7 +328,7 @@ Expected: Direct and App Store Debug builds pass with `CODE_SIGNING_ALLOWED=NO`;
 
 **Step 1: Write failing composition/lifecycle tests**
 
-Assert one shared `AppModel`, MCP off by default, enable creates listener, disable removes endpoint/closes connections, termination shuts listener before assertion release, helper failure does not alter session, and App Store environment has no MCP environment.
+Assert one shared `AppModel`, MCP off by default, enable creates and registers the listener, disable unregisters the broker endpoint/closes connections, termination shuts listener before assertion release, helper failure does not alter session, and App Store environment has no MCP environment.
 
 **Step 2: Implement Direct-only composition**
 

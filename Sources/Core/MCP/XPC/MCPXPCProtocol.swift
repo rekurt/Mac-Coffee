@@ -29,7 +29,7 @@ public protocol MCPXPCAppService {
 @objc(MCPXPCHelperCallback)
 public protocol MCPXPCHelperCallback {
     func receive(_ event: MCPXPCEvent)
-    func closed(_ close: MCPXPCClose)
+    func closed(_ close: MCPXPCClose, withReply reply: @escaping () -> Void)
 }
 
 public enum MCPXPCInterfaces {
@@ -134,7 +134,7 @@ public enum MCPXPCInterfaces {
         set(
             [MCPXPCClose.self],
             on: interface,
-            selector: #selector(MCPXPCHelperCallback.closed(_:)),
+            selector: #selector(MCPXPCHelperCallback.closed(_:withReply:)),
             argumentIndex: 0,
             ofReply: false
         )

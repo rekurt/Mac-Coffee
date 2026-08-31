@@ -1,7 +1,7 @@
 import Foundation
 
 @objc(MCPXPCAuthenticationHello)
-public final class MCPXPCAuthenticationHello: NSObject, NSSecureCoding {
+public final class MCPXPCAuthenticationHello: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let schemaVersion: Int
@@ -34,7 +34,7 @@ public final class MCPXPCAuthenticationHello: NSObject, NSSecureCoding {
 }
 
 @objc(MCPXPCAuthenticationChallenge)
-public final class MCPXPCAuthenticationChallenge: NSObject, NSSecureCoding {
+public final class MCPXPCAuthenticationChallenge: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let schemaVersion: Int
@@ -78,7 +78,7 @@ public final class MCPXPCAuthenticationChallenge: NSObject, NSSecureCoding {
 }
 
 @objc(MCPXPCAuthenticationProof)
-public final class MCPXPCAuthenticationProof: NSObject, NSSecureCoding {
+public final class MCPXPCAuthenticationProof: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let schemaVersion: Int
@@ -116,7 +116,7 @@ public enum MCPXPCAuthenticationState: String, Sendable {
 }
 
 @objc(MCPXPCAuthenticationResult)
-public final class MCPXPCAuthenticationResult: NSObject, NSSecureCoding {
+public final class MCPXPCAuthenticationResult: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let schemaVersion: Int
@@ -162,7 +162,7 @@ public final class MCPXPCAuthenticationResult: NSObject, NSSecureCoding {
 }
 
 @objc(MCPXPCError)
-public final class MCPXPCError: NSObject, NSSecureCoding {
+public final class MCPXPCError: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let code: String
@@ -195,7 +195,7 @@ public final class MCPXPCError: NSObject, NSSecureCoding {
 }
 
 @objc(MCPXPCRequest)
-public final class MCPXPCRequest: NSObject, NSSecureCoding {
+public final class MCPXPCRequest: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let schemaVersion: Int
@@ -245,7 +245,7 @@ public final class MCPXPCRequest: NSObject, NSSecureCoding {
 }
 
 @objc(MCPXPCResponse)
-public final class MCPXPCResponse: NSObject, NSSecureCoding {
+public final class MCPXPCResponse: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let schemaVersion: Int
@@ -291,7 +291,7 @@ public final class MCPXPCResponse: NSObject, NSSecureCoding {
 }
 
 @objc(MCPXPCSubscription)
-public final class MCPXPCSubscription: NSObject, NSSecureCoding {
+public final class MCPXPCSubscription: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let schemaVersion: Int
@@ -334,7 +334,7 @@ public final class MCPXPCSubscription: NSObject, NSSecureCoding {
 }
 
 @objc(MCPXPCEvent)
-public final class MCPXPCEvent: NSObject, NSSecureCoding {
+public final class MCPXPCEvent: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let schemaVersion: Int
@@ -376,7 +376,7 @@ public final class MCPXPCEvent: NSObject, NSSecureCoding {
 }
 
 @objc(MCPXPCCancellation)
-public final class MCPXPCCancellation: NSObject, NSSecureCoding {
+public final class MCPXPCCancellation: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let schemaVersion: Int
@@ -413,7 +413,7 @@ public enum MCPXPCCloseReason: String, Sendable {
 }
 
 @objc(MCPXPCClose)
-public final class MCPXPCClose: NSObject, NSSecureCoding {
+public final class MCPXPCClose: NSObject, NSSecureCoding, @unchecked Sendable {
     public static var supportsSecureCoding: Bool { true }
 
     public let schemaVersion: Int

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		053669E35DA0DCCB8C47336D /* KeychainMCPCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E30C11B6C469C0F0B82B58A /* KeychainMCPCredentialStore.swift */; };
+		06660495EC0B90B6222DB7BE /* MCPXPCIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9FB2D01E79AD770BE650FC /* MCPXPCIntegrationTests.swift */; };
 		08013D6C7A447E02B5E80772 /* MCPSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2338B232010CF19E9CC0B0EF /* MCPSettings.swift */; };
 		09D89609C61A47FAA59FAAE8 /* MacCoffeeCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; };
 		0DF483BE7BCF9C91C5AD69D5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 78033B85BB961A3E0A2572CE /* Localizable.strings */; };
@@ -58,6 +59,7 @@
 		657B7B6B1B73BE043F62D3FE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9358E95FF4C20DF0FA97F82D /* Assets.xcassets */; };
 		6BB9FA00674B08127BF7A8CF /* SettingsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5C8ECBEAAF29972964CE15 /* SettingsStoreTests.swift */; };
 		6E84B9A4C80A40833E25D93E /* MCPControlServicing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A96709DF02D8BE5EFDB2F49 /* MCPControlServicing.swift */; };
+		73F15697F88374EB55C0D806 /* MCPXPCConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8976851A0B6C1CA05AEA98A /* MCPXPCConnection.swift */; };
 		748B3532C37B8F8410B25B92 /* LifecycleObserving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C309CF2C5EE4A3ED2DE8EF3 /* LifecycleObserving.swift */; };
 		7836BBF80996BDE1844DE6E9 /* MacCoffeeCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; };
 		783FFC771E685CE54BA2A390 /* LowBatteryPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF0FCEF7F60B545BF37C6AD /* LowBatteryPolicy.swift */; };
@@ -82,18 +84,25 @@
 		9CC27D5B25A1B96D48A32ED0 /* SecurityClientIdentityVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A9C60ED9092B909CCEEF36F /* SecurityClientIdentityVerifier.swift */; };
 		9E07AA5E9D70C778B391538E /* MCPControlService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A308CE4C796B02EC46564A55 /* MCPControlService.swift */; };
 		9F1B8E0162F7E41D463F35E7 /* MCPStatusPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034394AA53CA25C6520FCCB5 /* MCPStatusPublisher.swift */; };
+		9FB9A0FE985A1881F1DC38F1 /* MacCoffeeCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A12B7AE32804896121B52A71 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 78033B85BB961A3E0A2572CE /* Localizable.strings */; };
+		A9701BBF823829366C9961D6 /* MCPXPCConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8976851A0B6C1CA05AEA98A /* MCPXPCConnection.swift */; };
 		AF923D52E64190829CE51444 /* MacCoffeeCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82A246A0DCF736C0A7ACD7F /* MacCoffeeCore.swift */; };
+		B0193F641C2D307E475D8CC7 /* Fakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B307F98231FFABB3C96D453 /* Fakes.swift */; };
 		B1FED5159FB7DFB9F15ACCC3 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C887D4BEB03D4C79748A9B3 /* AppModel.swift */; };
 		B691482671C32DAFC5BD8C31 /* CountdownText.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9EF26D6E607D0E8D9E41C5 /* CountdownText.swift */; };
 		B6B1EA4E847FB1EA12D650BE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A7BB528782F50E32C7F3EAF8 /* PrivacyInfo.xcprivacy */; };
+		B6CE159A344EE78F537C6442 /* MCPXPCListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A75B78FF9008269B541AE5 /* MCPXPCListener.swift */; };
 		B7E19372890442C7DA7B3A03 /* MCPError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D7BAFA8B19547A68010116F /* MCPError.swift */; };
 		B843C8577EA694BE4A0FC0FA /* PlatformAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB165D15D8DE850D6BBA56CC /* PlatformAdapterTests.swift */; };
+		B846175B6981678EBE8E3141 /* FakePowerAssertionDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B842E9D4C6BD4DC510EFDB80 /* FakePowerAssertionDriver.swift */; };
 		B9A53C66585491208A5DD67C /* MenuBarLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51D644690E4909F3FDA025EB /* MenuBarLabel.swift */; };
 		BDA9122FF17BF0EF797EED35 /* MCPRuntimeBehaviorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D441E4415532329236777B /* MCPRuntimeBehaviorTests.swift */; };
 		C05AE9512260D824C6801292 /* PowerAssertionManaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = E525A34EC2464A276FC490AC /* PowerAssertionManaging.swift */; };
 		C1C6567B68AB69BAC0E91776 /* MacCoffeeCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C65162BC88AAAAB67919F703 /* MCPXPCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74BF6026B1B734245DC230 /* MCPXPCClient.swift */; };
 		C9F491262B5B61D7C2F9775D /* MCPRequestCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24711E37717F84C9BC4F8764 /* MCPRequestCache.swift */; };
+		CEBF5D7C577758011771DFBF /* MCPXPCListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A75B78FF9008269B541AE5 /* MCPXPCListener.swift */; };
 		D05516C41E282C47FA24792E /* MCPActivityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B02A4FAD8A5BDF9B18AA04 /* MCPActivityStore.swift */; };
 		D2D26835DE48FDB8BAB3C9BF /* MCPPairingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC33B70A75BC321EB0ACEB0 /* MCPPairingCoordinator.swift */; };
 		D359AC96C98CB5E7BAD57550 /* DomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7FC0CED383B614B3C223EF /* DomainTests.swift */; };
@@ -102,6 +111,7 @@
 		DB02EA865BC12B709E32D3C2 /* ModePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC90BF616FF690AEBE1FE77E /* ModePicker.swift */; };
 		DFC9C6B53DEA1B171F7BCC2D /* CompositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C256390BEE444053ABAA65 /* CompositionTests.swift */; };
 		E04F9B0429AC39FCE17F4B37 /* ReleaseAssetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A942054AF42C60B466C5A2B3 /* ReleaseAssetTests.swift */; };
+		E083DC8FA3116C414B928D98 /* MacCoffeeCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */; };
 		E97F170C6A2FDF527534B215 /* PowerAssertionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCCF65F6050BB0DD681FEF98 /* PowerAssertionManagerTests.swift */; };
 		ED129BB71A387CFDF181D401 /* LaunchAtLoginManaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 194D8817D619E72C0E39DF9B /* LaunchAtLoginManaging.swift */; };
 		F0E4E511E52ED9970E5D6C2D /* SMAppLaunchAtLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B256B54921413DBF44BB34E /* SMAppLaunchAtLoginManager.swift */; };
@@ -121,6 +131,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8312A6E6223341D60ECBEC53;
 			remoteInfo = MacCoffeeDirect;
+		};
+		65E179655D286D3A94F758DA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A71D42048F48FBC2CEFB365C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 75BB45C9B49C9CEB8446A30B;
+			remoteInfo = MacCoffeeCore;
 		};
 		D17FC42AAA518E96A678BCDD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -153,6 +170,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		4C0A37BC5213F3273476885A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				9FB9A0FE985A1881F1DC38F1 /* MacCoffeeCore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5E444967A09B0C1DF2B5AF21 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -222,6 +250,7 @@
 		25C029E2872509F20589800A /* MCPCredentialStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPCredentialStoring.swift; sourceTree = "<group>"; };
 		2DC7DF7700F935B5CCBB96E5 /* MCPControlServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPControlServiceTests.swift; sourceTree = "<group>"; };
 		2E30C11B6C469C0F0B82B58A /* KeychainMCPCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainMCPCredentialStore.swift; sourceTree = "<group>"; };
+		2F9FB2D01E79AD770BE650FC /* MCPXPCIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPXPCIntegrationTests.swift; sourceTree = "<group>"; };
 		34FEB1454B31E2357E123DE2 /* MacCoffeeScreenshots.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacCoffeeScreenshots.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37D722A2CD1809F7EC89DF67 /* IOKitPowerAssertionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOKitPowerAssertionManager.swift; sourceTree = "<group>"; };
 		38D698D77A2FD5F0B873AC6A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -232,6 +261,7 @@
 		4634EF20BE0718DB6BA7B949 /* Direct.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Direct.xcconfig; sourceTree = "<group>"; };
 		470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MacCoffeeCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		47C256390BEE444053ABAA65 /* CompositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompositionTests.swift; sourceTree = "<group>"; };
+		48A75B78FF9008269B541AE5 /* MCPXPCListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPXPCListener.swift; sourceTree = "<group>"; };
 		48B643F8AF6B5D3C9F9EF0AF /* MacCoffeeQuitCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacCoffeeQuitCommands.swift; sourceTree = "<group>"; };
 		4BA3F16B212877CB6CE6A472 /* ParentProcessIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentProcessIdentity.swift; sourceTree = "<group>"; };
 		51D644690E4909F3FDA025EB /* MenuBarLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabel.swift; sourceTree = "<group>"; };
@@ -239,6 +269,7 @@
 		5BC452DF0E5C8DF5FE3AFCDC /* LowBatteryPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowBatteryPolicyTests.swift; sourceTree = "<group>"; };
 		5D76E91559DD558AEF50FB2C /* SparkleUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkleUpdater.swift; sourceTree = "<group>"; };
 		621BA2020D7E00925D4251DA /* UserDefaultsSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsSettingsStore.swift; sourceTree = "<group>"; };
+		63063FF894EB902FB2E121F0 /* MacCoffeeIntegrationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacCoffeeIntegrationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6842C207385DE3C94945B48A /* QuitConfirmationCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitConfirmationCoordinatorTests.swift; sourceTree = "<group>"; };
 		68CC44D26FE932D1B3B26B05 /* LocalizationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationController.swift; sourceTree = "<group>"; };
 		6A3AB23774EE6FDE8AA3572C /* SettingsStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStoring.swift; sourceTree = "<group>"; };
@@ -269,6 +300,7 @@
 		A8B6125894284D725E2B32B9 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		A942054AF42C60B466C5A2B3 /* ReleaseAssetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseAssetTests.swift; sourceTree = "<group>"; };
 		AB165D15D8DE850D6BBA56CC /* PlatformAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformAdapterTests.swift; sourceTree = "<group>"; };
+		AB74BF6026B1B734245DC230 /* MCPXPCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPXPCClient.swift; sourceTree = "<group>"; };
 		ABF9FD2766D808837E3AE52B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		AC288A6517BA4411F2353161 /* WakeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeMode.swift; sourceTree = "<group>"; };
 		AC90BF616FF690AEBE1FE77E /* ModePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModePicker.swift; sourceTree = "<group>"; };
@@ -281,6 +313,7 @@
 		BE25748D5CC981F842795247 /* DurationPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationPicker.swift; sourceTree = "<group>"; };
 		BFBECE1EBECCC6116C200421 /* RuntimeLocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeLocalizationTests.swift; sourceTree = "<group>"; };
 		C274EDF3A93569D86FE5BEC0 /* MCPXPCCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPXPCCodec.swift; sourceTree = "<group>"; };
+		C8976851A0B6C1CA05AEA98A /* MCPXPCConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPXPCConnection.swift; sourceTree = "<group>"; };
 		C969EF5E001651BE0474D10A /* NotificationSending.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSending.swift; sourceTree = "<group>"; };
 		C97FB72D5D792B637F69C005 /* QuitConfirmationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitConfirmationCoordinator.swift; sourceTree = "<group>"; };
 		CE6386A3BEB15FE1E1F45F51 /* WakeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeSession.swift; sourceTree = "<group>"; };
@@ -336,6 +369,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				7836BBF80996BDE1844DE6E9 /* MacCoffeeCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A0623F1D60C8AEA5BABE6CD0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E083DC8FA3116C414B928D98 /* MacCoffeeCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -397,6 +438,7 @@
 		1552903AE789147FF1C5556B /* Direct */ = {
 			isa = PBXGroup;
 			children = (
+				D840643868607221D06A2296 /* MCP */,
 				8CF4D1F30E6C04D67DF594A2 /* Security */,
 				5941C5C1AC867972C6CCCFDD /* MacCoffeeDirectApp.swift */,
 				5D76E91559DD558AEF50FB2C /* SparkleUpdater.swift */,
@@ -412,6 +454,7 @@
 				1473B9DE0FB8D0F8F3C52E77 /* MacCoffeeAppStore.app */,
 				470BAA8731DBEB0A930C9D6D /* MacCoffeeCore.framework */,
 				F4CCE3B663849BE1E1F02E53 /* MacCoffeeDirect.app */,
+				63063FF894EB902FB2E121F0 /* MacCoffeeIntegrationTests.xctest */,
 				34FEB1454B31E2357E123DE2 /* MacCoffeeScreenshots.app */,
 				FB719DFEBF09A4B7A1C98EB7 /* MacCoffeeTests.xctest */,
 				87316A786DADC3D5F5D02BFE /* MacCoffeeUITests.xctest */,
@@ -429,6 +472,15 @@
 			path = XPC;
 			sourceTree = "<group>";
 		};
+		45D0E94EA02A295D1A6E72BE /* XPC */ = {
+			isa = PBXGroup;
+			children = (
+				AB74BF6026B1B734245DC230 /* MCPXPCClient.swift */,
+			);
+			name = XPC;
+			path = Sources/MCPHelper/XPC;
+			sourceTree = "<group>";
+		};
 		4838CB8FD4BE1342E9AE7DD7 /* Config */ = {
 			isa = PBXGroup;
 			children = (
@@ -436,6 +488,15 @@
 				4634EF20BE0718DB6BA7B949 /* Direct.xcconfig */,
 			);
 			path = Config;
+			sourceTree = "<group>";
+		};
+		64431FCDBDC87A028DF8BE89 /* Integration */ = {
+			isa = PBXGroup;
+			children = (
+				2F9FB2D01E79AD770BE650FC /* MCPXPCIntegrationTests.swift */,
+			);
+			name = Integration;
+			path = Tests/Integration;
 			sourceTree = "<group>";
 		};
 		6883A5D726CF4A9746B6A8F5 /* Direct */ = {
@@ -563,6 +624,15 @@
 			path = Sources/AppStore;
 			sourceTree = "<group>";
 		};
+		D840643868607221D06A2296 /* MCP */ = {
+			isa = PBXGroup;
+			children = (
+				C8976851A0B6C1CA05AEA98A /* MCPXPCConnection.swift */,
+				48A75B78FF9008269B541AE5 /* MCPXPCListener.swift */,
+			);
+			path = MCP;
+			sourceTree = "<group>";
+		};
 		EAC51325EA5B7883FA72AD2D /* Localization */ = {
 			isa = PBXGroup;
 			children = (
@@ -581,12 +651,14 @@
 				C8D347C6EDEAE8F589718B5F /* Core */,
 				6883A5D726CF4A9746B6A8F5 /* Direct */,
 				1552903AE789147FF1C5556B /* Direct */,
+				64431FCDBDC87A028DF8BE89 /* Integration */,
 				86AE0034D151B16DB811D62E /* Screenshots */,
 				AAD70DFEDFE7503EA2A04FD6 /* Security */,
 				96BBD9E6917EE4E74C3E3968 /* Shared */,
 				F9BC7E60DDAAA1F63587E78F /* Support */,
 				F5E3A29882CE73E374198714 /* UI */,
 				01EB2F38D26D9A0E22D43CA9 /* Unit */,
+				45D0E94EA02A295D1A6E72BE /* XPC */,
 				17795BA9B87BE2AB77D923F1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -662,6 +734,26 @@
 			productName = MacCoffeeScreenshots;
 			productReference = 34FEB1454B31E2357E123DE2 /* MacCoffeeScreenshots.app */;
 			productType = "com.apple.product-type.application";
+		};
+		2D528039EEF8070352A9D13D /* MacCoffeeIntegrationTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9BB90A5908A65C189CCEB410 /* Build configuration list for PBXNativeTarget "MacCoffeeIntegrationTests" */;
+			buildPhases = (
+				272E47914C806154915F84E9 /* Sources */,
+				A0623F1D60C8AEA5BABE6CD0 /* Frameworks */,
+				4C0A37BC5213F3273476885A /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5B933952B1703F240966B660 /* PBXTargetDependency */,
+			);
+			name = MacCoffeeIntegrationTests;
+			packageProductDependencies = (
+			);
+			productName = MacCoffeeIntegrationTests;
+			productReference = 63063FF894EB902FB2E121F0 /* MacCoffeeIntegrationTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		56F6CDF1A96FF15BCAE62FF6 /* MacCoffeeTests */ = {
 			isa = PBXNativeTarget;
@@ -773,6 +865,9 @@
 					120079FEB7745EDC143FB53A = {
 						ProvisioningStyle = Automatic;
 					};
+					2D528039EEF8070352A9D13D = {
+						ProvisioningStyle = Automatic;
+					};
 					56F6CDF1A96FF15BCAE62FF6 = {
 						ProvisioningStyle = Automatic;
 					};
@@ -820,6 +915,7 @@
 				D2ADA9BDAE25C4AFF6405A80 /* MacCoffeeAppStore */,
 				56F6CDF1A96FF15BCAE62FF6 /* MacCoffeeTests */,
 				BB7970E7F588AB0EE0A7285E /* MacCoffeeUITests */,
+				2D528039EEF8070352A9D13D /* MacCoffeeIntegrationTests */,
 				120079FEB7745EDC143FB53A /* MacCoffeeScreenshots */,
 			);
 		};
@@ -859,6 +955,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		272E47914C806154915F84E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B846175B6981678EBE8E3141 /* FakePowerAssertionDriver.swift in Sources */,
+				B0193F641C2D307E475D8CC7 /* Fakes.swift in Sources */,
+				C65162BC88AAAAB67919F703 /* MCPXPCClient.swift in Sources */,
+				73F15697F88374EB55C0D806 /* MCPXPCConnection.swift in Sources */,
+				06660495EC0B90B6222DB7BE /* MCPXPCIntegrationTests.swift in Sources */,
+				B6CE159A344EE78F537C6442 /* MCPXPCListener.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2A71C25BC1E86C466F07F546 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -981,6 +1090,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				463BBB4179D3C12F2599A36E /* KeychainMCPCredentialStore.swift in Sources */,
+				A9701BBF823829366C9961D6 /* MCPXPCConnection.swift in Sources */,
+				CEBF5D7C577758011771DFBF /* MCPXPCListener.swift in Sources */,
 				21048DCEE6A4A9AFC7AC68DD /* MacCoffeeDirectApp.swift in Sources */,
 				9CC27D5B25A1B96D48A32ED0 /* SecurityClientIdentityVerifier.swift in Sources */,
 				0EBB711100D2BE796069EA4C /* SparkleUpdater.swift in Sources */,
@@ -995,6 +1106,11 @@
 			isa = PBXTargetDependency;
 			target = 75BB45C9B49C9CEB8446A30B /* MacCoffeeCore */;
 			targetProxy = E2365A0544A2EFE77B8D4D0D /* PBXContainerItemProxy */;
+		};
+		5B933952B1703F240966B660 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 75BB45C9B49C9CEB8446A30B /* MacCoffeeCore */;
+			targetProxy = 65E179655D286D3A94F758DA /* PBXContainerItemProxy */;
 		};
 		71BD11B33B24E8A0DA2B5170 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1060,6 +1176,22 @@
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
+		};
+		08A1D3EC2F163CDC5E6A647A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.rekurt.maccoffee.integration-tests";
+				SDKROOT = macosx;
+			};
+			name = Debug;
 		};
 		0C26ED50258E4D112FD6A81A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1340,6 +1472,22 @@
 			};
 			name = Debug;
 		};
+		EC17EA452618F26741F8D167 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.rekurt.maccoffee.integration-tests";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		FCDD7E1775FCA909419237BC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 4634EF20BE0718DB6BA7B949 /* Direct.xcconfig */;
@@ -1394,6 +1542,15 @@
 			buildConfigurations = (
 				2D8272FED3CCE30FC0734A67 /* Debug */,
 				B46B8DCCF58D7331E9BC62B2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9BB90A5908A65C189CCEB410 /* Build configuration list for PBXNativeTarget "MacCoffeeIntegrationTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08A1D3EC2F163CDC5E6A647A /* Debug */,
+				EC17EA452618F26741F8D167 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

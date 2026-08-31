@@ -100,6 +100,21 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: MacCoffeeDirect
 
+  MacCoffeeIntegrationTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/Integration
+      - Tests/Support
+      - Sources/Direct/MCP
+      - Sources/MCPHelper/XPC
+    dependencies:
+      - target: MacCoffeeCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.integration-tests
+        GENERATE_INFOPLIST_FILE: YES
+
   MacCoffeeScreenshots:
     type: application
     platform: macOS
@@ -159,6 +174,17 @@ schemes:
       macroExpansion: MacCoffeeDirect
       targets:
         - MacCoffeeUITests
+
+  MacCoffeeIntegrationTests:
+    build:
+      targets:
+        MacCoffeeCore: all
+        MacCoffeeIntegrationTests: [test]
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - MacCoffeeIntegrationTests
 
   MacCoffeeScreenshots:
     build:

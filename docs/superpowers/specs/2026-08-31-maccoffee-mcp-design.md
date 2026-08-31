@@ -98,12 +98,15 @@ AppModel (single source of truth)
 
 ### 4.2 XPC endpoint lifecycle
 
-- When MCP is enabled, the Direct app creates an anonymous `NSXPCListener` and publishes an archived listener endpoint atomically under `~/Library/Application Support/Mac Coffee/MCP/`.
-- The directory is mode `0700`; the endpoint file is mode `0600`.
-- The app removes the endpoint file when MCP is disabled and during orderly termination.
-- The helper never launches the app. A missing, stale, or unreachable endpoint maps to `APP_NOT_RUNNING` unless the helper can prove the app is running but MCP is disabled, which maps to `MCP_DISABLED`.
-- The helper watches the endpoint directory and reconnects when the app starts or republishes the endpoint.
+- The Direct bundle contains a minimal `MacCoffeeMCPBroker.xpc` rendezvous service. It owns no application data, trust records, private keys, or command implementation.
+- When MCP is enabled, the Direct app creates an anonymous `NSXPCListener` and registers its `NSXPCListenerEndpoint` with the broker over an existing XPC connection. The app keeps that registration connection alive for exactly the listener lifetime.
+- The broker binds registration to the validated Mac Coffee app connection and clears it on invalidation, explicit disable, or orderly termination.
+- The helper asks the broker for the current endpoint and then connects directly to the app. Pairing, authentication, status, commands, events, deadlines, and cancellation never transit the broker.
+- The helper never launches Mac Coffee. An absent or invalidated app endpoint maps to `APP_NOT_RUNNING`; an already-connected helper receives `MCP_DISABLED` when the app disables the integration.
+- Reconnect fetches a fresh endpoint from the broker with bounded exponential backoff and jitter and never changes wake-session state.
 - Every connection is authenticated before any state or command request is accepted.
+
+This broker is required by the macOS XPC object-capability model. `NSXPCListenerEndpoint` is a live Mach-port right that Apple supports sending only over an existing XPC connection; it cannot be archived to disk. Likewise, `NSXPCListener(machServiceName:)` is only valid for names advertised by `launchd`, so an application cannot publish an arbitrary per-launch Mach service name. The broker is the smallest supported rendezvous layer and the authenticated app connection remains the sole carrier of application data.
 
 ## 5. Public MCP contract
 
@@ -242,7 +245,7 @@ Authentication is repeated for every XPC connection. A successful old connection
 
 - Settings lists clients individually with display name, verification status, last seen, and revoke action.
 - Revoking a client immediately closes its active connections and subscriptions.
-- Disabling MCP closes all helper connections, removes the endpoint, and prevents requests without deleting trusted-client records.
+- Disabling MCP closes all helper connections, unregisters the broker endpoint, and prevents requests without deleting trusted-client records.
 - Trust can be deleted explicitly using `Forget client` or `Forget all clients`.
 
 ### 6.6 IPC hardening
@@ -355,7 +358,7 @@ Documentation set:
 - The Direct app build embeds and signs `MacCoffeeMCP` as nested code before the outer app signature.
 - The helper version and XPC contract version must be compatible with the containing app.
 - Direct archives, DMGs, Sparkle artifacts, Hardened Runtime validation, and notarization checks include the helper.
-- App Store archives fail validation if the helper, MCP SDK, endpoint assets, or Direct-only UI/resources are present.
+- App Store archives fail validation if the helper, broker XPC service, MCP SDK, or Direct-only UI/resources are present.
 - A launch smoke test verifies the Direct app, the helper's stdio initialization, `APP_NOT_RUNNING`, enabled/running behavior, pairing, a read, a mutation, revocation, and clean shutdown.
 - Release validation verifies only `en-US`, `ru`, and `zh-Hans` metadata while continuing to verify all eight app localization resource sets.
 
@@ -378,7 +381,7 @@ Implementation follows test-driven development. A failing test precedes each pro
 ### 13.2 Integration tests
 
 - Helper ↔ anonymous NSXPC endpoint authentication.
-- App absent/stale endpoint maps to `APP_NOT_RUNNING` without launching it.
+- App absent/invalidated endpoint maps to `APP_NOT_RUNNING` without launching it.
 - MCP disabled maps to `MCP_DISABLED`.
 - Trusted request reaches the single `AppModel` and produces one side effect.
 - status subscriptions follow UI-originated and MCP-originated state changes.

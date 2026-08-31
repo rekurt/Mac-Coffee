@@ -320,6 +320,13 @@ final class MCPXPCTests: XCTestCase {
                 ofReply: false
             )).contains(MCPXPCEvent.self)
         )
+        XCTAssertTrue(
+            NSSet(set: callbacks.classes(
+                for: #selector(MCPXPCHelperCallback.closed(_:withReply:)),
+                argumentIndex: 0,
+                ofReply: false
+            )).contains(MCPXPCClose.self)
+        )
     }
 
     private func roundTrip<T: NSObject & NSSecureCoding>(_ value: T) throws -> T {

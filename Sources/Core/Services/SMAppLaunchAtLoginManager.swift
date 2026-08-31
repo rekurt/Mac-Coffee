@@ -13,7 +13,7 @@ public final class SMAppLaunchAtLoginManager: LaunchAtLoginManaging {
         case .requiresApproval:
             .requiresApproval
         case .notFound:
-            .unavailable
+            .disabled
         @unknown default:
             .unavailable
         }

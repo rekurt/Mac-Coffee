@@ -268,26 +268,37 @@ Commit as `feat(mcp): bridge helper with authenticated xpc`.
 
 - Modify: `project.yml`
 - Modify: `MacCoffee.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`
+- Create: `Sources/MCPBrokerShared/MCPBrokerProtocol.swift`
+- Create: `Sources/MCPBrokerShared/MCPBrokerReplyGate.swift`
+- Create: `Sources/MCPBroker/{main,MCPBrokerRegistry,MCPBrokerConnection,MCPBrokerListenerDelegate,MCPBrokerPeerValidator}.swift`
+- Create: `Sources/Direct/MCP/MCPBrokerRegistrar.swift`
+- Create: `Sources/MCPHelper/XPC/MCPBrokerEndpointProvider.swift`
+- Create: `Resources/MCPBroker/Info.plist`
 - Create: `Sources/MCPHelper/main.swift`
 - Create: `Sources/MCPHelper/MCPServerAdapter.swift`
 - Create: `Sources/MCPHelper/MCPToolAdapter.swift`
 - Create: `Sources/MCPHelper/MCPResourceAdapter.swift`
 - Create: `Sources/MCPHelper/Diagnostics.swift`
 - Test: `Tests/Integration/MCPStdioProtocolTests.swift`
+- Test: `Tests/Integration/MCPBrokerTests.swift`
 
-**Step 1: Pin the dependency and create the target**
+**Step 1: Add the minimal bundled rendezvous broker**
+
+Create a Direct-only XPC service that accepts endpoint registration only from the containing Mac Coffee app and endpoint lookup only from its bundled helper. Bind registration to the app connection, reject replacement by another live connection, clear on invalidation, and transfer only the anonymous `NSXPCListenerEndpoint`. Prove the transfer over a real anonymous XPC test channel. The broker must own no app data, trust state, command logic, or credentials.
+
+**Step 2: Pin the dependency and create the target**
 
 Add `https://github.com/modelcontextprotocol/swift-sdk` at exact `0.12.1`. Create command-line target `MacCoffeeMCP`, macOS 13, Swift 6, product name `MacCoffeeMCP`, `SKIP_INSTALL=YES`.
 
-**Step 2: Write failing process-level protocol tests**
+**Step 3: Write failing process-level protocol tests**
 
 Launch the built helper with pipes. Test initialize/version negotiation, list tools/resources, status read, malformed framing, cancellation, unavailable app error, stderr diagnostics, and that every stdout line/frame parses as protocol output.
 
-**Step 3: Implement the SDK adapter**
+**Step 4: Implement the SDK adapter**
 
 Expose the approved six tools, three resources, and status subscriptions. Convert MCP SDK content to/from versioned Core DTOs. The adapter must contain no app business rules.
 
-**Step 4: Run tests and commit**
+**Step 5: Run tests and commit**
 
 Commit as `feat(mcp): add stdio helper using official sdk`.
 
@@ -305,7 +316,7 @@ Commit as `feat(mcp): add stdio helper using official sdk`.
 
 **Step 1: Write failing build-structure tests**
 
-Assert Direct contains `Contents/Helpers/MacCoffeeMCP`, nested helper signing precedes outer signing, App Store has no helper/MCP SDK/MCP Direct resources, and exact helper/app version compatibility values exist.
+Assert Direct contains `Contents/Helpers/MacCoffeeMCP` and `Contents/XPCServices/MacCoffeeMCPBroker.xpc`, nested helper/service signing precedes outer signing, App Store has no helper/broker/MCP SDK/MCP Direct resources, and exact helper/app version compatibility values exist.
 
 **Step 2: Add target dependency/copy phase**
 

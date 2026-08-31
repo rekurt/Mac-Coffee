@@ -40,6 +40,7 @@ targets:
     platform: macOS
     sources:
       - Sources/Direct
+      - Sources/MCPBrokerShared
       - path: Resources/Shared
         buildPhase: resources
       - path: Resources/Direct
@@ -48,6 +49,8 @@ targets:
         buildPhase: resources
     dependencies:
       - target: MacCoffeeCore
+      - target: MacCoffeeMCPBroker
+        embed: true
       - package: Sparkle
     configFiles:
       Debug: Config/Direct.xcconfig
@@ -108,12 +111,30 @@ targets:
       - Tests/Support
       - Sources/Direct/MCP
       - Sources/MCPHelper/XPC
+      - Sources/MCPBrokerShared
+      - path: Sources/MCPBroker
+        excludes:
+          - main.swift
     dependencies:
       - target: MacCoffeeCore
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.integration-tests
         GENERATE_INFOPLIST_FILE: YES
+
+  MacCoffeeMCPBroker:
+    type: xpc-service
+    platform: macOS
+    sources:
+      - Sources/MCPBroker
+      - Sources/MCPBrokerShared
+    info:
+      path: Resources/MCPBroker/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.mcp-broker
+        PRODUCT_NAME: MacCoffeeMCPBroker
+        SKIP_INSTALL: YES
 
   MacCoffeeScreenshots:
     type: application

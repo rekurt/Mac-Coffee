@@ -67,3 +67,6 @@
 "about.versionFormat" = "バージョン %@（%@）";
 "error.launchAtLogin" = "Mac Coffee はログイン時に起動の設定を更新できませんでした。もう一度お試しください。";
 "error.generic" = "問題が発生しました。もう一度お試しください。";
+"mcp.status.off" = "Mac Coffee はオフです。";
+"mcp.status.system" = "Mac Coffee が Mac のスリープを防いでいます。";
+"mcp.status.display" = "Mac Coffee が Mac とディスプレイのスリープを防いでいます。";

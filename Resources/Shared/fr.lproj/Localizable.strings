@@ -67,3 +67,6 @@
 "about.versionFormat" = "Version %@ (%@)";
 "error.launchAtLogin" = "Mac Coffee n’a pas pu mettre à jour l’ouverture à la connexion. Réessayez.";
 "error.generic" = "Un problème est survenu. Réessayez.";
+"mcp.status.off" = "Mac Coffee est désactivé.";
+"mcp.status.system" = "Mac Coffee garde votre Mac éveillé.";
+"mcp.status.display" = "Mac Coffee garde votre Mac et son écran éveillés.";

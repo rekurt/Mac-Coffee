@@ -176,6 +176,54 @@ final class MCPBrokerTests: XCTestCase {
     XCTAssertNotNil(recoveredEndpoint)
     await registrar.unregister()
   }
+
+  func testRegistrarRetriesWhenRecoveredConnectionDropsBeforeCompletion() async throws {
+    let recovery = RegistrarRecoveryStore()
+    let delegate = MCPBrokerListenerDelegate { _ in
+      recovery.succeeded ? .helper : .app
+    }
+    let brokerListener = NSXPCListener.anonymous()
+    brokerListener.delegate = delegate
+    brokerListener.activate()
+    defer { brokerListener.invalidate() }
+
+    let connections = RegistrarConnectionStore()
+    let registrar = MCPBrokerRegistrar(
+      connectionFactory: {
+        let connection = NSXPCConnection(listenerEndpoint: brokerListener.endpoint)
+        connections.append(connection)
+        return connection
+      },
+      recoveryAttemptDidRegister: { connection in
+        guard connections.count == 2 else { return }
+        connection.invalidate()
+        connection.invalidationHandler?()
+      }
+    )
+    registrar.setRecoveryHandlers(
+      onStarted: {},
+      onCompleted: { recovery.record($0) }
+    )
+    let provider = MCPBrokerEndpointProvider {
+      NSXPCConnection(listenerEndpoint: brokerListener.endpoint)
+    }
+    let appListener = NSXPCListener.anonymous()
+
+    try await registrar.register(appListener.endpoint)
+    try XCTUnwrap(connections.first).invalidate()
+
+    let deadline = ContinuousClock.now + .seconds(3)
+    while !recovery.succeeded, ContinuousClock.now < deadline {
+      try await Task.sleep(for: .milliseconds(20))
+    }
+
+    XCTAssertTrue(recovery.succeeded)
+    XCTAssertEqual(recovery.completionCount, 1)
+    XCTAssertEqual(connections.count, 3)
+    let recoveredEndpoint = try await provider.currentEndpoint()
+    XCTAssertNotNil(recoveredEndpoint)
+    await registrar.unregister()
+  }
 }
 
 private final class BrokerRoleQueue: @unchecked Sendable {
@@ -208,5 +256,27 @@ private final class RegistrarConnectionStore: @unchecked Sendable {
 
   func append(_ connection: NSXPCConnection) {
     lock.withLock { connections.append(connection) }
+  }
+}
+
+private final class RegistrarRecoveryStore: @unchecked Sendable {
+  private let lock = NSLock()
+  private var results: [Result<Void, MCPBrokerRegistrarError>] = []
+
+  var succeeded: Bool {
+    lock.withLock {
+      results.contains { result in
+        if case .success = result { return true }
+        return false
+      }
+    }
+  }
+
+  var completionCount: Int {
+    lock.withLock { results.count }
+  }
+
+  func record(_ result: Result<Void, MCPBrokerRegistrarError>) {
+    lock.withLock { results.append(result) }
   }
 }

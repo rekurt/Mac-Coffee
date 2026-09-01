@@ -28,6 +28,7 @@ public final class MCPBrokerRegistrar: @unchecked Sendable {
   }
 
   private let connectionFactory: ConnectionFactory
+  private let recoveryAttemptDidRegister: (NSXPCConnection) -> Void
   private let lock = NSLock()
   private var registration: Registration?
   private var recoveryHandlers: RecoveryHandlers?
@@ -38,6 +39,15 @@ public final class MCPBrokerRegistrar: @unchecked Sendable {
     }
   ) {
     self.connectionFactory = connectionFactory
+    recoveryAttemptDidRegister = { _ in }
+  }
+
+  init(
+    connectionFactory: @escaping ConnectionFactory,
+    recoveryAttemptDidRegister: @escaping (NSXPCConnection) -> Void
+  ) {
+    self.connectionFactory = connectionFactory
+    self.recoveryAttemptDidRegister = recoveryAttemptDidRegister
   }
 
   public func register(_ endpoint: NSXPCListenerEndpoint) async throws {
@@ -53,7 +63,7 @@ public final class MCPBrokerRegistrar: @unchecked Sendable {
       )
     }
     do {
-      try await establishConnection(endpoint: endpoint, generation: generation)
+      _ = try await establishConnection(endpoint: endpoint, generation: generation)
     } catch {
       clearRegistration(generation: generation)
       throw error
@@ -75,7 +85,7 @@ public final class MCPBrokerRegistrar: @unchecked Sendable {
   private func establishConnection(
     endpoint: NSXPCListenerEndpoint,
     generation: UUID
-  ) async throws {
+  ) async throws -> ActiveConnection {
     let connection = connectionFactory()
     let token = UUID()
     connection.remoteObjectInterface = MCPBrokerInterfaces.service()
@@ -126,6 +136,7 @@ public final class MCPBrokerRegistrar: @unchecked Sendable {
       connection.invalidate()
       throw error
     }
+    return ActiveConnection(token: token, connection: connection)
   }
 
   public func unregister() async {
@@ -215,14 +226,27 @@ public final class MCPBrokerRegistrar: @unchecked Sendable {
       }
       guard isCurrent(generation: generation) else { return }
       do {
-        try await establishConnection(endpoint: endpoint, generation: generation)
-        finishRecovery(generation: generation, result: .success(()))
-        return
+        let established = try await establishConnection(
+          endpoint: endpoint,
+          generation: generation
+        )
+        recoveryAttemptDidRegister(established.connection)
+        if finishRecovery(
+          generation: generation,
+          activeToken: established.token,
+          result: .success(())
+        ) {
+          return
+        }
       } catch {
         continue
       }
     }
-    finishRecovery(generation: generation, result: .failure(.unavailable))
+    _ = finishRecovery(
+      generation: generation,
+      activeToken: nil,
+      result: .failure(.unavailable)
+    )
   }
 
   private func isCurrent(generation: UUID) -> Bool {
@@ -231,16 +255,24 @@ public final class MCPBrokerRegistrar: @unchecked Sendable {
 
   private func finishRecovery(
     generation: UUID,
+    activeToken: UUID?,
     result: Result<Void, MCPBrokerRegistrarError>
-  ) {
-    let onCompleted = lock.withLock {
-      () -> (@Sendable (Result<Void, MCPBrokerRegistrarError>) -> Void)? in
-      guard var current = registration, current.generation == generation else { return nil }
+  ) -> Bool {
+    let outcome = lock.withLock {
+      () -> (Bool, (@Sendable (Result<Void, MCPBrokerRegistrarError>) -> Void)?) in
+      guard var current = registration, current.generation == generation else {
+        return (false, nil)
+      }
+      if let activeToken, current.active?.token != activeToken {
+        return (false, nil)
+      }
       current.isRecovering = false
       registration = current
-      return recoveryHandlers?.onCompleted
+      return (true, recoveryHandlers?.onCompleted)
     }
-    onCompleted?(result)
+    guard outcome.0 else { return false }
+    outcome.1?(result)
+    return true
   }
 
   private static func map(_ code: MCPBrokerErrorCode) -> MCPBrokerRegistrarError {

@@ -235,7 +235,15 @@ struct CodexConfigurationPlanner {
         if !isTable { return false }
         continue
       }
-      if arrayDepth == 0 && inlineTableDepth == 0 && !line.contains("=") { return false }
+      if arrayDepth == 0 && inlineTableDepth == 0 {
+        guard let separator = assignmentSeparator(in: line) else { return false }
+        let key = String(line[..<separator])
+        let value = String(line[line.index(after: separator)...])
+          .trimmingCharacters(in: .whitespaces)
+        guard parseKeyPath(key) != nil, isConservativelyValidValue(value) else {
+          return false
+        }
+      }
       var quote: Character?
       var escaped = false
       for character in line {
@@ -262,6 +270,41 @@ struct CodexConfigurationPlanner {
       if quote != nil || escaped || inlineTableDepth != 0 { return false }
     }
     return arrayDepth == 0 && inlineTableDepth == 0
+  }
+
+  private static func isConservativelyValidValue(_ value: String) -> Bool {
+    guard let first = value.first else { return false }
+    if first == "\"" || first == "'" {
+      return quotedValueConsumesEntireString(value, quote: first)
+    }
+    if first == "[" || first == "{" { return true }
+    if value == "true" || value == "false" || value == "inf" || value == "nan" {
+      return true
+    }
+    if value == "+inf" || value == "-inf" || value == "+nan" || value == "-nan" {
+      return true
+    }
+    guard first.isNumber || first == "+" || first == "-" else { return false }
+    let allowed = CharacterSet(charactersIn: "0123456789abcdefABCDEFxob_+-.eE:T Z")
+    return value.unicodeScalars.allSatisfy { allowed.contains($0) }
+  }
+
+  private static func quotedValueConsumesEntireString(
+    _ value: String,
+    quote: Character
+  ) -> Bool {
+    var escaped = false
+    for index in value.indices.dropFirst() {
+      let character = value[index]
+      if escaped {
+        escaped = false
+      } else if character == "\\" && quote == "\"" {
+        escaped = true
+      } else if character == quote {
+        return value.index(after: index) == value.endIndex
+      }
+    }
+    return false
   }
 
   private static func removingComment(from line: String) -> String {

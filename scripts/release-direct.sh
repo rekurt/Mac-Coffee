@@ -105,10 +105,17 @@ done
   print -u2 "Direct archive does not expose an HTTPS Sparkle feed."
   exit 65
 }
-if ! /usr/bin/codesign -dvv "$app_path" 2>&1 | /usr/bin/grep -q 'flags=.*runtime'; then
-  print -u2 "Direct archive does not have Hardened Runtime enabled."
-  exit 65
-fi
+runtime_targets=(
+  "$app_path"
+  "$app_path/Contents/Helpers/MacCoffeeMCP"
+  "$app_path/Contents/XPCServices/MacCoffeeMCPBroker.xpc"
+)
+for runtime_target in "$runtime_targets[@]"; do
+  if ! /usr/bin/codesign -dvv "$runtime_target" 2>&1 | /usr/bin/grep -q 'flags=.*runtime'; then
+    print -u2 "$runtime_target does not have Hardened Runtime enabled."
+    exit 65
+  fi
+done
 entitlements_file=$(/usr/bin/mktemp -t maccoffee-direct-entitlements)
 /usr/bin/codesign -d --entitlements - --xml "$app_path" > "$entitlements_file" 2>/dev/null
 if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.get-task-allow' "$entitlements_file" >/dev/null 2>&1; then

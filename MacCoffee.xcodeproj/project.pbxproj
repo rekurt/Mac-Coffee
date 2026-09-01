@@ -1696,6 +1696,7 @@
 		};
 		099F5D2F81FDAFC2A4B183B6 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EDE809E9DDA8D1700D50A842 /* Shared.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Resources/MCPBroker/Info.plist;
@@ -1887,6 +1888,7 @@
 		};
 		8D8F079C3671556F64A60614 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EDE809E9DDA8D1700D50A842 /* Shared.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Resources/MCPBroker/Info.plist;

@@ -207,6 +207,26 @@ final class ReleaseAssetTests: XCTestCase {
         XCTAssertTrue(source.contains("destination: wrapper\n          subpath: Contents/Helpers"))
     }
 
+    func testEmbeddedMCPExecutablesEnableHardenedRuntime() throws {
+        let project = try text(at: repositoryRoot.appendingPathComponent("project.yml"))
+        let releaseScript = try text(
+            at: repositoryRoot.appendingPathComponent("scripts/release-direct.sh")
+        )
+
+        XCTAssertTrue(
+            project.contains(
+                "MacCoffeeMCPBroker:\n" +
+                    "    type: xpc-service\n" +
+                    "    platform: macOS\n" +
+                    "    configFiles:\n" +
+                    "      Debug: Config/Shared.xcconfig\n" +
+                    "      Release: Config/Shared.xcconfig"
+            )
+        )
+        XCTAssertTrue(releaseScript.contains("MacCoffeeMCPBroker.xpc"))
+        XCTAssertTrue(releaseScript.contains("does not have Hardened Runtime enabled"))
+    }
+
     func testMCPSettingsLinkTargetsPublishedSecurityPolicy() throws {
         let source = try text(
             at: repositoryRoot.appendingPathComponent(

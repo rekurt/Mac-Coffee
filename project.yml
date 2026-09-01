@@ -156,6 +156,9 @@ targets:
   MacCoffeeMCPBroker:
     type: xpc-service
     platform: macOS
+    configFiles:
+      Debug: Config/Shared.xcconfig
+      Release: Config/Shared.xcconfig
     sources:
       - Sources/MCPBroker
       - Sources/MCPBrokerShared

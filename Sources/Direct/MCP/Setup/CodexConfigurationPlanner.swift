@@ -235,39 +235,43 @@ struct CodexConfigurationPlanner {
         continue
       }
       if arrayDepth == 0 && !line.contains("=") { return false }
-      var inString = false
+      var quote: Character?
       var escaped = false
       for character in line {
         if escaped {
           escaped = false
-        } else if character == "\\" && inString {
+        } else if character == "\\" && quote == "\"" {
           escaped = true
-        } else if character == "\"" {
-          inString.toggle()
-        } else if !inString && character == "[" {
+        } else if character == quote {
+          quote = nil
+        } else if quote == nil && (character == "\"" || character == "'") {
+          quote = character
+        } else if quote == nil && character == "[" {
           arrayDepth += 1
-        } else if !inString && character == "]" {
+        } else if quote == nil && character == "]" {
           arrayDepth -= 1
           if arrayDepth < 0 { return false }
         }
       }
-      if inString { return false }
+      if quote != nil || escaped { return false }
     }
     return arrayDepth == 0
   }
 
   private static func removingComment(from line: String) -> String {
-    var inString = false
+    var quote: Character?
     var escaped = false
     for index in line.indices {
       let character = line[index]
       if escaped {
         escaped = false
-      } else if character == "\\" && inString {
+      } else if character == "\\" && quote == "\"" {
         escaped = true
-      } else if character == "\"" {
-        inString.toggle()
-      } else if character == "#" && !inString {
+      } else if character == quote {
+        quote = nil
+      } else if quote == nil && (character == "\"" || character == "'") {
+        quote = character
+      } else if character == "#" && quote == nil {
         return String(line[..<index])
       }
     }

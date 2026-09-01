@@ -113,6 +113,20 @@ final class MCPConfigurationTests: XCTestCase {
     }
   }
 
+  func testCodexPlannerRejectsUnterminatedLiteralString() throws {
+    let before = "foo = 'unterminated\n"
+
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .manual)
+    XCTAssertEqual(plan.validation, .invalid)
+    XCTAssertNil(plan.after)
+  }
+
   func testClaudePlannerMergesServerWithoutDroppingUnrelatedEntries() throws {
     let before = try fixture("claude-existing.json")
     let plan = try ClaudeConfigurationPlanner().plan(

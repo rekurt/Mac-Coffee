@@ -39,13 +39,13 @@ jobs:
             -project MacCoffee.xcodeproj \
             -scheme MacCoffeeDirect \
             -configuration Release \
-            -destination 'platform=macOS,arch=arm64' \
+            -destination 'platform=macOS' \
             CODE_SIGNING_ALLOWED=NO
           xcodebuild clean build \
             -project MacCoffee.xcodeproj \
             -scheme MacCoffeeAppStore \
             -configuration Release \
-            -destination 'platform=macOS,arch=arm64' \
+            -destination 'platform=macOS' \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Analyze

@@ -75,4 +75,74 @@ for (const key of new Set(keys)) {
 }
 
 new vm.Script(readFileSync(join(siteRoot, "script.js"), "utf8"));
+
+const css = readFileSync(join(siteRoot, "styles.css"), "utf8");
+const script = readFileSync(join(siteRoot, "script.js"), "utf8");
+
+for (const token of ["prefers-reduced-motion", ":focus-visible", "@media (max-width:", "[data-wake-active=\"true\"]"]) {
+  assert.ok(css.includes(token), `Missing CSS contract ${token}`);
+}
+
+const attributes = new Map();
+const translatedNode = { dataset: { i18n: "heroTitle" }, textContent: "" };
+const ariaNode = { dataset: { i18nAria: "navLabel" }, setAttribute: (name, value) => attributes.set(`aria:${name}`, value) };
+const languageButtons = ["en", "ru"].map((language) => ({
+  dataset: { language },
+  setAttribute: (name, value) => attributes.set(`${language}:${name}`, value),
+}));
+const wakeDemo = { setAttribute: (name, value) => attributes.set(`demo:${name}`, value) };
+const wakeToggle = { setAttribute: (name, value) => attributes.set(`toggle:${name}`, value) };
+const copyStatus = { textContent: "" };
+const codeNode = { innerText: "maccoffee_set_session" };
+const stored = new Map();
+let clipboardText = "";
+
+const runtime = {
+  MacCoffeeTranslations: {
+    en: { heroTitle: "Agents awake", navLabel: "Navigation", copySuccess: "Copied", copied: "Copied" },
+    ru: { heroTitle: "Агенты работают", navLabel: "Навигация", copySuccess: "Скопировано", copied: "Готово" },
+  },
+  document: {
+    documentElement: { lang: "en", classList: { add() {} } },
+    addEventListener() {},
+    querySelectorAll(selector) {
+      if (selector === "[data-i18n]") return [translatedNode];
+      if (selector === "[data-i18n-aria]") return [ariaNode];
+      if (selector === "[data-language]") return languageButtons;
+      return [];
+    },
+    querySelector(selector) {
+      return {
+        "#wake-demo": wakeDemo,
+        "#wake-toggle": wakeToggle,
+        "#copy-status": copyStatus,
+        "#code": codeNode,
+      }[selector] ?? null;
+    },
+  },
+  localStorage: {
+    getItem: (key) => stored.get(key) ?? null,
+    setItem: (key, value) => stored.set(key, value),
+  },
+  navigator: { clipboard: { writeText: async (value) => { clipboardText = value; } } },
+  IntersectionObserver: class { observe() {} unobserve() {} },
+  setTimeout: (callback) => callback(),
+};
+
+vm.runInNewContext(script, runtime);
+assert.ok(runtime.MacCoffeeSite, "Missing interaction API");
+runtime.MacCoffeeSite.setLanguage("ru");
+assert.equal(translatedNode.textContent, "Агенты работают", "Russian content was not applied");
+assert.equal(attributes.get("ru:aria-pressed"), "true", "Russian language button was not selected");
+runtime.MacCoffeeSite.setWakeState(true);
+assert.equal(attributes.get("demo:data-wake-active"), "true", "Wake demo did not activate");
+await runtime.MacCoffeeSite.copyCode({ dataset: { copy: "#code" }, querySelector: () => ({ textContent: "" }) });
+assert.equal(clipboardText, "maccoffee_set_session", "Code was not copied");
+
+for (const token of ["maccoffee-language", "navigator.clipboard", "IntersectionObserver", "MacCoffeeTranslations"]) {
+  assert.ok(script.includes(token), `Missing script contract ${token}`);
+}
+
+assert.ok(!html.includes("<script>"), "Inline JavaScript is forbidden");
+assert.ok(!html.includes("http://"), "Insecure HTTP URL is forbidden");
 console.log(`Validated ${ids.length} IDs and ${new Set(keys).size} translation keys.`);

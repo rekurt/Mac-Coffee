@@ -225,16 +225,17 @@ struct CodexConfigurationPlanner {
   private static func isConservativelyValidTOML(_ contents: String) -> Bool {
     guard !contents.contains("\"\"\""), !contents.contains("'''") else { return false }
     var arrayDepth = 0
+    var inlineTableDepth = 0
     for rawLine in contents.components(separatedBy: .newlines) {
       let line = removingComment(from: rawLine).trimmingCharacters(in: .whitespaces)
       if line.isEmpty { continue }
-      if line.hasPrefix("[") && arrayDepth == 0 {
+      if line.hasPrefix("[") && arrayDepth == 0 && inlineTableDepth == 0 {
         let isTable = (line.hasPrefix("[[") && line.hasSuffix("]]"))
           || (!line.hasPrefix("[[") && line.hasSuffix("]"))
         if !isTable { return false }
         continue
       }
-      if arrayDepth == 0 && !line.contains("=") { return false }
+      if arrayDepth == 0 && inlineTableDepth == 0 && !line.contains("=") { return false }
       var quote: Character?
       var escaped = false
       for character in line {
@@ -251,11 +252,16 @@ struct CodexConfigurationPlanner {
         } else if quote == nil && character == "]" {
           arrayDepth -= 1
           if arrayDepth < 0 { return false }
+        } else if quote == nil && character == "{" {
+          inlineTableDepth += 1
+        } else if quote == nil && character == "}" {
+          inlineTableDepth -= 1
+          if inlineTableDepth < 0 { return false }
         }
       }
-      if quote != nil || escaped { return false }
+      if quote != nil || escaped || inlineTableDepth != 0 { return false }
     }
-    return arrayDepth == 0
+    return arrayDepth == 0 && inlineTableDepth == 0
   }
 
   private static func removingComment(from line: String) -> String {

@@ -97,14 +97,52 @@ final class MCPSecurityAdapterTests: XCTestCase {
         )
     }
 
-    func testAppleExecutableIdentityIsVerifiedFromItsRealPath() throws {
+    func testTeamSignedExecutableIdentityIsVerifiedFromItsRealPath() throws {
+        let developerDirectory = ProcessInfo.processInfo.environment["DEVELOPER_DIR"]
+            ?? "/Applications/Xcode.app/Contents/Developer"
+        let xcodeExecutable = URL(fileURLWithPath: developerDirectory)
+            .deletingLastPathComponent()
+            .appendingPathComponent("MacOS/Xcode")
         let verifier = SecurityClientIdentityVerifier()
-        let identity = try verifier.identity(forExecutableAt: "/bin/ls")
+        let identity = try verifier.identity(forExecutableAt: xcodeExecutable.path)
 
         XCTAssertTrue(identity.executablePath.hasPrefix("/"))
         XCTAssertTrue(identity.isSigned)
+        XCTAssertNotNil(identity.teamIdentifier)
         XCTAssertNotNil(identity.signingIdentifier)
         XCTAssertNotNil(identity.codeDirectoryHash)
+    }
+
+    func testAdHocSignedExecutableIdentityUsesFileHashAndRequiresApproval() throws {
+        let temporaryDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let executableURL = temporaryDirectory.appendingPathComponent("echo")
+        try FileManager.default.createDirectory(
+            at: temporaryDirectory,
+            withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: temporaryDirectory) }
+        try FileManager.default.copyItem(
+            at: URL(fileURLWithPath: "/bin/echo"),
+            to: executableURL
+        )
+        let codesign = Process()
+        codesign.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
+        codesign.arguments = ["--force", "--sign", "-", executableURL.path]
+        try codesign.run()
+        codesign.waitUntilExit()
+        XCTAssertEqual(codesign.terminationStatus, 0)
+
+        let identity = try SecurityClientIdentityVerifier()
+            .identity(forExecutableAt: executableURL.path)
+        let fileData = try Data(contentsOf: executableURL, options: .mappedIfSafe)
+        let fileHash = Data(SHA256.hash(data: fileData))
+            .map { String(format: "%02x", $0) }
+            .joined()
+
+        XCTAssertFalse(identity.isSigned)
+        XCTAssertNil(identity.teamIdentifier)
+        XCTAssertEqual(identity.codeDirectoryHash, fileHash)
     }
 
     func testParentProcessCaptureReturnsIdentityForRequestedPID() throws {

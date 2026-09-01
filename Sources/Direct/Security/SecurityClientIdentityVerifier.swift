@@ -72,14 +72,17 @@ public final class SecurityClientIdentityVerifier: MCPExecutableIdentityVerifyin
             SecCSFlags(),
             nil
         )
-        let isSigned = validityStatus == errSecSuccess
-        let signingInfo = isSigned ? copySigningInformation(staticCode) : nil
+        let hasValidSignature = validityStatus == errSecSuccess
+        let signingInfo = hasValidSignature ? copySigningInformation(staticCode) : nil
         let fileHash = try sha256(of: executableURL)
         let signingIdentifier = signingInfo?[kSecCodeInfoIdentifier as String] as? String
         let teamIdentifier = signingInfo?[kSecCodeInfoTeamIdentifier as String] as? String
-        let codeDirectoryHash = (
-            signingInfo?[kSecCodeInfoUnique as String] as? Data
-        )?.hexadecimalString ?? fileHash
+        let isVerifiedSignature = hasValidSignature
+            && teamIdentifier?.isEmpty == false
+            && signingIdentifier?.isEmpty == false
+        let codeDirectoryHash = isVerifiedSignature
+            ? (signingInfo?[kSecCodeInfoUnique as String] as? Data)?.hexadecimalString ?? fileHash
+            : fileHash
 
         return MCPCodeIdentity(
             executablePath: executableURL.path,
@@ -87,7 +90,7 @@ public final class SecurityClientIdentityVerifier: MCPExecutableIdentityVerifyin
             teamIdentifier: teamIdentifier,
             signingIdentifier: signingIdentifier,
             codeDirectoryHash: codeDirectoryHash,
-            isSigned: isSigned
+            isSigned: isVerifiedSignature
         )
     }
 

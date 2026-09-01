@@ -49,6 +49,7 @@ public final class AppModel: ObservableObject {
     @Published public private(set) var launchAtLoginStatus: LaunchAtLoginStatus
     @Published public private(set) var statusNotice: AppStatusNotice?
     @Published public private(set) var isBusy = false
+    private var requiresPowerAssertionRetry = false
 
     public var statusMessage: String? {
         statusNotice.map { $0.localized(using: environment.localization) }
@@ -78,7 +79,7 @@ public final class AppModel: ObservableObject {
     }
 
     public func setMode(_ requestedMode: WakeMode) throws {
-        guard requestedMode != mode else { return }
+        guard requestedMode != mode || requiresPowerAssertionRetry else { return }
         if requestedMode != .off, isBatteryBlocked {
             let error = AppModelError.batteryBlocked
             statusNotice = .batteryBlocked
@@ -93,6 +94,7 @@ public final class AppModel: ObservableObject {
         do {
             try environment.powerAssertions.transition(to: requestedMode)
         } catch {
+            requiresPowerAssertionRetry = true
             commitConfirmedMode(
                 environment.powerAssertions.activeMode,
                 previousMode: previousMode,
@@ -102,6 +104,7 @@ public final class AppModel: ObservableObject {
             throw error
         }
 
+        requiresPowerAssertionRetry = false
         commitConfirmedMode(
             requestedMode,
             previousMode: previousMode,
@@ -187,6 +190,7 @@ public final class AppModel: ObservableObject {
         environment.battery.stop()
         environment.lifecycle.stop()
         environment.powerAssertions.releaseAll()
+        requiresPowerAssertionRetry = false
         mode = .off
         session = nil
         isBusy = false
@@ -270,6 +274,7 @@ public final class AppModel: ObservableObject {
         let previousSession = session
         do {
             try environment.powerAssertions.transition(to: .off)
+            requiresPowerAssertionRetry = false
             mode = .off
             session = nil
             environment.scheduler.cancel()
@@ -280,6 +285,7 @@ public final class AppModel: ObservableObject {
                 statusNotice = .timerCompleted
             }
         } catch {
+            requiresPowerAssertionRetry = true
             reconcileAfterFailedStop(previousSession: previousSession)
             statusNotice = .powerAssertionFailed
         }

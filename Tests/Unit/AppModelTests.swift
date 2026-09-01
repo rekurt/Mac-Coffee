@@ -116,6 +116,23 @@ final class AppModelTests: XCTestCase {
         XCTAssertNotNil(harness.model.statusMessage)
     }
 
+    func testSameModeRetriesCleanupAfterFailedTransitionChangedConfirmedMode() throws {
+        let harness = Harness()
+        try harness.model.setMode(.system)
+        harness.power.failNextTransition = true
+        harness.power.confirmedModeOnFailure = .display
+
+        XCTAssertThrowsError(try harness.model.setMode(.display))
+        XCTAssertEqual(harness.model.mode, .display)
+        XCTAssertEqual(harness.model.statusNotice, .powerAssertionFailed)
+        harness.model.dismissStatus()
+
+        try harness.model.setMode(.display)
+
+        XCTAssertEqual(harness.power.transitions, [.system, .display, .display])
+        XCTAssertNil(harness.model.statusNotice)
+    }
+
     func testLaunchAtLoginSuccessFailureAndActivationRefresh() throws {
         let harness = Harness()
 

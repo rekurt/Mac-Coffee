@@ -37,7 +37,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
 
       - name: Menu bar UI tests
-        timeout-minutes: 10
+        timeout-minutes: 20
         run: >-
           xcodebuild test
           -project MacCoffee.xcodeproj

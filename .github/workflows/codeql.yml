@@ -41,7 +41,7 @@ jobs:
             -configuration Release \
             -destination 'platform=macOS' \
             CODE_SIGNING_ALLOWED=NO
-          xcodebuild clean build \
+          xcodebuild build \
             -project MacCoffee.xcodeproj \
             -scheme MacCoffeeAppStore \
             -configuration Release \

@@ -373,7 +373,7 @@ final class MCPXPCIntegrationTests: XCTestCase {
         )
     }
 
-    private func assertClientError<T>(
+    private func assertClientError<T: Sendable>(
         _ expected: MCPXPCClientError,
         operation: () async throws -> T
     ) async {

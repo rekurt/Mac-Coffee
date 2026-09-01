@@ -3,7 +3,7 @@ import MacCoffeeCore
 import Sparkle
 
 @MainActor
-final class SparkleUpdater: NSObject, UpdaterProviding, @MainActor SPUStandardUserDriverDelegate {
+final class SparkleUpdater: NSObject, UpdaterProviding, @preconcurrency SPUStandardUserDriverDelegate {
     let state = UpdateStateController()
     private lazy var controller = SPUStandardUpdaterController(
         startingUpdater: false,

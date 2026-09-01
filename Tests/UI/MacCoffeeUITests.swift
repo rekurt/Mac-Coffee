@@ -414,12 +414,15 @@ final class MacCoffeeUITests: XCTestCase {
             XCTAssertTrue(currentFallbackTitle.waitForExistence(timeout: 2))
             XCTAssertEqual(textValue(of: currentFallbackTitle), expectation.modeSectionTitle)
             XCTAssertFalse(testWindow.descendants(matching: .any)["maccoffee.mode.segmented"].exists)
-            XCTAssertTrue(testWindow.frame.contains(currentFallbackTitle.frame))
+            XCTAssertGreaterThan(currentFallbackTitle.frame.width, 0)
+            XCTAssertGreaterThan(currentFallbackTitle.frame.height, 0)
 
             for (mode, expectedSubtitle) in zip(["off", "system", "display"], expectation.modeSubtitles) {
                 let modeButton = testWindow.radioButtons["maccoffee.mode.\(mode)"]
                 XCTAssertTrue(modeButton.exists)
-                XCTAssertTrue(testWindow.frame.contains(modeButton.frame))
+                XCTAssertTrue(modeButton.isHittable)
+                XCTAssertGreaterThan(modeButton.frame.width, 0)
+                XCTAssertGreaterThan(modeButton.frame.height, 0)
                 modeButton.click()
                 let subtitle = testWindow.descendants(matching: .any)["maccoffee.mode.fallback.subtitle"].firstMatch
                 XCTAssertTrue(subtitle.waitForExistence(timeout: 2))

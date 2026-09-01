@@ -377,7 +377,7 @@ final class MacCoffeeUITests: XCTestCase {
             assertPanelControlsFitInsideTestWindow()
 
             testWindow.buttons["maccoffee.action.about"].click()
-            let version = app.staticTexts["maccoffee.about.version"]
+            let version = app.descendants(matching: .any)["maccoffee.about.version"].firstMatch
             XCTAssertTrue(version.waitForExistence(timeout: 2))
             XCTAssertTrue(textValue(of: version).contains(expectation.versionPrefix))
             app.typeKey("w", modifierFlags: .command)
@@ -408,6 +408,9 @@ final class MacCoffeeUITests: XCTestCase {
             XCTAssertTrue(currentFallbackTitle.waitForExistence(timeout: 2))
             XCTAssertEqual(textValue(of: currentFallbackTitle), expectation.modeSectionTitle)
             XCTAssertFalse(testWindow.descendants(matching: .any)["maccoffee.mode.segmented"].exists)
+            let fallback = testWindow.descendants(matching: .any)["maccoffee.mode.fallback"].firstMatch
+            XCTAssertTrue(fallback.exists)
+            XCTAssertTrue(testWindow.frame.contains(fallback.frame), "Fallback mode picker is clipped outside the narrow window")
 
             for (mode, expectedSubtitle) in zip(["off", "system", "display"], expectation.modeSubtitles) {
                 testWindow.radioButtons["maccoffee.mode.\(mode)"].click()
@@ -424,7 +427,6 @@ final class MacCoffeeUITests: XCTestCase {
                     currentFallbackTitle.frame.height * 0.9,
                     "Subtitle layout is too short to render a full caption"
                 )
-                XCTAssertTrue(testWindow.frame.contains(subtitle.frame), "Subtitle is clipped outside the narrow window")
             }
 
             testWindow.buttons["maccoffee.action.settings"].click()

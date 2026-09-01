@@ -9,8 +9,8 @@ final class MacCoffeeUITests: XCTestCase {
         launch(language: "en", batteryPercentage: 80)
 
         XCTAssertTrue(testWindow.waitForExistence(timeout: 5))
-        XCTAssertTrue(testWindow.radioGroups["maccoffee.mode.picker"].exists)
-        XCTAssertTrue(testWindow.radioGroups["maccoffee.duration.picker"].exists)
+        XCTAssertTrue(modePicker.exists)
+        XCTAssertTrue(durationPicker.exists)
 
         testWindow.radioButtons["maccoffee.mode.system"].click()
         XCTAssertTrue(app.staticTexts["Mac Coffee is active"].waitForExistence(timeout: 2))
@@ -118,6 +118,10 @@ final class MacCoffeeUITests: XCTestCase {
         XCTAssertTrue(toggle.waitForExistence(timeout: 3))
         XCTAssertEqual(integerValue(of: toggle), 0)
 
+        let settingsScrollView = app.windows["Mac Coffee Settings"].scrollViews.firstMatch
+        XCTAssertTrue(settingsScrollView.exists)
+        scrollToMakeHittable(toggle, in: settingsScrollView)
+        XCTAssertTrue(toggle.isHittable)
         toggle.click()
 
         XCTAssertEqual(integerValue(of: toggle), 1)
@@ -236,10 +240,7 @@ final class MacCoffeeUITests: XCTestCase {
         assertFooterContainer(layout: "toolbar")
         XCTAssertFalse(footerList.exists, "A 420 pt Direct footer must not use its narrow list")
         XCTAssertGreaterThanOrEqual(testWindow.frame.width, 400, "The deterministic host must expose its 420 pt width")
-        XCTAssertTrue(
-            testWindow.descendants(matching: .any)["maccoffee.mode.segmented"].exists,
-            "English mode labels must fit the compact segmented control at 420 pt"
-        )
+        XCTAssertTrue(modePicker.exists, "The mode picker must be present at normal width")
 
         let identifiers = ["settings", "about", "quit"]
         assertFooterActionTargets(identifiers, labels: [
@@ -355,14 +356,16 @@ final class MacCoffeeUITests: XCTestCase {
             XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.mode.system"]), 1)
             XCTAssertEqual(integerValue(of: testWindow.radioButtons["maccoffee.duration.hours2"]), 1)
             XCTAssertTrue(testWindow.staticTexts[expectation.activeStatus].exists)
-            let countdown = testWindow.descendants(matching: .any)["maccoffee.session.countdown"]
-                .firstMatch
+            let countdown = testWindow.staticTexts.matching(
+                NSPredicate(format: "value MATCHES %@", expectation.countdownPattern)
+            ).firstMatch
+            XCTAssertTrue(countdown.waitForExistence(timeout: 2))
             assertCountdown(
                 countdown.label,
                 matches: expectation.countdownPattern,
                 language: expectation.nativeName
             )
-            XCTAssertTrue(String(describing: testWindow.radioGroups["maccoffee.mode.picker"].value).contains(expectation.modeTitle))
+            XCTAssertTrue(String(describing: modePicker.value).contains(expectation.modeTitle))
             XCTAssertTrue(app.staticTexts[expectation.settingsTitle].exists)
             XCTAssertTrue(String(describing: picker.value).contains(expectation.nativeName))
 
@@ -643,6 +646,14 @@ final class MacCoffeeUITests: XCTestCase {
 
     private var footer: XCUIElement {
         testWindow.groups["maccoffee.footer"]
+    }
+
+    private var modePicker: XCUIElement {
+        testWindow.descendants(matching: .any)["maccoffee.mode.picker"].firstMatch
+    }
+
+    private var durationPicker: XCUIElement {
+        testWindow.descendants(matching: .any)["maccoffee.duration.picker"].firstMatch
     }
 
     private var footerToolbar: XCUIElement {

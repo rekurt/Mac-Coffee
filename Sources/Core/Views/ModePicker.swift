@@ -28,6 +28,7 @@ public struct ModePicker: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel(Text("mode.title"))
                     .accessibilityIdentifier("maccoffee.mode.fallback.title")
                 fallbackPicker
                     .pickerStyle(.radioGroup)
@@ -37,6 +38,7 @@ public struct ModePicker: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel(Text(verbatim: selection.localizedSubtitle(using: localization)))
                     .accessibilityIdentifier("maccoffee.mode.fallback.subtitle")
             }
             .frame(maxWidth: .infinity, alignment: .leading)

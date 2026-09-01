@@ -145,4 +145,20 @@ for (const token of ["maccoffee-language", "navigator.clipboard", "IntersectionO
 
 assert.ok(!html.includes("<script>"), "Inline JavaScript is forbidden");
 assert.ok(!html.includes("http://"), "Insecure HTTP URL is forbidden");
+
+for (const metadata of [
+  'property="og:title"',
+  'property="og:description"',
+  'property="og:image"',
+  'name="twitter:card" content="summary_large_image"',
+  'name="theme-color"',
+]) {
+  assert.ok(html.includes(metadata), `Missing metadata ${metadata}`);
+}
+assert.ok(existsSync(join(siteRoot, "assets/og.png")), "Missing social card");
+
+const workflow = readFileSync(join(siteRoot, "../.github/workflows/pages.yml"), "utf8");
+for (const token of ["pages: write", "id-token: write", "actions/upload-pages-artifact", "path: site", "actions/deploy-pages"]) {
+  assert.ok(workflow.includes(token), `Missing Pages workflow contract ${token}`);
+}
 console.log(`Validated ${ids.length} IDs and ${new Set(keys).size} translation keys.`);

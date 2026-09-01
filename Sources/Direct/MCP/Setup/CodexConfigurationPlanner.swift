@@ -24,6 +24,16 @@ struct CodexConfigurationPlanner {
       )
     }
 
+    guard !Self.containsNonCanonicalMacCoffeeDeclaration(before) else {
+      return manualPlan(
+        configurationURL: configurationURL,
+        helperURL: helperURL,
+        targetExisted: targetExisted,
+        before: before,
+        instructions: manualInstructions
+      )
+    }
+
     let matchingHeaders = before.components(separatedBy: .newlines)
       .filter { $0.trimmingCharacters(in: .whitespaces) == Self.tableHeader }
     if !matchingHeaders.isEmpty {
@@ -81,6 +91,7 @@ struct CodexConfigurationPlanner {
 
   static func validate(contents: String, helperURL: URL) -> Bool {
     isConservativelyValidTOML(contents)
+      && !containsNonCanonicalMacCoffeeDeclaration(contents)
       && containsMatchingManagedEntry(contents: contents, helperURL: helperURL)
   }
 
@@ -118,6 +129,97 @@ struct CodexConfigurationPlanner {
       let value = content[content.index(after: separator)...].trimmingCharacters(in: .whitespaces)
       return key == "command" && value == expected
     }
+  }
+
+  private static func containsNonCanonicalMacCoffeeDeclaration(_ contents: String) -> Bool {
+    let managedPath = ["mcp_servers", "mac_coffee"]
+    var tablePath: [String] = []
+    for rawLine in contents.components(separatedBy: .newlines) {
+      let line = removingComment(from: rawLine).trimmingCharacters(in: .whitespaces)
+      if line.isEmpty { continue }
+      if line.hasPrefix("[") && line.hasSuffix("]") {
+        let isArray = line.hasPrefix("[[") && line.hasSuffix("]]")
+        let startOffset = isArray ? 2 : 1
+        let endOffset = isArray ? 2 : 1
+        let start = line.index(line.startIndex, offsetBy: startOffset)
+        let end = line.index(line.endIndex, offsetBy: -endOffset)
+        guard let parsed = parseKeyPath(String(line[start..<end])) else { return true }
+        tablePath = parsed
+        if tablePath.starts(with: managedPath), line != tableHeader {
+          return true
+        }
+        continue
+      }
+      guard let separator = assignmentSeparator(in: line) else { continue }
+      guard let keyPath = parseKeyPath(String(line[..<separator])) else { return true }
+      let fullPath = tablePath + keyPath
+      if fullPath == ["mcp_servers"]
+        || (fullPath.starts(with: managedPath) && tablePath != managedPath)
+      {
+        return true
+      }
+    }
+    return false
+  }
+
+  private static func assignmentSeparator(in line: String) -> String.Index? {
+    var quote: Character?
+    var escaped = false
+    for index in line.indices {
+      let character = line[index]
+      if escaped {
+        escaped = false
+      } else if character == "\\" && quote == "\"" {
+        escaped = true
+      } else if character == "\"" || character == "'" {
+        if quote == character {
+          quote = nil
+        } else if quote == nil {
+          quote = character
+        }
+      } else if character == "=" && quote == nil {
+        return index
+      }
+    }
+    return nil
+  }
+
+  private static func parseKeyPath(_ value: String) -> [String]? {
+    var parts: [String] = []
+    var current = ""
+    var quote: Character?
+    var escaped = false
+
+    func appendCurrent() -> Bool {
+      let key = current.trimmingCharacters(in: .whitespaces)
+      guard !key.isEmpty else { return false }
+      parts.append(key)
+      current = ""
+      return true
+    }
+
+    for character in value {
+      if escaped {
+        current.append(character)
+        escaped = false
+      } else if character == "\\" && quote == "\"" {
+        escaped = true
+      } else if character == "\"" || character == "'" {
+        if quote == character {
+          quote = nil
+        } else if quote == nil {
+          quote = character
+        } else {
+          current.append(character)
+        }
+      } else if character == "." && quote == nil {
+        guard appendCurrent() else { return nil }
+      } else {
+        current.append(character)
+      }
+    }
+    guard quote == nil, !escaped, appendCurrent() else { return nil }
+    return parts
   }
 
   private static func isConservativelyValidTOML(_ contents: String) -> Bool {

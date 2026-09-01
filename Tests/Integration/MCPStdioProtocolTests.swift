@@ -33,7 +33,10 @@ final class MCPStdioProtocolTests: XCTestCase {
     XCTAssertEqual(initializeResult["protocolVersion"] as? String, "2025-11-25")
     let serverInfo = try dictionary(initializeResult["serverInfo"])
     XCTAssertEqual(serverInfo["name"] as? String, "MacCoffeeMCP")
-    XCTAssertEqual(serverInfo["version"] as? String, "2.0.0")
+    XCTAssertEqual(
+      serverInfo["version"] as? String,
+      try productVersion()
+    )
 
     let toolsMessage = try message(withID: 2, in: messages)
     let toolsResult = try dictionary(toolsMessage["result"])
@@ -322,6 +325,21 @@ final class MCPStdioProtocolTests: XCTestCase {
       stdout: String(decoding: output.data, as: UTF8.self),
       stderr: String(decoding: stderr.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
     )
+  }
+
+  private func productVersion() throws -> String {
+    let configurationURL = URL(fileURLWithPath: #filePath)
+      .deletingLastPathComponent()
+      .deletingLastPathComponent()
+      .deletingLastPathComponent()
+      .appendingPathComponent("Config/Shared.xcconfig")
+    let contents = try String(contentsOf: configurationURL, encoding: .utf8)
+    guard let line = contents.components(separatedBy: .newlines).first(where: {
+      $0.hasPrefix("MARKETING_VERSION = ")
+    }) else {
+      throw TestFailure("Missing MARKETING_VERSION in Shared.xcconfig")
+    }
+    return String(line.dropFirst("MARKETING_VERSION = ".count))
   }
 
   private func initializedPhases(

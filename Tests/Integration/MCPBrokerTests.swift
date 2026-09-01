@@ -141,6 +141,41 @@ final class MCPBrokerTests: XCTestCase {
       XCTAssertEqual(error, .appNotRunning)
     }
   }
+
+  func testRegistrarReconnectsAndReregistersAfterBrokerConnectionInvalidation() async throws {
+    let roles = BrokerRoleQueue([.app, .helper, .app, .helper])
+    let delegate = MCPBrokerListenerDelegate { _ in roles.next() }
+    let brokerListener = NSXPCListener.anonymous()
+    brokerListener.delegate = delegate
+    brokerListener.activate()
+    defer { brokerListener.invalidate() }
+
+    let connections = RegistrarConnectionStore()
+    let registrar = MCPBrokerRegistrar {
+      let connection = NSXPCConnection(listenerEndpoint: brokerListener.endpoint)
+      connections.append(connection)
+      return connection
+    }
+    let provider = MCPBrokerEndpointProvider {
+      NSXPCConnection(listenerEndpoint: brokerListener.endpoint)
+    }
+    let appListener = NSXPCListener.anonymous()
+
+    try await registrar.register(appListener.endpoint)
+    let initialEndpoint = try await provider.currentEndpoint()
+    XCTAssertNotNil(initialEndpoint)
+    try XCTUnwrap(connections.first).invalidate()
+
+    let deadline = ContinuousClock.now + .seconds(2)
+    while connections.count < 2, ContinuousClock.now < deadline {
+      try await Task.sleep(for: .milliseconds(20))
+    }
+
+    XCTAssertEqual(connections.count, 2)
+    let recoveredEndpoint = try await provider.currentEndpoint()
+    XCTAssertNotNil(recoveredEndpoint)
+    await registrar.unregister()
+  }
 }
 
 private final class BrokerRoleQueue: @unchecked Sendable {
@@ -156,5 +191,22 @@ private final class BrokerRoleQueue: @unchecked Sendable {
       guard !roles.isEmpty else { return nil }
       return roles.removeFirst()
     }
+  }
+}
+
+private final class RegistrarConnectionStore: @unchecked Sendable {
+  private let lock = NSLock()
+  private var connections: [NSXPCConnection] = []
+
+  var first: NSXPCConnection? {
+    lock.withLock { connections.first }
+  }
+
+  var count: Int {
+    lock.withLock { connections.count }
+  }
+
+  func append(_ connection: NSXPCConnection) {
+    lock.withLock { connections.append(connection) }
   }
 }

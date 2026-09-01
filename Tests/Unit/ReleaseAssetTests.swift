@@ -288,6 +288,14 @@ final class ReleaseAssetTests: XCTestCase {
         XCTAssertTrue(source.contains("com.elliotwu.maccoffee.helper.log"))
     }
 
+    func testLegacyPowerPolicyChangesOnlyTheExactLegacySignature() throws {
+        let policy = repositoryRoot.appendingPathComponent("scripts/legacy-power-policy.zsh")
+
+        XCTAssertEqual(try runLegacyPolicy(policy, sleep: "0", disablesleep: "1"), "sleep 5 disablesleep 0")
+        XCTAssertEqual(try runLegacyPolicy(policy, sleep: "10", disablesleep: "1"), "")
+        XCTAssertEqual(try runLegacyPolicy(policy, sleep: "0", disablesleep: "0"), "")
+    }
+
     private var repositoryRoot: URL {
         URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
@@ -319,5 +327,29 @@ final class ReleaseAssetTests: XCTestCase {
             String(decoding: error, as: UTF8.self)
         )
         return String(decoding: output, as: UTF8.self)
+    }
+
+    private func runLegacyPolicy(_ script: URL, sleep: String, disablesleep: String) throws -> String {
+        let process = Process()
+        let standardOutput = Pipe()
+        let standardError = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
+        process.arguments = [
+            "-c",
+            "source \"$1\"; legacy_battery_restore_arguments \"$2\" \"$3\"",
+            "maccoffee-policy-test",
+            script.path,
+            sleep,
+            disablesleep,
+        ]
+        process.standardOutput = standardOutput
+        process.standardError = standardError
+        try process.run()
+        let output = standardOutput.fileHandleForReading.readDataToEndOfFile()
+        let error = standardError.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        XCTAssertEqual(process.terminationStatus, 0, String(decoding: error, as: UTF8.self))
+        return String(decoding: output, as: UTF8.self)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

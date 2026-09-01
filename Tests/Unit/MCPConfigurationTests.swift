@@ -51,6 +51,55 @@ final class MCPConfigurationTests: XCTestCase {
     XCTAssertTrue(plan.proposedDiff.isEmpty)
   }
 
+  func testCodexPlannerRejectsEquivalentDottedKeyDeclaration() throws {
+    let before = """
+      mcp_servers.mac_coffee = { command = "/usr/local/bin/existing" }
+      """ + "\n"
+
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .manual)
+    XCTAssertEqual(plan.validation, .invalid)
+    XCTAssertNil(plan.after)
+  }
+
+  func testCodexPlannerRejectsNestedDottedKeyDeclaration() throws {
+    let before = """
+      mcp_servers.mac_coffee.command = "/usr/local/bin/existing"
+      """ + "\n"
+
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .manual)
+    XCTAssertEqual(plan.validation, .invalid)
+    XCTAssertNil(plan.after)
+  }
+
+  func testCodexPlannerRejectsEquivalentKeyInsideParentTable() throws {
+    let before = """
+      [mcp_servers]
+      mac_coffee = { command = "/usr/local/bin/existing" }
+      """ + "\n"
+
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .manual)
+    XCTAssertEqual(plan.validation, .invalid)
+    XCTAssertNil(plan.after)
+  }
+
   func testCodexPlannerFallsBackToManualInstructionsForMalformedOrConflictingTOML() throws {
     for contents in [try fixture("codex-malformed.toml"), try fixture("codex-conflict.toml")] {
       let plan = try CodexConfigurationPlanner().plan(
@@ -236,6 +285,32 @@ final class MCPConfigurationTests: XCTestCase {
     let leftovers = try FileManager.default.contentsOfDirectory(atPath: directory.path)
       .filter { $0.contains(".maccoffee-") && $0.hasSuffix(".tmp") }
     XCTAssertTrue(leftovers.isEmpty)
+  }
+
+  func testInstallerRejectsConcurrentEditImmediatelyBeforeReplacement() throws {
+    let directory = try makeTemporaryDirectory()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let target = directory.appendingPathComponent("config.toml")
+    let reviewed = "# reviewed\n"
+    let concurrent = "# concurrently changed\n"
+    try reviewed.write(to: target, atomically: true, encoding: .utf8)
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: target,
+      helperURL: helperURL,
+      existingContents: reviewed
+    )
+    let installer = AtomicConfigurationInstaller(
+      beforeReplacement: {
+        try concurrent.write(to: target, atomically: true, encoding: .utf8)
+      }
+    )
+
+    XCTAssertThrowsError(
+      try installer.install(plan: plan, confirmedHash: plan.confirmationHash)
+    ) {
+      XCTAssertEqual($0 as? MCPConfigurationInstallationError, .stalePlan)
+    }
+    XCTAssertEqual(try String(contentsOf: target, encoding: .utf8), concurrent)
   }
 
   private let helperURL = URL(

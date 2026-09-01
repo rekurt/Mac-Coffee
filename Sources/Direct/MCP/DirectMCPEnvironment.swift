@@ -17,6 +17,10 @@ extension MCPXPCListener: MCPListenerLifecycle {}
 protocol MCPBrokerRegistration: AnyObject {
   func register(_ endpoint: NSXPCListenerEndpoint) async throws
   func unregister() async
+  func setRecoveryHandlers(
+    onStarted: @escaping @Sendable () -> Void,
+    onCompleted: @escaping @Sendable (Result<Void, MCPBrokerRegistrarError>) -> Void
+  )
 }
 
 extension MCPBrokerRegistrar: MCPBrokerRegistration {}
@@ -60,6 +64,25 @@ final class DirectMCPEnvironment: ObservableObject {
     self.controlService = controlService
     self.listener = listener
     self.broker = broker
+    broker.setRecoveryHandlers(
+      onStarted: { [weak self] in
+        Task { @MainActor in
+          guard let self, self.settings.isEnabled, !self.isTerminating else { return }
+          self.connectionState = .starting
+        }
+      },
+      onCompleted: { [weak self] result in
+        Task { @MainActor in
+          guard let self, self.settings.isEnabled, !self.isTerminating else { return }
+          switch result {
+          case .success:
+            self.connectionState = .ready
+          case .failure:
+            self.connectionState = .failed
+          }
+        }
+      }
+    )
   }
 
   static func live(

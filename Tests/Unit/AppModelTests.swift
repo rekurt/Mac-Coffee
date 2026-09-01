@@ -26,6 +26,21 @@ final class AppModelTests: XCTestCase {
         XCTAssertEqual(harness.model.mode, .display)
     }
 
+    func testApplyingIdenticalSessionRestartsItsDeadline() throws {
+        let harness = Harness(now: Date(timeIntervalSince1970: 1_000))
+        try harness.model.applySession(mode: .system, duration: .hours1)
+
+        harness.clock.now = Date(timeIntervalSince1970: 1_500)
+        try harness.model.applySession(mode: .system, duration: .hours1)
+
+        XCTAssertEqual(harness.model.session?.startedAt, harness.clock.now)
+        XCTAssertEqual(
+            harness.model.session?.expiresAt,
+            Date(timeIntervalSince1970: 5_100)
+        )
+        XCTAssertEqual(harness.scheduler.scheduleCount, 2)
+    }
+
     func testTurningOffClearsSessionAndSchedule() throws {
         let harness = Harness()
         try harness.model.setMode(.system)

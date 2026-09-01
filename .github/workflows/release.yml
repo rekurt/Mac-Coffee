@@ -54,11 +54,19 @@ jobs:
           test -n "$version"
           test "$GITHUB_REF_NAME" = "v$version"
 
-      - name: Unit and integration tests
+      - name: Unit tests
         run: >-
           xcodebuild test
           -project MacCoffee.xcodeproj
           -scheme MacCoffeeTests
+          -destination 'platform=macOS'
+          CODE_SIGNING_ALLOWED=NO
+
+      - name: MCP integration tests
+        run: >-
+          xcodebuild test
+          -project MacCoffee.xcodeproj
+          -scheme MacCoffeeIntegrationTests
           -destination 'platform=macOS'
           CODE_SIGNING_ALLOWED=NO
 

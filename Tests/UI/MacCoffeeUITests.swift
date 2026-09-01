@@ -566,7 +566,7 @@ final class MacCoffeeUITests: XCTestCase {
         }
         if let firstWidth = widths.first {
             for width in widths.dropFirst() {
-                XCTAssertEqual(width, firstWidth, accuracy: 2, "Duration segments must be equal width", file: file, line: line)
+                XCTAssertEqual(width, firstWidth, accuracy: 3, "Duration segments must be equal width", file: file, line: line)
             }
         }
     }

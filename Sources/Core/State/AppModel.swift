@@ -128,10 +128,11 @@ public final class AppModel: ObservableObject {
             throw AppModelError.invalidWakeMode
         }
 
+        let hadActiveSession = mode != .off
         if requestedMode != mode {
             try setMode(requestedMode)
         }
-        if duration != selectedDuration {
+        if hadActiveSession || duration != selectedDuration {
             selectDuration(duration)
         }
     }

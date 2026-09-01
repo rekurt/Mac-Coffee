@@ -89,26 +89,50 @@ struct AtomicConfigurationInstaller {
       throw MCPConfigurationInstallationError.validationFailed
     }
 
-    let createdBackupURL: URL?
-    if destinationExists {
-      let candidate = backupURL(for: destination)
-      try fileManager.copyItem(at: destination, to: candidate)
-      createdBackupURL = candidate
-    } else {
-      createdBackupURL = nil
+    var coordinationError: NSError?
+    var replacementResult: Result<URL?, Error>?
+    let coordinator = NSFileCoordinator(filePresenter: nil)
+    let coordinatedURL = destinationExists ? destination : parent
+    let coordinationOptions: NSFileCoordinator.WritingOptions =
+      destinationExists ? .forReplacing : .forMerging
+    coordinator.coordinate(
+      writingItemAt: coordinatedURL,
+      options: coordinationOptions,
+      error: &coordinationError
+    ) { _ in
+      replacementResult = Result {
+        try beforeReplacement()
+        let stillExists = fileManager.fileExists(atPath: destination.path)
+        guard stillExists == plan.targetExisted else {
+          throw MCPConfigurationInstallationError.stalePlan
+        }
+        if stillExists {
+          let current = try String(contentsOf: destination, encoding: .utf8)
+          guard current == plan.before else {
+            throw MCPConfigurationInstallationError.stalePlan
+          }
+          let candidate = backupURL(for: destination)
+          try fileManager.copyItem(at: destination, to: candidate)
+          _ = try fileManager.replaceItemAt(
+            destination,
+            withItemAt: temporary,
+            backupItemName: nil,
+            options: []
+          )
+          return candidate
+        }
+        guard plan.before.isEmpty else {
+          throw MCPConfigurationInstallationError.stalePlan
+        }
+        try fileManager.moveItem(at: temporary, to: destination)
+        return nil
+      }
     }
-
-    try beforeReplacement()
-    if destinationExists {
-      _ = try fileManager.replaceItemAt(
-        destination,
-        withItemAt: temporary,
-        backupItemName: nil,
-        options: []
-      )
-    } else {
-      try fileManager.moveItem(at: temporary, to: destination)
+    if let coordinationError { throw coordinationError }
+    guard let replacementResult else {
+      throw MCPConfigurationInstallationError.stalePlan
     }
+    let createdBackupURL = try replacementResult.get()
 
     let installed = try String(contentsOf: destination, encoding: .utf8)
     guard ConfigurationPlanValidator.validate(contents: installed, plan: plan) else {

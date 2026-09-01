@@ -1,6 +1,9 @@
 #!/bin/zsh
 set -euo pipefail
 
+script_directory=${0:A:h}
+source "$script_directory/legacy-power-policy.zsh"
+
 legacy_helper='/Library/PrivilegedHelperTools/com.elliotwu.maccoffee.helper'
 legacy_plist='/Library/LaunchDaemons/com.elliotwu.maccoffee.helper.plist'
 legacy_socket='/var/run/com.elliotwu.maccoffee.helper.sock'
@@ -37,11 +40,12 @@ print "This removes only the Mac Coffee 1.x helper, socket, launch daemon, and l
 /usr/bin/sudo /bin/launchctl bootout system/com.elliotwu.maccoffee.helper >/dev/null 2>&1 || true
 /usr/bin/sudo /bin/rm -f "$legacy_helper" "$legacy_plist" "$legacy_socket" "$legacy_log"
 
-if [[ "$battery_sleep" == 0 && "$battery_disablesleep" == 1 ]]; then
+restore_arguments=$(legacy_battery_restore_arguments "$battery_sleep" "$battery_disablesleep")
+if [[ "$restore_arguments" == "sleep 5 disablesleep 0" ]]; then
   print "The exact Mac Coffee 1.x keep-awake signature is active; restoring its normal battery values."
   /usr/bin/sudo /usr/bin/pmset -b sleep 5 disablesleep 0
 else
-  /usr/bin/sudo /usr/bin/pmset -b disablesleep 0
+  print "The battery settings do not match the complete Mac Coffee 1.x signature; preserving them."
   if [[ "$battery_sleep" == 0 ]]; then
     print -u2 "Battery sleep is still 0, but the complete 1.x signature was not detected."
     print -u2 "That value may be intentional, so it will not be changed without confirmation."
@@ -56,4 +60,4 @@ else
   fi
 fi
 
-print "Legacy Mac Coffee helper artifacts removed and battery disablesleep restored to 0."
+print "Legacy Mac Coffee helper artifacts removed."

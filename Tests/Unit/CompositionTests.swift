@@ -106,6 +106,26 @@ final class CompositionTests: XCTestCase {
         XCTAssertEqual(system.power.transitions, [.display])
     }
 
+    func testBrokerRecoveryUpdatesTheExposedConnectionState() async {
+        let system = makeMCPSystem(enabled: true)
+        system.mcp.startIfEnabled()
+        await system.mcp.waitForIdle()
+        XCTAssertEqual(system.mcp.connectionState, .ready)
+
+        system.broker.emitRecoveryStarted()
+        await Task.yield()
+        XCTAssertEqual(system.mcp.connectionState, .starting)
+
+        system.broker.emitRecoveryCompleted(.failure(.unavailable))
+        await Task.yield()
+        XCTAssertEqual(system.mcp.connectionState, .failed)
+
+        system.broker.emitRecoveryStarted()
+        system.broker.emitRecoveryCompleted(.success(()))
+        await Task.yield()
+        XCTAssertEqual(system.mcp.connectionState, .ready)
+    }
+
     func testMCPSettingsViewModelRevokesTrustAndClosesTheClientImmediately() throws {
         let system = makeMCPSystem(enabled: true)
         let client = makeTrustedClient(identifier: "codex-client")
@@ -269,6 +289,9 @@ private final class FakeMCPBroker: MCPBrokerRegistration {
     private let events: EventLog
     var registerError: Error?
     private(set) var registerCount = 0
+    private var recoveryStarted: (@Sendable () -> Void)?
+    private var recoveryCompleted:
+        (@Sendable (Result<Void, MCPBrokerRegistrarError>) -> Void)?
 
     init(events: EventLog) {
         self.events = events
@@ -282,6 +305,22 @@ private final class FakeMCPBroker: MCPBrokerRegistration {
 
     func unregister() async {
         events.values.append("broker.unregister")
+    }
+
+    func setRecoveryHandlers(
+        onStarted: @escaping @Sendable () -> Void,
+        onCompleted: @escaping @Sendable (Result<Void, MCPBrokerRegistrarError>) -> Void
+    ) {
+        recoveryStarted = onStarted
+        recoveryCompleted = onCompleted
+    }
+
+    func emitRecoveryStarted() {
+        recoveryStarted?()
+    }
+
+    func emitRecoveryCompleted(_ result: Result<Void, MCPBrokerRegistrarError>) {
+        recoveryCompleted?(result)
     }
 }
 

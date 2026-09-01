@@ -81,6 +81,19 @@ public struct MCPStatusSnapshot: Codable, Equatable, Sendable {
     }
 }
 
+public struct MCPActivitySnapshot: Codable, Equatable, Sendable {
+    public let schemaVersion: Int
+    public let entries: [MCPActivityEvent]
+
+    public init(
+        schemaVersion: Int = MCPContract.schemaVersion,
+        entries: [MCPActivityEvent]
+    ) {
+        self.schemaVersion = schemaVersion
+        self.entries = entries
+    }
+}
+
 public struct MCPSessionSnapshot: Codable, Equatable, Sendable {
     public let mode: WakeMode
     public let duration: SessionDuration

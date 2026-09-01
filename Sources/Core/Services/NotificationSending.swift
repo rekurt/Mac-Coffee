@@ -3,6 +3,7 @@ import Foundation
 public enum AppNotificationEvent: Equatable, Sendable {
     case timerCompleted
     case lowBatteryStopped
+    case updateAvailable(version: String)
 }
 
 @MainActor

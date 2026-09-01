@@ -29,12 +29,13 @@ final class InMemorySettingsPreferences: SettingsPreferences {
     }
 }
 
-final class FakeSettingsStore: SettingsStoring {
+final class FakeSettingsStore: MCPSettingsStoring {
     var selectedLanguage: SupportedLanguage
     var selectedDuration: SessionDuration
     var batteryThreshold: Int
     var launchAtLoginRequested: Bool
     var notificationAuthorizationRequested: Bool
+    var lastAnnouncedUpdateVersion: String?
     var mcpEnabled: Bool
 
     init(
@@ -43,6 +44,7 @@ final class FakeSettingsStore: SettingsStoring {
         batteryThreshold: Int = 15,
         launchAtLoginRequested: Bool = false,
         notificationAuthorizationRequested: Bool = false,
+        lastAnnouncedUpdateVersion: String? = nil,
         mcpEnabled: Bool = false
     ) {
         self.selectedLanguage = selectedLanguage
@@ -50,6 +52,7 @@ final class FakeSettingsStore: SettingsStoring {
         self.batteryThreshold = batteryThreshold
         self.launchAtLoginRequested = launchAtLoginRequested
         self.notificationAuthorizationRequested = notificationAuthorizationRequested
+        self.lastAnnouncedUpdateVersion = lastAnnouncedUpdateVersion
         self.mcpEnabled = mcpEnabled
     }
 }
@@ -79,6 +82,7 @@ final class FakePowerAssertionManager: PowerAssertionManaging {
     var failNextTransition = false
     var failEveryTransition = false
     var confirmedModeOnFailure: WakeMode?
+    var onReleaseAll: (() -> Void)?
     private(set) var transitions: [WakeMode] = []
     private(set) var releaseAllCalled = false
 
@@ -96,6 +100,7 @@ final class FakePowerAssertionManager: PowerAssertionManaging {
     }
 
     func releaseAll() {
+        onReleaseAll?()
         releaseAllCalled = true
         activeMode = .off
     }

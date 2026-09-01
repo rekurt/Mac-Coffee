@@ -1,11 +1,19 @@
+#if DEBUG
+import AppKit
+#endif
 import SwiftUI
 
-public struct SettingsView: View {
+public struct SettingsView<AdditionalContent: View>: View {
     @ObservedObject private var model: AppModel
     @ObservedObject private var localization: LocalizationController
+    private let additionalContent: AdditionalContent
 
-    public init(model: AppModel) {
+    public init(
+        model: AppModel,
+        @ViewBuilder additionalContent: () -> AdditionalContent
+    ) {
         self.model = model
+        self.additionalContent = additionalContent()
         _localization = ObservedObject(wrappedValue: model.environment.localization)
     }
 
@@ -82,12 +90,43 @@ public struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
+            additionalContent
         }
         .formStyle(.grouped)
         .padding()
-        .frame(minWidth: 480)
-        .fixedSize(horizontal: false, vertical: true)
+        .frame(minWidth: 480, idealWidth: 600, minHeight: 420, idealHeight: 620)
         .navigationTitle(Text("settings.title"))
+#if DEBUG
+        .onAppear(perform: centerSettingsWindowForUITests)
+#endif
+    }
+
+#if DEBUG
+    private func centerSettingsWindowForUITests() {
+        guard CommandLine.arguments.contains("--ui-testing-window") else { return }
+        DispatchQueue.main.async {
+            let settingsIdentifier = "com_apple_SwiftUI_Settings_window"
+            guard let window = NSApplication.shared.windows.first(where: {
+                $0.identifier?.rawValue == settingsIdentifier
+            }), let screen = NSScreen.screens.first(where: { $0.frame.origin == .zero })
+                ?? NSScreen.screens.first
+            else { return }
+            let visibleFrame = screen.visibleFrame
+            window.setFrameOrigin(NSPoint(
+                x: visibleFrame.midX - window.frame.width / 2,
+                y: visibleFrame.midY - window.frame.height / 2
+            ))
+            window.orderFrontRegardless()
+            NSApplication.shared.activate(ignoringOtherApps: true)
+        }
+    }
+#endif
+}
+
+public extension SettingsView where AdditionalContent == EmptyView {
+    init(model: AppModel) {
+        self.init(model: model) { EmptyView() }
     }
 }
 

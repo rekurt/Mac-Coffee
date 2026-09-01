@@ -1,5 +1,5 @@
 import AppKit
-import MacCoffeeCore
+import MacCoffeeAppStoreCore
 import SwiftUI
 
 @main

@@ -23,6 +23,7 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(store.batteryThreshold, 15)
         XCTAssertFalse(store.launchAtLoginRequested)
         XCTAssertFalse(store.notificationAuthorizationRequested)
+        XCTAssertNil(store.lastAnnouncedUpdateVersion)
         XCTAssertFalse(store.mcpEnabled)
     }
 
@@ -34,6 +35,7 @@ final class SettingsStoreTests: XCTestCase {
         store.batteryThreshold = 50
         store.launchAtLoginRequested = true
         store.notificationAuthorizationRequested = true
+        store.lastAnnouncedUpdateVersion = "2.0.0"
         store.mcpEnabled = true
 
         let reloaded = UserDefaultsSettingsStore(preferences: preferences)
@@ -42,6 +44,7 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(reloaded.batteryThreshold, 30)
         XCTAssertTrue(reloaded.launchAtLoginRequested)
         XCTAssertTrue(reloaded.notificationAuthorizationRequested)
+        XCTAssertEqual(reloaded.lastAnnouncedUpdateVersion, "2.0.0")
         XCTAssertTrue(reloaded.mcpEnabled)
     }
 

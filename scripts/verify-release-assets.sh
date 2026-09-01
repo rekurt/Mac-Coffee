@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="${0:A:h}"
 ROOT_DIR="${SCRIPT_DIR:h}"
-locales=(de-DE en-US es-ES fr-FR ja ko ru zh-Hans)
+locales=(en-US ru zh-Hans)
 bundle_locales=(de en es fr ja ko ru zh-Hans)
 metadata_files=(
   description.txt keywords.txt marketing_url.txt name.txt privacy_url.txt
@@ -80,6 +80,14 @@ for locale in "$locales[@]"; do
   done
 done
 
+actual_metadata_locales=("${(@f)$(
+  /usr/bin/find "$ROOT_DIR/metadata" -mindepth 1 -maxdepth 1 -type d -exec /usr/bin/basename {} \; \
+    | LC_ALL=C /usr/bin/sort
+)}")
+[[ "${(j:,:)actual_metadata_locales}" == "${(j:,:)locales}" ]] || {
+  fail "metadata must contain only en-US, ru, and zh-Hans"
+}
+
 for localization in "$ROOT_DIR"/Resources/Shared/*.lproj/Localizable.strings; do
   /usr/bin/plutil -lint "$localization" >/dev/null
 done
@@ -148,8 +156,19 @@ expected_attribution='Forked from [Elliotwu-7/Mac-Coffee](https://github.com/Ell
 }
 
 [[ ! -e "$ROOT_DIR/README.zh-CN.md" ]] || fail "obsolete README.zh-CN.md is still present"
-for readme in README.md README.ru.md README.de.md README.fr.md README.zh-Hans.md README.ja.md README.ko.md README.es.md; do
+[[ ! -e "$ROOT_DIR/docs/superpowers" ]] || fail "internal agent planning artifacts are still present"
+[[ ! -e "$ROOT_DIR/.superdesign" ]] || fail "local design workspace is still present"
+for readme in README.md README.ru.md README.zh-Hans.md; do
   [[ -s "$ROOT_DIR/$readme" ]] || fail "missing localized $readme"
 done
+
+actual_readmes=("${(@f)$(
+  /usr/bin/find "$ROOT_DIR" -mindepth 1 -maxdepth 1 -type f -name 'README*.md' \
+    -exec /usr/bin/basename {} \; | LC_ALL=C /usr/bin/sort
+)}")
+expected_readmes=(README.md README.ru.md README.zh-Hans.md)
+[[ "${(j:,:)actual_readmes}" == "${(j:,:)expected_readmes}" ]] || {
+  fail "repository documentation must contain only English, Russian, and Simplified Chinese READMEs"
+}
 
 print "Verified App Store metadata, localization parity, screenshots, and repository entry points."

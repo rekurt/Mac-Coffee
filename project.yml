@@ -11,6 +11,9 @@ configs:
   Release: release
 
 packages:
+  MCP:
+    url: https://github.com/modelcontextprotocol/swift-sdk
+    exactVersion: 0.12.1
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle
     exactVersion: 2.9.4
@@ -35,11 +38,25 @@ targets:
         PRODUCT_NAME: MacCoffeeCore
         GENERATE_INFOPLIST_FILE: YES
 
+  MacCoffeeAppStoreCore:
+    type: framework
+    platform: macOS
+    sources:
+      - path: Sources/Core
+        excludes:
+          - MCP
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.app-store-core
+        PRODUCT_NAME: MacCoffeeAppStoreCore
+        GENERATE_INFOPLIST_FILE: YES
+
   MacCoffeeDirect:
     type: application
     platform: macOS
     sources:
       - Sources/Direct
+      - Sources/MCPBrokerShared
       - path: Resources/Shared
         buildPhase: resources
       - path: Resources/Direct
@@ -48,6 +65,14 @@ targets:
         buildPhase: resources
     dependencies:
       - target: MacCoffeeCore
+      - target: MacCoffeeMCPBroker
+        embed: true
+      - target: MacCoffeeMCP
+        embed: true
+        codeSign: true
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
       - package: Sparkle
     configFiles:
       Debug: Config/Direct.xcconfig
@@ -65,7 +90,7 @@ targets:
           - Info.plist
         buildPhase: resources
     dependencies:
-      - target: MacCoffeeCore
+      - target: MacCoffeeAppStoreCore
     configFiles:
       Debug: Config/AppStore.xcconfig
       Release: Config/AppStore.xcconfig
@@ -76,7 +101,12 @@ targets:
     sources:
       - Tests/Unit
       - Tests/Support
+      - Sources/Direct/MCP
       - Sources/Direct/Security/KeychainMCPCredentialStore.swift
+      - Sources/Direct/Security/SecurityClientIdentityVerifier.swift
+      - Sources/MCPHelper/Security/KeychainClientKeyStore.swift
+      - Sources/MCPHelper/Security/ParentProcessIdentity.swift
+      - Sources/MCPBrokerShared
     dependencies:
       - target: MacCoffeeCore
     settings:
@@ -96,6 +126,78 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: MacCoffeeDirect
+
+  MacCoffeeIntegrationTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/Integration
+      - Tests/Support
+      - path: Sources/Direct/MCP
+        excludes:
+          - DirectMCPEnvironment.swift
+          - MCPActivityView.swift
+          - MCPPairingView.swift
+          - MCPSettingsView.swift
+          - MCPSettingsViewModel.swift
+          - Setup
+      - Sources/MCPHelper/XPC
+      - Sources/MCPBrokerShared
+      - path: Sources/MCPBroker
+        excludes:
+          - main.swift
+    dependencies:
+      - target: MacCoffeeCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.integration-tests
+        GENERATE_INFOPLIST_FILE: YES
+
+  MacCoffeeMCPBroker:
+    type: xpc-service
+    platform: macOS
+    sources:
+      - Sources/MCPBroker
+      - Sources/MCPBrokerShared
+    info:
+      path: Resources/MCPBroker/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.mcp-broker
+        PRODUCT_NAME: MacCoffeeMCPBroker
+        SKIP_INSTALL: YES
+
+  MacCoffeeMCP:
+    type: tool
+    platform: macOS
+    sources:
+      - Sources/MCPHelper/main.swift
+      - Sources/MCPHelper/MCPServerAdapter.swift
+      - Sources/MCPHelper/MCPToolAdapter.swift
+      - Sources/MCPHelper/MCPResourceAdapter.swift
+      - Sources/MCPHelper/MCPHelperRuntime.swift
+      - Sources/MCPHelper/Diagnostics.swift
+      - Sources/MCPHelper/Security
+      - Sources/MCPHelper/XPC
+      - Sources/MCPBrokerShared
+      - Sources/Direct/Security/SecurityClientIdentityVerifier.swift
+    dependencies:
+      - target: MacCoffeeCore
+      - package: MCP
+        product: MCP
+    configFiles:
+      Debug: Config/Shared.xcconfig
+      Release: Config/Shared.xcconfig
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.mcp-helper
+        PRODUCT_NAME: MacCoffeeMCP
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path @executable_path/../Frameworks"
+        GENERATE_INFOPLIST_FILE: YES
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        INFOPLIST_KEY_CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        INFOPLIST_KEY_CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
 
   MacCoffeeScreenshots:
     type: application
@@ -138,6 +240,8 @@ schemes:
     build:
       targets:
         MacCoffeeCore: all
+        MacCoffeeDirect: all
+        MacCoffeeAppStore: all
         MacCoffeeTests: [test]
     test:
       config: Debug
@@ -157,9 +261,26 @@ schemes:
       targets:
         - MacCoffeeUITests
 
+  MacCoffeeIntegrationTests:
+    build:
+      targets:
+        MacCoffeeCore: all
+        MacCoffeeMCP: all
+        MacCoffeeIntegrationTests: [test]
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - MacCoffeeIntegrationTests
+
   MacCoffeeScreenshots:
     build:
       targets:
         MacCoffeeScreenshots: all
     run:
       config: Release
+
+  MacCoffeeMCP:
+    build:
+      targets:
+        MacCoffeeMCP: all

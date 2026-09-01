@@ -39,8 +39,8 @@
     <true/>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright © 2026 Mac Coffee contributors.</string>
-    <key>SUEnableAutomaticChecks</key>
-    <false/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
     <key>SUFeedURL</key>
     <string>$(MACCOFFEE_APPCAST_URL)</string>
     <key>SUPublicEDKey</key>

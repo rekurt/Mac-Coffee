@@ -80,6 +80,30 @@ public final class MCPControlService: MCPControlServicing {
         return try resolve(result)
     }
 
+    public func readStatus(
+        client: MCPClientContext
+    ) -> MCPEnvelope<MCPStatusSnapshot> {
+        activityStore.record(
+            client: client,
+            action: .readStatus,
+            outcome: .success,
+            replayed: false
+        )
+        return snapshotFactory.makeStatus(from: model)
+    }
+
+    public func readActivity(
+        client: MCPClientContext
+    ) -> MCPActivitySnapshot {
+        activityStore.record(
+            client: client,
+            action: .readActivity,
+            outcome: .success,
+            replayed: false
+        )
+        return MCPActivitySnapshot(entries: activityStore.entries)
+    }
+
     private func perform(_ command: MCPCommand) -> MCPCachedCommandResult {
         do {
             return .success(try executeUncached(command))

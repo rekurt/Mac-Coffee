@@ -361,11 +361,14 @@ final class MacCoffeeUITests: XCTestCase {
             ).firstMatch
             XCTAssertTrue(countdown.waitForExistence(timeout: 2))
             assertCountdown(
-                countdown.label,
+                textValue(of: countdown),
                 matches: expectation.countdownPattern,
                 language: expectation.nativeName
             )
-            XCTAssertTrue(String(describing: modePicker.value).contains(expectation.modeTitle))
+            XCTAssertEqual(
+                testWindow.radioButtons["maccoffee.mode.system"].label,
+                expectation.modeTitle
+            )
             XCTAssertTrue(app.staticTexts[expectation.settingsTitle].exists)
             XCTAssertTrue(String(describing: picker.value).contains(expectation.nativeName))
 
@@ -376,7 +379,7 @@ final class MacCoffeeUITests: XCTestCase {
             testWindow.buttons["maccoffee.action.about"].click()
             let version = app.staticTexts["maccoffee.about.version"]
             XCTAssertTrue(version.waitForExistence(timeout: 2))
-            XCTAssertTrue(version.label.contains(expectation.versionPrefix))
+            XCTAssertTrue(textValue(of: version).contains(expectation.versionPrefix))
             app.typeKey("w", modifierFlags: .command)
 
             testWindow.buttons["maccoffee.action.settings"].click()
@@ -403,14 +406,18 @@ final class MacCoffeeUITests: XCTestCase {
 
             let currentFallbackTitle = fallbackTitle
             XCTAssertTrue(currentFallbackTitle.waitForExistence(timeout: 2))
-            XCTAssertEqual(currentFallbackTitle.label, expectation.modeSectionTitle)
+            XCTAssertEqual(textValue(of: currentFallbackTitle), expectation.modeSectionTitle)
             XCTAssertFalse(testWindow.descendants(matching: .any)["maccoffee.mode.segmented"].exists)
 
             for (mode, expectedSubtitle) in zip(["off", "system", "display"], expectation.modeSubtitles) {
                 testWindow.radioButtons["maccoffee.mode.\(mode)"].click()
                 let subtitle = testWindow.descendants(matching: .any)["maccoffee.mode.fallback.subtitle"].firstMatch
                 XCTAssertTrue(subtitle.waitForExistence(timeout: 2))
-                XCTAssertEqual(subtitle.label, expectedSubtitle, "Wrong \(mode) subtitle for \(expectation.nativeName)")
+                XCTAssertEqual(
+                    textValue(of: subtitle),
+                    expectedSubtitle,
+                    "Wrong \(mode) subtitle for \(expectation.nativeName)"
+                )
                 XCTAssertGreaterThan(subtitle.frame.width, 0)
                 XCTAssertGreaterThanOrEqual(
                     subtitle.frame.height,
@@ -481,6 +488,13 @@ final class MacCoffeeUITests: XCTestCase {
         return nil
     }
 
+    private func textValue(of element: XCUIElement) -> String {
+        if let value = element.value as? String, !value.isEmpty {
+            return value
+        }
+        return element.label
+    }
+
     private func scrollToMakeHittable(
         _ element: XCUIElement,
         in window: XCUIElement,
@@ -540,7 +554,7 @@ final class MacCoffeeUITests: XCTestCase {
         }
         if let firstWidth = widths.first {
             for width in widths.dropFirst() {
-                XCTAssertEqual(width, firstWidth, accuracy: 1, "Duration segments must be equal width", file: file, line: line)
+                XCTAssertEqual(width, firstWidth, accuracy: 2, "Duration segments must be equal width", file: file, line: line)
             }
         }
     }

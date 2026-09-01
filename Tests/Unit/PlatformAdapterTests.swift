@@ -1,5 +1,6 @@
 import Foundation
 import IOKit.ps
+import ServiceManagement
 import XCTest
 @testable import MacCoffeeCore
 
@@ -7,6 +8,40 @@ final class PlatformAdapterTests: XCTestCase {
     @MainActor
     func testMissingMainAppRegistrationIsTreatedAsDisabledSoItCanBeRegistered() {
         XCTAssertEqual(SMAppLaunchAtLoginManager().status, .disabled)
+    }
+
+    @MainActor
+    func testLegacyLaunchAgentIsReportedAndRemovedWhenStartupIsDisabled() throws {
+        var serviceStatus = SMAppService.Status.notRegistered
+        var legacyExists = true
+        var bootoutURLs: [URL] = []
+        var removedURLs: [URL] = []
+        let legacyURL = URL(
+            fileURLWithPath: "/Users/test/Library/LaunchAgents/com.elliotwu.maccoffee.plist"
+        )
+        let legacyAgent = LegacyLaunchAgentManager(
+            plistURL: legacyURL,
+            fileExists: { _ in legacyExists },
+            bootout: { bootoutURLs.append($0) },
+            removeItem: {
+                removedURLs.append($0)
+                legacyExists = false
+            }
+        )
+        let manager = SMAppLaunchAtLoginManager(
+            serviceStatus: { serviceStatus },
+            registerService: { serviceStatus = .enabled },
+            unregisterService: { serviceStatus = .notRegistered },
+            legacyAgent: legacyAgent
+        )
+
+        XCTAssertEqual(manager.status, LaunchAtLoginStatus.enabled)
+
+        try manager.setEnabled(false)
+
+        XCTAssertEqual(bootoutURLs, [legacyURL])
+        XCTAssertEqual(removedURLs, [legacyURL])
+        XCTAssertEqual(manager.status, LaunchAtLoginStatus.disabled)
     }
 
     func testBatteryDescriptionUsesCurrentOverMaximumCapacity() {

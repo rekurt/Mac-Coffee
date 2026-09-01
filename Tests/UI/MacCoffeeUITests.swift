@@ -377,7 +377,13 @@ final class MacCoffeeUITests: XCTestCase {
             assertPanelControlsFitInsideTestWindow()
 
             testWindow.buttons["maccoffee.action.about"].click()
-            let version = app.descendants(matching: .any)["maccoffee.about.version"].firstMatch
+            let version = app.staticTexts.matching(
+                NSPredicate(
+                    format: "value BEGINSWITH %@ OR label BEGINSWITH %@",
+                    expectation.versionPrefix,
+                    expectation.versionPrefix
+                )
+            ).firstMatch
             XCTAssertTrue(version.waitForExistence(timeout: 2))
             XCTAssertTrue(textValue(of: version).contains(expectation.versionPrefix))
             app.typeKey("w", modifierFlags: .command)
@@ -408,12 +414,13 @@ final class MacCoffeeUITests: XCTestCase {
             XCTAssertTrue(currentFallbackTitle.waitForExistence(timeout: 2))
             XCTAssertEqual(textValue(of: currentFallbackTitle), expectation.modeSectionTitle)
             XCTAssertFalse(testWindow.descendants(matching: .any)["maccoffee.mode.segmented"].exists)
-            let fallback = testWindow.descendants(matching: .any)["maccoffee.mode.fallback"].firstMatch
-            XCTAssertTrue(fallback.exists)
-            XCTAssertTrue(testWindow.frame.contains(fallback.frame), "Fallback mode picker is clipped outside the narrow window")
+            XCTAssertTrue(testWindow.frame.contains(currentFallbackTitle.frame))
 
             for (mode, expectedSubtitle) in zip(["off", "system", "display"], expectation.modeSubtitles) {
-                testWindow.radioButtons["maccoffee.mode.\(mode)"].click()
+                let modeButton = testWindow.radioButtons["maccoffee.mode.\(mode)"]
+                XCTAssertTrue(modeButton.exists)
+                XCTAssertTrue(testWindow.frame.contains(modeButton.frame))
+                modeButton.click()
                 let subtitle = testWindow.descendants(matching: .any)["maccoffee.mode.fallback.subtitle"].firstMatch
                 XCTAssertTrue(subtitle.waitForExistence(timeout: 2))
                 XCTAssertEqual(

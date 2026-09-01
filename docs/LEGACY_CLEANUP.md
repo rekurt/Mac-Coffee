@@ -17,8 +17,8 @@ Then run the standalone cleanup script from this repository:
 ./scripts/uninstall-legacy-helper.sh
 ```
 
-The script asks for administrator authorization, unloads only `com.elliotwu.maccoffee.helper`, and removes its helper, launch daemon, socket, and log. It always restores battery `disablesleep` to `0`.
+The script asks for administrator authorization, unloads only `com.elliotwu.maccoffee.helper`, and removes its helper, launch daemon, socket, and log. It changes battery power settings only when it detects the complete Mac Coffee 1.x signature described below.
 
-If it detects the exact active 1.x signature (`sleep 0` plus `disablesleep 1`), it restores the 1.x normal battery values (`sleep 5` plus `disablesleep 0`). If `sleep 0` exists without that complete signature, the value may belong to the user or another tool; the script warns and asks before changing it. In a noninteractive shell it leaves that ambiguous value unchanged and prints the explicit recovery command.
+If it detects the exact active 1.x signature (`sleep 0` plus `disablesleep 1`), it restores the 1.x normal battery values (`sleep 5` plus `disablesleep 0`). For every other combination, including `sleep 5` plus `disablesleep 1`, it preserves `disablesleep`. If `sleep 0` exists without the complete signature, the script warns and asks before changing only `sleep`; in a noninteractive shell it leaves that ambiguous value unchanged and prints the explicit recovery command.
 
 Mac Coffee 2.0 never runs this script automatically and does not include it inside either application bundle.

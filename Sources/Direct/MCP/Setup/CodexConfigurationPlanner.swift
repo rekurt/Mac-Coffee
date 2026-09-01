@@ -284,9 +284,20 @@ struct CodexConfigurationPlanner {
     if value == "+inf" || value == "-inf" || value == "+nan" || value == "-nan" {
       return true
     }
-    guard first.isNumber || first == "+" || first == "-" else { return false }
-    let allowed = CharacterSet(charactersIn: "0123456789abcdefABCDEFxob_+-.eE:T Z")
-    return value.unicodeScalars.allSatisfy { allowed.contains($0) }
+    return isConservativelyValidNumericValue(value)
+  }
+
+  private static func isConservativelyValidNumericValue(_ value: String) -> Bool {
+    let patterns = [
+      #"^[+-]?(?:0|[1-9](?:_?[0-9])*)$"#,
+      #"^0x[0-9A-Fa-f](?:_?[0-9A-Fa-f])*$"#,
+      #"^0o[0-7](?:_?[0-7])*$"#,
+      #"^0b[01](?:_?[01])*$"#,
+      #"^[+-]?(?:0|[1-9](?:_?[0-9])*)(?:(?:\.[0-9](?:_?[0-9])*)(?:[eE][+-]?[0-9](?:_?[0-9])*)?|(?:[eE][+-]?[0-9](?:_?[0-9])*))$"#,
+    ]
+    return patterns.contains { pattern in
+      value.range(of: pattern, options: .regularExpression) != nil
+    }
   }
 
   private static func quotedValueConsumesEntireString(

@@ -155,6 +155,39 @@ final class MCPConfigurationTests: XCTestCase {
     }
   }
 
+  func testCodexPlannerRejectsMalformedNumericValues() throws {
+    for value in ["1 2", "+", "01", "1__2", "1.", ".5"] {
+      let plan = try CodexConfigurationPlanner().plan(
+        configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+        helperURL: helperURL,
+        existingContents: "retry_count = \(value)\n"
+      )
+
+      XCTAssertEqual(plan.disposition, .manual, "Accepted malformed value: \(value)")
+      XCTAssertEqual(plan.validation, .invalid)
+      XCTAssertNil(plan.after)
+    }
+  }
+
+  func testCodexPlannerAcceptsWellFormedNumericValues() throws {
+    let before = """
+      decimal = -42
+      grouped = 1_000
+      hexadecimal = 0xDEAD_BEEF
+      decimal_float = 3.14
+      exponent = 5e+22
+      """ + "\n"
+
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .installable)
+    XCTAssertEqual(plan.validation, .valid)
+  }
+
   func testClaudePlannerMergesServerWithoutDroppingUnrelatedEntries() throws {
     let before = try fixture("claude-existing.json")
     let plan = try ClaudeConfigurationPlanner().plan(

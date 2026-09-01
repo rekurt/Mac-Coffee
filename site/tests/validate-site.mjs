@@ -34,6 +34,10 @@ for (const [tag] of html.matchAll(/<a\b[^>]*target="_blank"[^>]*>/g)) {
   assert.match(tag, /rel="[^"]*noopener[^"]*"/, `External target requires noopener: ${tag}`);
 }
 
+for (const asset of ["assets/app-icon.png", "assets/panel-en.png", "assets/settings-ru.png", ".nojekyll"]) {
+  assert.ok(existsSync(join(siteRoot, asset)), `Missing ${asset}`);
+}
+
 for (const phrase of [
   "Your agents don’t sleep",
   "maccoffee_set_session",
@@ -43,6 +47,17 @@ for (const phrase of [
   "lid closure",
 ]) {
   assert.ok(html.includes(phrase), `Missing required narrative: ${phrase}`);
+}
+
+for (const hook of ["data-language", "data-copy", 'id="wake-demo"', 'id="wake-toggle"', 'id="copy-status"']) {
+  assert.ok(html.includes(hook), `Missing interaction hook ${hook}`);
+}
+
+for (const href of [
+  "https://github.com/rekurt/Mac-Coffee",
+  "https://github.com/rekurt/Mac-Coffee/releases/latest",
+]) {
+  assert.ok(html.includes(href), `Missing product link ${href}`);
 }
 
 const context = {};

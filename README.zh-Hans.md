@@ -1,4 +1,4 @@
-# Mac Coffee 2.0
+# Mac Coffee
 
 [English](README.md) · [Русский](README.ru.md) · **简体中文**
 
@@ -20,15 +20,28 @@ Mac Coffee 是一款轻量的原生 macOS 菜单栏应用。只有在你明确�
 
 Mac Coffee 只阻止因闲置而进入睡眠。手动睡眠、合上盖子、关机、重启以及 macOS 的安全保护始终有效。
 
-## 安装与使用
+## 安装
 
-正式签名并经过公证的 Direct 版本会发布到 [Releases](https://github.com/rekurt/Mac-Coffee/releases)。本地构建方式：
+需要 macOS 13 Ventura 或更高版本。
+
+使用 Homebrew 安装：
+
+```sh
+brew tap rekurt/maccoffee
+brew install --cask maccoffee
+```
+
+也可以从[最新版本](https://github.com/rekurt/Mac-Coffee/releases/latest)下载已签名并经过公证的 DMG。
+
+本地构建方式：
 
 ```sh
 brew bundle
 ./scripts/build-local.sh direct
 open "dist/local/Mac Coffee.app"
 ```
+
+## 使用
 
 打开菜单栏中的 Mac Coffee 图标，选择模式和时长。你可以在“设置”中更改语言、电量阈值、登录启动、更新和 MCP 集成。关闭模式或确认退出时，应用会立即释放唤醒请求。
 

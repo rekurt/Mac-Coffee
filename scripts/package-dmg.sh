@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="${0:A:h}"
 ROOT_DIR="${SCRIPT_DIR:h}"
-version="${MACCOFFEE_VERSION:-2.0.0}"
+version="${MACCOFFEE_VERSION:-2.0.1}"
 app_path="${MACCOFFEE_APP_PATH:-$ROOT_DIR/dist/local/Mac Coffee.app}"
 dmg_path="${MACCOFFEE_DMG_PATH:-$ROOT_DIR/dist/local/MacCoffee-${version}.dmg}"
 

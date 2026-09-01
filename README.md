@@ -1,69 +1,50 @@
-# Mac Coffee 2.0
+# Mac Coffee
 
-Lightweight, native macOS menu-bar control for keeping a Mac awake on your terms.
+A native macOS menu bar app that prevents idle sleep.
 
 **English** · [Русский](README.ru.md) · [简体中文](README.zh-Hans.md)
 
-![Mac Coffee menu-bar panel](docs/images/panel-en.png)
-
-Mac Coffee is a privacy-first rewrite of the original utility. It uses public, process-owned IOKit power assertions: no privileged helper, persistent `pmset` changes, account, analytics, or backend. The app starts Off and releases every assertion when a session ends or the process terminates.
-
-## Highlights
-
-- **Three explicit modes:** Off, Keep Mac Awake, and Keep Display Awake.
-- **Flexible sessions:** 30 minutes, 1, 2, 4, or 8 hours, plus indefinite.
-- **Battery protection:** configurable cutoff from 10% to 30%, with a safe 15% default and hysteresis.
-- **Native macOS integration:** Launch at Login through `SMAppService`, local notifications, VoiceOver labels, and one confirmation flow for the footer Quit action and `⌘Q`.
-- **Instant localization:** System, English, Russian, German, French, Simplified Chinese, Japanese, Korean, and Spanish; switching language never restarts or interrupts an active session.
-- **Direct updates:** Sparkle checks in the background, shows one unobtrusive update note per version, and keeps the manual Check for Updates action in Settings.
-- **Optional local MCP control:** the Direct build can expose Mac Coffee to Codex, Claude Desktop, or another stdio MCP client after explicit enablement and pairing.
-- **Two distribution boundaries:** a universal Direct build with Sparkle and MCP, and a sandboxed Mac App Store build containing neither.
-
-Mac Coffee prevents idle sleep only. Manual Sleep, lid closure, shutdown, restart, thermal protection, and other macOS safety decisions always remain effective.
-
-## Screenshots
-
-| Active wake session | Localized settings |
+| Wake session | Settings |
 | --- | --- |
-| ![Active English session](docs/images/panel-en.png) | ![Russian settings](docs/images/settings-ru.png) |
+| ![Active wake session](docs/images/panel-en.png) | ![Settings in Russian](docs/images/settings-ru.png) |
 
-Reproducible 1280×800 App Store screenshots are maintained for English, Russian, and Simplified Chinese under [`metadata`](metadata). The application interface itself remains available in all eight languages. Regenerate the images from production SwiftUI views with:
+Mac Coffee uses process-owned IOKit power assertions. It does not install a privileged helper, change `pmset`, collect analytics, or use a backend. Assertions are released when a session ends or the app exits.
 
-```sh
-./scripts/generate-screenshots.sh
-```
+## Install
 
-## Requirements
+Mac Coffee requires macOS 13 Ventura or later.
 
-- macOS 13 Ventura or later.
-- A full Xcode installation for source builds.
-- Homebrew and the tools declared in [`Brewfile`](Brewfile).
-
-## Install and use
-
-Signed and notarized Direct builds will appear under [Releases](https://github.com/rekurt/Mac-Coffee/releases). Until one is published, build locally:
+### Homebrew
 
 ```sh
-brew bundle
-./scripts/build-local.sh direct
-open "dist/local/Mac Coffee.app"
+brew tap rekurt/maccoffee
+brew install --cask maccoffee
 ```
 
-1. Open the Mac Coffee status item in the menu bar.
-2. Choose Keep Mac Awake or Keep Display Awake.
-3. Choose a duration; changing it updates the active session immediately.
-4. Choose Off to release the wake request.
-5. Open Settings to change the language, battery cutoff, Launch at Login, updates, or the optional MCP integration.
+### DMG
 
-The local build is ad-hoc signed for testing on the current Mac. It is not a distributable release artifact.
+Download the signed and notarized DMG from the [latest release](https://github.com/rekurt/Mac-Coffee/releases/latest), open it, and move Mac Coffee to Applications.
 
-## Local MCP server (Direct build)
+## Usage
 
-Mac Coffee ships an optional, disabled-by-default stdio MCP server. Enable it in **Settings → AI & automation**, open the setup wizard, review the proposed diff, and confirm installation for Codex or Claude Desktop. A generic stdio configuration is available for other clients.
+1. Open the coffee cup menu bar item.
+2. Select **Keep Mac Awake** or **Keep Display Awake**.
+3. Select a duration: 30 minutes, 1, 2, 4, or 8 hours, or indefinitely.
+4. Select **Off** to end the session.
 
-The server never launches Mac Coffee automatically. A client must pair with the running app, and Mac Coffee shows pending requests, trusted clients, revocation controls, and a bounded local activity log. Credentials are stored in Keychain; connections are limited to the current macOS user and validated across the embedded helper, broker, and app boundary.
+Settings include a 10–30% battery cutoff, Launch at Login, notifications, update checks, language selection, and MCP configuration. The default battery cutoff is 15%.
 
-Available tools:
+The interface is available in English, Russian, German, French, Simplified Chinese, Japanese, Korean, and Spanish. VoiceOver labels are included.
+
+Mac Coffee prevents idle sleep only. Manual sleep, lid closure, shutdown, restart, thermal protection, and other macOS safety mechanisms still apply.
+
+## Local MCP server
+
+The Direct build includes an optional stdio MCP server for Codex, Claude Desktop, and other MCP clients. It is disabled by default.
+
+Enable it under **Settings → AI & automation**, then use the setup wizard to review and install the client configuration. Clients must pair with a running Mac Coffee instance. Credentials are stored in Keychain, and connections are limited to the current macOS user.
+
+Tools:
 
 - `maccoffee_get_status`
 - `maccoffee_set_session`
@@ -72,43 +53,27 @@ Available tools:
 - `maccoffee_set_launch_at_login`
 - `maccoffee_set_language`
 
-Available resources:
+Resources:
 
 - `maccoffee://status`
 - `maccoffee://capabilities`
 - `maccoffee://activity`
 
-See the complete [MCP setup, security model, schemas, and troubleshooting guide](docs/MCP.md).
+See [MCP setup and security](docs/MCP.md) for configuration examples, schemas, and troubleshooting.
 
-## Architecture
+## Build from source
 
-| Component | Responsibility | Ships in |
-| --- | --- | --- |
-| `MacCoffeeCore` | Domain model, IOKit assertions, battery/lifecycle adapters, localization, and shared SwiftUI views | Direct |
-| `MacCoffeeAppStoreCore` | Store-safe core compiled without MCP symbols | App Store |
-| `MacCoffeeDirect` | Direct composition root, Sparkle update note, MCP settings and lifecycle | Direct |
-| `MacCoffeeMCP` | Embedded stdio MCP helper using the official Swift MCP SDK | Direct |
-| `MacCoffeeMCPBroker` | Embedded XPC broker that lets the helper locate a running app instance | Direct |
-| `MacCoffeeAppStore` | Sandboxed Store composition root with no alternate updater or MCP artifacts | App Store |
-| `MacCoffeeScreenshots` | Deterministic developer-only renderer of production views | Never |
-
-Wake sessions use `IOPMAssertionCreateWithName`. Assertions belong to the process, so macOS also removes them if it crashes. Battery state comes from IOPowerSources notifications rather than polling. Preferences contain no activity history; MCP activity is bounded and kept only in memory.
-
-Read [Architecture](docs/ARCHITECTURE.md), [Privacy](PRIVACY.md), [Security](docs/SECURITY.md), and [App Store submission](docs/APP_STORE_SUBMISSION.md) for the detailed boundaries.
-
-## Build and verify
+A source build requires Xcode and the tools listed in the [`Brewfile`](Brewfile).
 
 ```sh
 brew bundle
-xcodegen generate
-
 ./scripts/build-local.sh direct
-./scripts/build-local.sh app-store
-./scripts/verify-release-assets.sh
-./scripts/verify-bundles.sh
+open "dist/local/Mac Coffee.app"
 ```
 
-Run the automated suite:
+The local build is ad hoc signed and intended for testing on the current Mac.
+
+Run the test suite:
 
 ```sh
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
@@ -119,45 +84,77 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
   CODE_SIGNING_ALLOWED=NO
 ```
 
-XCUITests require an unlocked interactive desktop. CI builds both shipping products and exercises UI scenarios whenever macOS permits accessibility event delivery.
-
-Create a local smoke-test DMG:
+Build and verify both distribution variants:
 
 ```sh
-./scripts/package-dmg.sh
-open dist/local/MacCoffee-2.0.0.dmg
+xcodegen generate
+./scripts/build-local.sh direct
+./scripts/build-local.sh app-store
+./scripts/verify-release-assets.sh
+./scripts/verify-bundles.sh
 ```
 
-## Release paths
+XCUITests require an unlocked interactive desktop.
 
-The Direct release script refuses to continue without a Developer ID certificate, notarization credentials, an HTTPS appcast URL, and a Sparkle EdDSA public key:
+## Project structure
+
+| Component | Purpose | Distribution |
+| --- | --- | --- |
+| `MacCoffeeCore` | Power assertions, preferences, localization, and shared UI | Direct |
+| `MacCoffeeAppStoreCore` | Store-safe core without MCP symbols | App Store |
+| `MacCoffeeDirect` | Direct app, Sparkle updates, and MCP lifecycle | Direct |
+| `MacCoffeeMCP` | Embedded stdio MCP helper | Direct |
+| `MacCoffeeMCPBroker` | XPC broker between the helper and the running app | Direct |
+| `MacCoffeeAppStore` | Sandboxed App Store app without Sparkle or MCP | App Store |
+| `MacCoffeeScreenshots` | Deterministic App Store screenshot renderer | Development only |
+
+Wake sessions use `IOPMAssertionCreateWithName`. Battery changes come from IOPowerSources notifications rather than polling.
+
+Detailed documentation:
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Privacy policy](PRIVACY.md)
+- [Security](docs/SECURITY.md)
+- [App Store submission](docs/APP_STORE_SUBMISSION.md)
+
+## Release
+
+Create a signed and notarized Direct release:
 
 ```sh
 ./scripts/release-direct.sh
 ```
 
-The App Store archive is isolated from Sparkle and MCP and requires an Apple Developer Team ID plus valid App Store signing assets:
+The script requires a Developer ID certificate, notarization credentials, an HTTPS appcast URL, and a Sparkle EdDSA public key.
+
+Create an App Store archive:
 
 ```sh
 MACCOFFEE_APP_STORE_TEAM=YOUR_TEAM_ID ./scripts/archive-app-store.sh
 ```
 
-Neither path stores credentials in the repository. Complete the [release checklist](docs/RELEASE_CHECKLIST.md) before publishing or submitting anything.
+The App Store build does not contain Sparkle, the MCP helper, or the MCP broker. See the [release checklist](docs/RELEASE_CHECKLIST.md) before publishing a build.
+
+App Store screenshots are generated from production SwiftUI views:
+
+```sh
+./scripts/generate-screenshots.sh
+```
 
 ## Privacy and security
 
-Mac Coffee collects no personal data. The Direct build contacts only the configured Sparkle HTTPS appcast for scheduled or manual update checks. MCP communication stays local to the current macOS account; the App Store build has no MCP helper, broker, Sparkle framework, or alternate update path.
+Mac Coffee does not collect personal data. The Direct build connects only to the configured Sparkle appcast for update checks. MCP traffic stays on the local Mac and its activity log is kept in memory with a fixed size limit.
 
-Report vulnerabilities privately according to the [security policy](docs/SECURITY.md). For bugs and support questions, use [GitHub Issues](https://github.com/rekurt/Mac-Coffee/issues).
+Report vulnerabilities using the [security policy](docs/SECURITY.md). Use [GitHub Issues](https://github.com/rekurt/Mac-Coffee/issues) for bugs and support requests.
 
 ## Upgrading from 1.x
 
-Version 2.0 never installs or invokes the original privileged helper. If Mac Coffee 1.x was previously installed, follow the explicit, administrator-authorized [legacy cleanup guide](docs/LEGACY_CLEANUP.md). The cleanup script is not bundled with either application and never runs automatically.
+Version 2.0 does not install or call the privileged helper used by 1.x. If an older version was installed, follow the [legacy cleanup guide](docs/LEGACY_CLEANUP.md). Cleanup requires explicit administrator approval and never runs automatically.
 
-## Contributing and license
+## Contributing
 
-Contributions are welcome. Read [Contributing](docs/CONTRIBUTING.md) and the [Code of Conduct](docs/CODE_OF_CONDUCT.md) before opening a pull request.
+See [Contributing](docs/CONTRIBUTING.md) and the [Code of Conduct](docs/CODE_OF_CONDUCT.md).
 
-Mac Coffee is available under the [MIT License](LICENSE).
+Mac Coffee is licensed under the [MIT License](LICENSE).
 
 Forked from [Elliotwu-7/Mac-Coffee](https://github.com/Elliotwu-7/Mac-Coffee).

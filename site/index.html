@@ -3,22 +3,22 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Keep long-running AI agents, builds, downloads, and local automation alive with native macOS wake control and local MCP integration.">
+    <meta name="description" content="A native macOS menu bar app that prevents idle sleep with timed sessions, battery protection, and optional local MCP control.">
     <meta name="theme-color" content="#090a0c">
     <link rel="canonical" href="https://rekurt.github.io/Mac-Coffee/">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://rekurt.github.io/Mac-Coffee/">
-    <meta property="og:title" content="Mac Coffee — Keep your agents running">
-    <meta property="og:description" content="Native macOS wake control with local MCP automation, battery protection, and no cloud backend.">
+    <meta property="og:title" content="Mac Coffee — Keep your Mac awake">
+    <meta property="og:description" content="Native macOS wake control with timed sessions, battery protection, and optional local MCP control.">
     <meta property="og:image" content="https://rekurt.github.io/Mac-Coffee/assets/og.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Mac Coffee keeps three AI agents running with an active wake session">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Mac Coffee — Keep your agents running">
-    <meta name="twitter:description" content="Native macOS wake control with local MCP automation, battery protection, and no cloud backend.">
+    <meta name="twitter:title" content="Mac Coffee — Keep your Mac awake">
+    <meta name="twitter:description" content="Native macOS wake control with timed sessions, battery protection, and optional local MCP control.">
     <meta name="twitter:image" content="https://rekurt.github.io/Mac-Coffee/assets/og.png">
-    <title>Mac Coffee — Keep your agents running</title>
+    <title>Mac Coffee — Keep your Mac awake</title>
     <link rel="icon" href="assets/app-icon.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
   </head>
@@ -30,7 +30,7 @@
         <a class="brand" href="#top" aria-label="Mac Coffee home">
           <img src="assets/app-icon.png" alt="" width="36" height="36">
           <span>Mac Coffee</span>
-          <span class="version-pill">2.0</span>
+          <span class="version-pill">2.0.1</span>
         </a>
 
         <div class="nav-links">
@@ -45,7 +45,7 @@
             <button type="button" data-language="en" aria-pressed="true">EN</button>
             <button type="button" data-language="ru" aria-pressed="false">RU</button>
           </div>
-          <a class="button button-small button-primary" href="https://github.com/rekurt/Mac-Coffee/releases/latest" target="_blank" rel="noopener noreferrer" data-i18n="navDownload">Download</a>
+          <a class="button button-small button-primary" href="#install" data-i18n="navInstall">Install</a>
         </div>
       </nav>
     </header>
@@ -53,18 +53,22 @@
     <main id="main-content">
       <section class="hero shell" id="top" aria-labelledby="hero-title">
         <div class="hero-copy" data-reveal>
-          <div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="heroEyebrow">Native macOS wake control for human and AI work</span></div>
-          <h1 id="hero-title" data-i18n="heroTitle">Your agents don’t sleep. Your Mac shouldn’t either.</h1>
-          <p class="hero-lede" data-i18n="heroBody">Keep long-running agents, builds, downloads, and local automation alive while you step away.</p>
+          <div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="heroEyebrow">Native macOS menu bar app</span></div>
+          <h1 id="hero-title" data-i18n="heroTitle">Keep your Mac awake when you need it.</h1>
+          <p class="hero-lede" data-i18n="heroBody">Run timed or indefinite wake sessions without changing permanent power settings.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="https://github.com/rekurt/Mac-Coffee/releases/latest" target="_blank" rel="noopener noreferrer">
-              <span data-i18n="heroPrimary">Download Direct Build</span>
+            <button class="button button-primary" type="button" data-copy="#brew-install" data-i18n-aria="copyInstallLabel">
+              <span data-copy-label data-i18n="heroPrimary">Copy Homebrew command</span>
+              <span aria-hidden="true">⌘</span>
+            </button>
+            <a class="button button-ghost" href="https://github.com/rekurt/Mac-Coffee/releases/latest" target="_blank" rel="noopener noreferrer">
+              <span data-i18n="heroSecondary">Download DMG</span>
               <span aria-hidden="true">↗</span>
             </a>
-            <a class="button button-ghost" href="#mcp">
-              <span data-i18n="heroSecondary">Connect your MCP client</span>
-              <span aria-hidden="true">↓</span>
-            </a>
+          </div>
+          <div class="hero-install" id="install" aria-label="Homebrew installation" data-i18n-aria="installLabel">
+            <span>Homebrew</span>
+            <code id="brew-install">brew tap rekurt/maccoffee<br>brew install --cask maccoffee</code>
           </div>
           <div class="hero-trust">
             <span><i aria-hidden="true"></i><span data-i18n="trustNative">Native SwiftUI</span></span>
@@ -338,12 +342,12 @@ command = <span class="code-string">"/Applications/Mac Coffee.app/Contents/Helpe
         <div class="cta-card" data-reveal>
           <div class="cta-glow" aria-hidden="true"></div>
           <img src="assets/app-icon.png" alt="Mac Coffee application icon" width="128" height="128" loading="lazy">
-          <span class="section-index" data-i18n="ctaEyebrow">READY WHEN YOUR AGENTS ARE</span>
-          <h2 id="cta-title" data-i18n="ctaTitle">Start the run. Start the session. Walk away.</h2>
-          <p data-i18n="ctaBody">Your Mac stays available for the work — and battery protection stays in charge.</p>
+          <span class="section-index" data-i18n="ctaEyebrow">MACOS 13 OR LATER</span>
+          <h2 id="cta-title" data-i18n="ctaTitle">Install Mac Coffee and choose a wake session.</h2>
+          <p data-i18n="ctaBody">Install with Homebrew or download the signed and notarized DMG.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="https://github.com/rekurt/Mac-Coffee/releases/latest" target="_blank" rel="noopener noreferrer"><span data-i18n="heroPrimary">Download Direct Build</span><span aria-hidden="true">↗</span></a>
-            <a class="button button-ghost" href="https://github.com/rekurt/Mac-Coffee" target="_blank" rel="noopener noreferrer"><span data-i18n="viewSource">View source on GitHub</span><span aria-hidden="true">↗</span></a>
+            <a class="button button-primary" href="#install"><span data-i18n="ctaPrimary">Install with Homebrew</span><span aria-hidden="true">↑</span></a>
+            <a class="button button-ghost" href="https://github.com/rekurt/Mac-Coffee/releases/latest" target="_blank" rel="noopener noreferrer"><span data-i18n="heroSecondary">Download DMG</span><span aria-hidden="true">↗</span></a>
           </div>
           <small data-i18n="ctaRequirement">Requires macOS 13 Ventura or later · MIT licensed</small>
         </div>

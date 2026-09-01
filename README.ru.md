@@ -1,4 +1,4 @@
-# Mac Coffee 2.0
+# Mac Coffee
 
 [English](README.md) · **Русский** · [简体中文](README.zh-Hans.md)
 
@@ -20,15 +20,28 @@ Mac Coffee — лёгкое нативное приложение в строк�
 
 Mac Coffee предотвращает только сон из-за бездействия. Ручной сон, закрытие крышки, выключение, перезапуск и защитные решения macOS продолжают действовать.
 
-## Установка и использование
+## Установка
 
-Подписанные и notarized-сборки будут опубликованы в [Releases](https://github.com/rekurt/Mac-Coffee/releases). Для локальной сборки:
+Требуется macOS 13 Ventura или новее.
+
+Через Homebrew:
+
+```sh
+brew tap rekurt/maccoffee
+brew install --cask maccoffee
+```
+
+Либо скачайте подписанный и нотарифицированный DMG из [последнего релиза](https://github.com/rekurt/Mac-Coffee/releases/latest).
+
+Для локальной сборки:
 
 ```sh
 brew bundle
 ./scripts/build-local.sh direct
 open "dist/local/Mac Coffee.app"
 ```
+
+## Использование
 
 Откройте значок Mac Coffee в строке меню, выберите режим и длительность. В настройках доступны язык, порог батареи, запуск при входе, обновления и MCP-интеграция. Режим «Выкл.» и подтверждённый выход немедленно освобождают системный запрос бодрствования.
 

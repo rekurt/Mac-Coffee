@@ -39,7 +39,9 @@ for (const asset of ["assets/app-icon.png", "assets/panel-en.png", "assets/setti
 }
 
 for (const phrase of [
-  "Your agents don’t sleep",
+  "Keep your Mac awake",
+  "brew tap rekurt/maccoffee",
+  "brew install --cask maccoffee",
   "maccoffee_set_session",
   "Settings → AI & automation",
   "Battery protection",

@@ -13,7 +13,7 @@ struct ClaudeConfigurationPlanner {
       provided: existingContents
     )
     let instructions = Self.manualInstructions(helperURL: helperURL)
-    guard !Self.hasDuplicateManagedKeys(before), var root = Self.parseRoot(before) else {
+    guard var root = Self.parseRoot(before), !Self.hasDuplicateJSONKeys(before) else {
       return manualPlan(
         configurationURL: configurationURL,
         helperURL: helperURL,
@@ -82,8 +82,8 @@ struct ClaudeConfigurationPlanner {
   }
 
   static func validate(contents: String, helperURL: URL) -> Bool {
-    guard !hasDuplicateManagedKeys(contents),
-      let root = parseRoot(contents),
+    guard let root = parseRoot(contents),
+      !hasDuplicateJSONKeys(contents),
       let servers = root["mcpServers"] as? [String: Any],
       let server = servers[serverKey] as? [String: Any]
     else { return false }
@@ -105,13 +105,10 @@ struct ClaudeConfigurationPlanner {
     return root
   }
 
-  private static func hasDuplicateManagedKeys(_ contents: String) -> Bool {
-    guard let regex = try? NSRegularExpression(
-      pattern: "\\\"mac-coffee\\\"\\s*:",
-      options: []
-    ) else { return true }
-    let range = NSRange(contents.startIndex..<contents.endIndex, in: contents)
-    return regex.numberOfMatches(in: contents, range: range) > 1
+  private static func hasDuplicateJSONKeys(_ contents: String) -> Bool {
+    if contents.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return false }
+    var detector = JSONDuplicateKeyDetector(contents: contents)
+    return (try? detector.hasDuplicateKeys()) ?? true
   }
 
   private static func matches(server: [String: Any], helperURL: URL) -> Bool {
@@ -155,5 +152,123 @@ struct ClaudeConfigurationPlanner {
       validation: .invalid,
       manualInstructions: instructions
     )
+  }
+}
+
+private struct JSONDuplicateKeyDetector {
+  private enum ParseError: Error {
+    case invalidJSON
+  }
+
+  private let bytes: [UInt8]
+  private var index = 0
+
+  init(contents: String) {
+    bytes = Array(contents.utf8)
+  }
+
+  mutating func hasDuplicateKeys() throws -> Bool {
+    skipWhitespace()
+    let duplicate = try parseValue()
+    if duplicate { return true }
+    skipWhitespace()
+    guard index == bytes.count else { throw ParseError.invalidJSON }
+    return false
+  }
+
+  private mutating func parseValue() throws -> Bool {
+    skipWhitespace()
+    guard index < bytes.count else { throw ParseError.invalidJSON }
+    switch bytes[index] {
+    case 0x7B:
+      return try parseObject()
+    case 0x5B:
+      return try parseArray()
+    case 0x22:
+      _ = try parseString()
+      return false
+    default:
+      let start = index
+      while index < bytes.count, !isValueDelimiter(bytes[index]) {
+        index += 1
+      }
+      guard index > start else { throw ParseError.invalidJSON }
+      return false
+    }
+  }
+
+  private mutating func parseObject() throws -> Bool {
+    index += 1
+    skipWhitespace()
+    if consume(0x7D) { return false }
+    var keys: Set<String> = []
+
+    while true {
+      skipWhitespace()
+      let key = try parseString()
+      guard keys.insert(key).inserted else { return true }
+      skipWhitespace()
+      guard consume(0x3A) else { throw ParseError.invalidJSON }
+      if try parseValue() { return true }
+      skipWhitespace()
+      if consume(0x7D) { return false }
+      guard consume(0x2C) else { throw ParseError.invalidJSON }
+    }
+  }
+
+  private mutating func parseArray() throws -> Bool {
+    index += 1
+    skipWhitespace()
+    if consume(0x5D) { return false }
+
+    while true {
+      if try parseValue() { return true }
+      skipWhitespace()
+      if consume(0x5D) { return false }
+      guard consume(0x2C) else { throw ParseError.invalidJSON }
+    }
+  }
+
+  private mutating func parseString() throws -> String {
+    guard index < bytes.count, bytes[index] == 0x22 else {
+      throw ParseError.invalidJSON
+    }
+    let start = index
+    index += 1
+    while index < bytes.count {
+      if bytes[index] == 0x5C {
+        index += 2
+        guard index <= bytes.count else { throw ParseError.invalidJSON }
+      } else if bytes[index] == 0x22 {
+        index += 1
+        let literal = String(decoding: bytes[start..<index], as: UTF8.self)
+        guard
+          let data = "[\(literal)]".data(using: .utf8),
+          let values = try? JSONSerialization.jsonObject(with: data) as? [String],
+          let value = values.first
+        else { throw ParseError.invalidJSON }
+        return value
+      } else {
+        index += 1
+      }
+    }
+    throw ParseError.invalidJSON
+  }
+
+  private mutating func skipWhitespace() {
+    while index < bytes.count, [0x20, 0x09, 0x0A, 0x0D].contains(bytes[index]) {
+      index += 1
+    }
+  }
+
+  private mutating func consume(_ byte: UInt8) -> Bool {
+    guard index < bytes.count, bytes[index] == byte else { return false }
+    index += 1
+    return true
+  }
+
+  private func isValueDelimiter(_ byte: UInt8) -> Bool {
+    byte == 0x2C || byte == 0x5D || byte == 0x7D
+      || byte == 0x20 || byte == 0x09 || byte == 0x0A || byte == 0x0D
   }
 }

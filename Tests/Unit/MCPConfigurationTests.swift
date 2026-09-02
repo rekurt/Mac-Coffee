@@ -236,6 +236,29 @@ final class MCPConfigurationTests: XCTestCase {
     }
   }
 
+  func testClaudePlannerRejectsDuplicateMCPServersContainers() throws {
+    let before = """
+      {
+        "mcpServers": {
+          "filesystem": { "command": "/usr/bin/filesystem" }
+        },
+        "mcpServers": {
+          "other": { "command": "/usr/bin/other" }
+        }
+      }
+      """
+
+    let plan = try ClaudeConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/claude_desktop_config.json"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .manual)
+    XCTAssertEqual(plan.validation, .invalid)
+    XCTAssertNil(plan.after)
+  }
+
   func testClaudePlannerDoesNotOverwriteAConflictingMacCoffeeServer() throws {
     let before = """
       {

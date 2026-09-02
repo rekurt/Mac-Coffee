@@ -59,22 +59,30 @@ final class MCPRuntimeBehaviorTests: XCTestCase {
         XCTAssertTrue(replacementRun.entries.isEmpty)
     }
 
-    func testRequestCacheIsBoundedFIFOAndCurrentRunOnly() {
+    func testRequestCacheIsBoundedFIFOAndCurrentRunOnly() throws {
         let cache = MCPRequestCache(capacity: 2)
+        let command = MCPCommand.stopSession(requestID: "request")
         let first = MCPCachedCommandResult.failure(MCPServiceError(code: .appBusy))
         let second = MCPCachedCommandResult.failure(MCPServiceError(code: .batteryBlocked))
         let third = MCPCachedCommandResult.failure(MCPServiceError(code: .assertionFailed))
 
-        cache.insert(first, clientIdentifier: "client", requestID: "one")
-        cache.insert(second, clientIdentifier: "client", requestID: "two")
-        cache.insert(third, clientIdentifier: "client", requestID: "three")
+        cache.insert(first, command: command, clientIdentifier: "client", requestID: "one")
+        cache.insert(second, command: command, clientIdentifier: "client", requestID: "two")
+        cache.insert(third, command: command, clientIdentifier: "client", requestID: "three")
 
-        XCTAssertNil(cache.result(clientIdentifier: "client", requestID: "one"))
-        XCTAssertEqual(cache.result(clientIdentifier: "client", requestID: "two"), second)
-        XCTAssertEqual(cache.result(clientIdentifier: "client", requestID: "three"), third)
-        XCTAssertNil(MCPRequestCache(capacity: 2).result(
+        XCTAssertNil(try cache.result(clientIdentifier: "client", requestID: "one", command: command))
+        XCTAssertEqual(
+            try cache.result(clientIdentifier: "client", requestID: "two", command: command),
+            second
+        )
+        XCTAssertEqual(
+            try cache.result(clientIdentifier: "client", requestID: "three", command: command),
+            third
+        )
+        XCTAssertNil(try MCPRequestCache(capacity: 2).result(
             clientIdentifier: "client",
-            requestID: "three"
+            requestID: "three",
+            command: command
         ))
     }
 
@@ -86,7 +94,7 @@ final class MCPRuntimeBehaviorTests: XCTestCase {
         )
 
         let replay = try harness.service.execute(
-            .setSession(mode: .display, duration: .hours8, requestID: "same-request"),
+            .setSession(mode: .system, duration: .hours1, requestID: "same-request"),
             client: harness.client
         )
 
@@ -97,6 +105,26 @@ final class MCPRuntimeBehaviorTests: XCTestCase {
         XCTAssertEqual(harness.activity.entries.count, 2)
         XCTAssertFalse(harness.activity.entries[0].replayed)
         XCTAssertTrue(harness.activity.entries[1].replayed)
+    }
+
+    func testReusedRequestIDWithDifferentCommandIsRejected() throws {
+        let harness = MCPRuntimeHarness()
+        _ = try harness.service.execute(
+            .setSession(mode: .system, duration: .hours1, requestID: "reused-request"),
+            client: harness.client
+        )
+
+        XCTAssertThrowsError(try harness.service.execute(
+            .stopSession(requestID: "reused-request"),
+            client: harness.client
+        )) { error in
+            XCTAssertEqual((error as? MCPServiceError)?.code, .invalidArgument)
+            XCTAssertEqual((error as? MCPServiceError)?.field, "requestId")
+        }
+
+        XCTAssertEqual(harness.model.mode, .system)
+        XCTAssertEqual(harness.power.transitions, [.system])
+        XCTAssertFalse(harness.activity.entries.last?.replayed == true)
     }
 
     func testDuplicateFailedRequestRetriesUntilItSucceeds() throws {

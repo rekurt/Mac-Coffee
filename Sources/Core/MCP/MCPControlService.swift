@@ -49,24 +49,37 @@ public final class MCPControlService: MCPControlServicing {
             throw error
         }
 
-        if let requestID = command.requestID,
-           let cached = requestCache.result(
-               clientIdentifier: client.identifier,
-               requestID: requestID
-           ) {
-            activityStore.record(
-                client: client,
-                command: command,
-                outcome: cached.activityOutcome,
-                replayed: true
-            )
-            return try resolve(cached)
+        if let requestID = command.requestID {
+            do {
+                if let cached = try requestCache.result(
+                    clientIdentifier: client.identifier,
+                    requestID: requestID,
+                    command: command
+                ) {
+                    activityStore.record(
+                        client: client,
+                        command: command,
+                        outcome: cached.activityOutcome,
+                        replayed: true
+                    )
+                    return try resolve(cached)
+                }
+            } catch let error as MCPServiceError {
+                activityStore.record(
+                    client: client,
+                    command: command,
+                    outcome: .failure(error.code),
+                    replayed: false
+                )
+                throw error
+            }
         }
 
         let result = perform(command)
         if let requestID = command.requestID, case .success = result {
             requestCache.insert(
                 result,
+                command: command,
                 clientIdentifier: client.identifier,
                 requestID: requestID
             )

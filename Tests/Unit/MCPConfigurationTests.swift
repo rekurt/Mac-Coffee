@@ -69,6 +69,25 @@ final class MCPConfigurationTests: XCTestCase {
     XCTAssertNil(plan.after)
   }
 
+  func testCodexPlannerRejectsDuplicateTableDeclarations() throws {
+    let before = """
+      [tool]
+      first = 1
+      [tool]
+      second = 2
+      """ + "\n"
+
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .manual)
+    XCTAssertEqual(plan.validation, .invalid)
+    XCTAssertNil(plan.after)
+  }
+
   func testCodexPlannerRejectsEquivalentDottedKeyDeclaration() throws {
     let before = """
       mcp_servers.mac_coffee = { command = "/usr/local/bin/existing" }

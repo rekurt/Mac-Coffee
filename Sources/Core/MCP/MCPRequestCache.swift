@@ -21,8 +21,13 @@ public final class MCPRequestCache {
         let requestID: String
     }
 
+    private struct Entry {
+        let command: MCPCommand
+        let result: MCPCachedCommandResult
+    }
+
     private let capacity: Int
-    private var values: [Key: MCPCachedCommandResult] = [:]
+    private var values: [Key: Entry] = [:]
     private var insertionOrder: [Key] = []
 
     public init(capacity: Int = 200) {
@@ -31,20 +36,28 @@ public final class MCPRequestCache {
 
     public func result(
         clientIdentifier: String,
-        requestID: String
-    ) -> MCPCachedCommandResult? {
-        values[Key(clientIdentifier: clientIdentifier, requestID: requestID)]
+        requestID: String,
+        command: MCPCommand
+    ) throws -> MCPCachedCommandResult? {
+        guard let entry = values[Key(clientIdentifier: clientIdentifier, requestID: requestID)] else {
+            return nil
+        }
+        guard entry.command == command else {
+            throw MCPServiceError.invalidArgument(field: "requestId")
+        }
+        return entry.result
     }
 
     public func insert(
         _ result: MCPCachedCommandResult,
+        command: MCPCommand,
         clientIdentifier: String,
         requestID: String
     ) {
         let key = Key(clientIdentifier: clientIdentifier, requestID: requestID)
         guard values[key] == nil else { return }
 
-        values[key] = result
+        values[key] = Entry(command: command, result: result)
         insertionOrder.append(key)
         if insertionOrder.count > capacity {
             let evicted = insertionOrder.removeFirst()

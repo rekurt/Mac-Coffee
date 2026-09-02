@@ -232,7 +232,10 @@ struct CodexConfigurationPlanner {
     var arrayDepth = 0
     var inlineTableDepth = 0
     var tablePath: [String] = []
+    var tableInstanceIdentifier = ""
+    var nextArrayTableInstance = 0
     var assignmentPaths = Set<String>()
+    var declaredTables = Set<String>()
     for rawLine in contents.components(separatedBy: .newlines) {
       let uncommentedLine = removingComment(from: rawLine)
       guard hasOnlyValidBasicStringEscapes(in: uncommentedLine) else { return false }
@@ -247,6 +250,13 @@ struct CodexConfigurationPlanner {
         let end = line.index(line.endIndex, offsetBy: -offset)
         guard let parsedTablePath = parseKeyPath(String(line[start..<end])) else { return false }
         tablePath = parsedTablePath
+        if isArray {
+          nextArrayTableInstance += 1
+          tableInstanceIdentifier = "#array:\(nextArrayTableInstance)"
+        } else {
+          tableInstanceIdentifier = ""
+          guard declaredTables.insert(pathIdentifier(tablePath)).inserted else { return false }
+        }
         continue
       }
       if arrayDepth == 0 && inlineTableDepth == 0 {
@@ -257,10 +267,8 @@ struct CodexConfigurationPlanner {
         guard let keyPath = parseKeyPath(key), isConservativelyValidValue(value) else {
           return false
         }
-        let pathIdentifier = (tablePath + keyPath)
-          .map { "\($0.utf8.count):\($0)" }
-          .joined()
-        guard assignmentPaths.insert(pathIdentifier).inserted else { return false }
+        let assignmentIdentifier = pathIdentifier(tablePath + keyPath) + tableInstanceIdentifier
+        guard assignmentPaths.insert(assignmentIdentifier).inserted else { return false }
       }
       var quote: Character?
       var escaped = false
@@ -288,6 +296,10 @@ struct CodexConfigurationPlanner {
       if quote != nil || escaped || inlineTableDepth != 0 { return false }
     }
     return arrayDepth == 0 && inlineTableDepth == 0
+  }
+
+  private static func pathIdentifier(_ path: [String]) -> String {
+    path.map { "\($0.utf8.count):\($0)" }.joined()
   }
 
   private static func hasOnlyValidBasicStringEscapes(in value: String) -> Bool {

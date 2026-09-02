@@ -113,8 +113,9 @@ struct ClaudeConfigurationPlanner {
 
   private static func matches(server: [String: Any], helperURL: URL) -> Bool {
     guard server["command"] as? String == helperURL.standardizedFileURL.path else { return false }
-    if let args = server["args"] as? [Any] { return args.isEmpty }
-    return true
+    guard let value = server["args"] else { return true }
+    guard let args = value as? [Any] else { return false }
+    return args.isEmpty
   }
 
   private static func manualInstructions(helperURL: URL) -> String {

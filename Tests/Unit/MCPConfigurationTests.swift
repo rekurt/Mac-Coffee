@@ -389,6 +389,29 @@ final class MCPConfigurationTests: XCTestCase {
     XCTAssertNil(plan.after)
   }
 
+  func testClaudePlannerRejectsNonArrayArgs() throws {
+    let before = """
+      {
+        "mcpServers": {
+          "mac-coffee": {
+            "command": "\(helperURL.path)",
+            "args": "--flag"
+          }
+        }
+      }
+      """
+
+    let plan = try ClaudeConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/claude_desktop_config.json"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .manual)
+    XCTAssertEqual(plan.validation, .invalid)
+    XCTAssertNil(plan.after)
+  }
+
   func testGenericPlanUsesAbsoluteEnvironmentFreeCommandAndContainsNoSecretMaterial() {
     let plan = ConfigurationChangePlan.generic(helperURL: helperURL)
 
@@ -529,6 +552,32 @@ final class MCPConfigurationTests: XCTestCase {
       try installer.install(plan: plan, confirmedHash: plan.confirmationHash)
     ) {
       XCTAssertEqual($0 as? MCPConfigurationInstallationError, .stalePlan)
+    }
+    XCTAssertEqual(try String(contentsOf: target, encoding: .utf8), concurrent)
+  }
+
+  func testInstallerDoesNotRollbackAConcurrentEditAfterReplacement() throws {
+    let directory = try makeTemporaryDirectory()
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let target = directory.appendingPathComponent("config.toml")
+    let reviewed = "# reviewed\n"
+    let concurrent = "# concurrently changed after replacement\n"
+    try reviewed.write(to: target, atomically: true, encoding: .utf8)
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: target,
+      helperURL: helperURL,
+      existingContents: reviewed
+    )
+    let installer = AtomicConfigurationInstaller(
+      afterReplacement: {
+        try concurrent.write(to: target, atomically: true, encoding: .utf8)
+      }
+    )
+
+    XCTAssertThrowsError(
+      try installer.install(plan: plan, confirmedHash: plan.confirmationHash)
+    ) {
+      XCTAssertEqual($0 as? MCPConfigurationInstallationError, .validationFailed)
     }
     XCTAssertEqual(try String(contentsOf: target, encoding: .utf8), concurrent)
   }

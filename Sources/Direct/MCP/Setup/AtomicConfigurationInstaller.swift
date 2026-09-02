@@ -18,15 +18,18 @@ struct AtomicConfigurationInstaller {
   private let now: () -> Date
   private let uniqueSuffix: () -> String
   private let beforeReplacement: () throws -> Void
+  private let afterReplacement: () throws -> Void
 
   init(
     now: @escaping () -> Date = Date.init,
     uniqueSuffix: @escaping () -> String = { UUID().uuidString },
-    beforeReplacement: @escaping () throws -> Void = {}
+    beforeReplacement: @escaping () throws -> Void = {},
+    afterReplacement: @escaping () throws -> Void = {}
   ) {
     self.now = now
     self.uniqueSuffix = uniqueSuffix
     self.beforeReplacement = beforeReplacement
+    self.afterReplacement = afterReplacement
   }
 
   func install(
@@ -119,12 +122,28 @@ struct AtomicConfigurationInstaller {
             backupItemName: nil,
             options: []
           )
+          try afterReplacement()
+          let installed = try String(contentsOf: destination, encoding: .utf8)
+          guard installed == after,
+            ConfigurationPlanValidator.validate(contents: installed, plan: plan)
+          else {
+            if installed == after {
+              _ = try? fileManager.replaceItemAt(destination, withItemAt: candidate)
+            }
+            throw MCPConfigurationInstallationError.validationFailed
+          }
           return candidate
         }
-        guard plan.before.isEmpty else {
-          throw MCPConfigurationInstallationError.stalePlan
-        }
+        guard plan.before.isEmpty else { throw MCPConfigurationInstallationError.stalePlan }
         try fileManager.moveItem(at: temporary, to: destination)
+        try afterReplacement()
+        let installed = try String(contentsOf: destination, encoding: .utf8)
+        guard installed == after,
+          ConfigurationPlanValidator.validate(contents: installed, plan: plan)
+        else {
+          if installed == after { try? fileManager.removeItem(at: destination) }
+          throw MCPConfigurationInstallationError.validationFailed
+        }
         return nil
       }
     }
@@ -133,14 +152,6 @@ struct AtomicConfigurationInstaller {
       throw MCPConfigurationInstallationError.stalePlan
     }
     let createdBackupURL = try replacementResult.get()
-
-    let installed = try String(contentsOf: destination, encoding: .utf8)
-    guard ConfigurationPlanValidator.validate(contents: installed, plan: plan) else {
-      if let createdBackupURL {
-        _ = try? fileManager.replaceItemAt(destination, withItemAt: createdBackupURL)
-      }
-      throw MCPConfigurationInstallationError.validationFailed
-    }
     return MCPConfigurationInstallationResult(
       installedURL: destination,
       backupURL: createdBackupURL

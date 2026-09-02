@@ -122,13 +122,18 @@ struct CodexConfigurationPlanner {
       $0.trimmingCharacters(in: .whitespaces).hasPrefix("[")
     }) ?? lines.endIndex
     let expected = "\"\(tomlEscaped(helperURL.standardizedFileURL.path))\""
-    return lines[(start + 1)..<end].contains { line in
+    var commandValues: [String] = []
+    for line in lines[(start + 1)..<end] {
       let content = removingComment(from: line).trimmingCharacters(in: .whitespaces)
-      guard let separator = content.firstIndex(of: "=") else { return false }
-      let key = content[..<separator].trimmingCharacters(in: .whitespaces)
+      guard let separator = assignmentSeparator(in: content),
+        let keyPath = parseKeyPath(String(content[..<separator]))
+      else { continue }
+      guard keyPath.first == "command" else { continue }
+      guard keyPath == ["command"] else { return false }
       let value = content[content.index(after: separator)...].trimmingCharacters(in: .whitespaces)
-      return key == "command" && value == expected
+      commandValues.append(value)
     }
+    return commandValues == [expected]
   }
 
   private static func containsNonCanonicalMacCoffeeDeclaration(_ contents: String) -> Bool {
@@ -226,15 +231,22 @@ struct CodexConfigurationPlanner {
     guard !contents.contains("\"\"\""), !contents.contains("'''") else { return false }
     var arrayDepth = 0
     var inlineTableDepth = 0
+    var tablePath: [String] = []
+    var assignmentPaths = Set<String>()
     for rawLine in contents.components(separatedBy: .newlines) {
       let uncommentedLine = removingComment(from: rawLine)
       guard hasOnlyValidBasicStringEscapes(in: uncommentedLine) else { return false }
       let line = uncommentedLine.trimmingCharacters(in: .whitespaces)
       if line.isEmpty { continue }
       if line.hasPrefix("[") && arrayDepth == 0 && inlineTableDepth == 0 {
-        let isTable = (line.hasPrefix("[[") && line.hasSuffix("]]"))
-          || (!line.hasPrefix("[[") && line.hasSuffix("]"))
-        if !isTable { return false }
+        let isArray = line.hasPrefix("[[") && line.hasSuffix("]]")
+        let isTable = isArray || (!line.hasPrefix("[[") && line.hasSuffix("]"))
+        guard isTable else { return false }
+        let offset = isArray ? 2 : 1
+        let start = line.index(line.startIndex, offsetBy: offset)
+        let end = line.index(line.endIndex, offsetBy: -offset)
+        guard let parsedTablePath = parseKeyPath(String(line[start..<end])) else { return false }
+        tablePath = parsedTablePath
         continue
       }
       if arrayDepth == 0 && inlineTableDepth == 0 {
@@ -242,9 +254,13 @@ struct CodexConfigurationPlanner {
         let key = String(line[..<separator])
         let value = String(line[line.index(after: separator)...])
           .trimmingCharacters(in: .whitespaces)
-        guard parseKeyPath(key) != nil, isConservativelyValidValue(value) else {
+        guard let keyPath = parseKeyPath(key), isConservativelyValidValue(value) else {
           return false
         }
+        let pathIdentifier = (tablePath + keyPath)
+          .map { "\($0.utf8.count):\($0)" }
+          .joined()
+        guard assignmentPaths.insert(pathIdentifier).inserted else { return false }
       }
       var quote: Character?
       var escaped = false

@@ -51,6 +51,24 @@ final class MCPConfigurationTests: XCTestCase {
     XCTAssertTrue(plan.proposedDiff.isEmpty)
   }
 
+  func testCodexPlannerRejectsDuplicateCommandKeysInManagedTable() throws {
+    let before = """
+      [mcp_servers.mac_coffee]
+      command = "/Applications/Mac Coffee.app/Contents/Helpers/MacCoffeeMCP"
+      "command" = "/usr/local/bin/other"
+      """ + "\n"
+
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .manual)
+    XCTAssertEqual(plan.validation, .invalid)
+    XCTAssertNil(plan.after)
+  }
+
   func testCodexPlannerRejectsEquivalentDottedKeyDeclaration() throws {
     let before = """
       mcp_servers.mac_coffee = { command = "/usr/local/bin/existing" }

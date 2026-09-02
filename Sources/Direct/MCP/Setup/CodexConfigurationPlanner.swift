@@ -196,8 +196,7 @@ struct CodexConfigurationPlanner {
     var escaped = false
 
     func appendCurrent() -> Bool {
-      let key = current.trimmingCharacters(in: .whitespaces)
-      guard !key.isEmpty else { return false }
+      guard let key = parseKeySegment(current) else { return false }
       parts.append(key)
       current = ""
       return true
@@ -208,14 +207,14 @@ struct CodexConfigurationPlanner {
         current.append(character)
         escaped = false
       } else if character == "\\" && quote == "\"" {
+        current.append(character)
         escaped = true
       } else if character == "\"" || character == "'" {
+        current.append(character)
         if quote == character {
           quote = nil
         } else if quote == nil {
           quote = character
-        } else {
-          current.append(character)
         }
       } else if character == "." && quote == nil {
         guard appendCurrent() else { return nil }
@@ -227,6 +226,70 @@ struct CodexConfigurationPlanner {
     return parts
   }
 
+  private static func parseKeySegment(_ value: String) -> String? {
+    let key = value.trimmingCharacters(in: .whitespaces)
+    guard let first = key.first else { return nil }
+    if first == "'" {
+      guard key.count >= 2, key.last == "'" else { return nil }
+      let inner = key.dropFirst().dropLast()
+      guard !inner.contains("'") else { return nil }
+      return String(inner)
+    }
+    if first == "\"" {
+      guard key.count >= 2, key.last == "\"" else { return nil }
+      return decodeBasicKey(String(key.dropFirst().dropLast()))
+    }
+    guard key.range(of: #"^[A-Za-z0-9_-]+$"#, options: .regularExpression) != nil else {
+      return nil
+    }
+    return key
+  }
+
+  private static func decodeBasicKey(_ value: String) -> String? {
+    var decoded = ""
+    var index = value.startIndex
+    while index < value.endIndex {
+      let character = value[index]
+      guard character == "\\" else {
+        decoded.append(character)
+        index = value.index(after: index)
+        continue
+      }
+
+      let escapeIndex = value.index(after: index)
+      guard escapeIndex < value.endIndex else { return nil }
+      let escape = value[escapeIndex]
+      switch escape {
+      case "b": decoded.append("\u{8}")
+      case "t": decoded.append("\t")
+      case "n": decoded.append("\n")
+      case "f": decoded.append("\u{c}")
+      case "r": decoded.append("\r")
+      case "\"": decoded.append("\"")
+      case "\\": decoded.append("\\")
+      case "u", "U":
+        let digitCount = escape == "u" ? 4 : 8
+        var cursor = value.index(after: escapeIndex)
+        var digits = ""
+        for _ in 0 ..< digitCount {
+          guard cursor < value.endIndex, value[cursor].isHexDigit else { return nil }
+          digits.append(value[cursor])
+          cursor = value.index(after: cursor)
+        }
+        guard let scalarValue = UInt32(digits, radix: 16),
+          let scalar = Unicode.Scalar(scalarValue)
+        else { return nil }
+        decoded.append(Character(String(scalar)))
+        index = cursor
+        continue
+      default:
+        return nil
+      }
+      index = value.index(after: escapeIndex)
+    }
+    return decoded
+  }
+
   private static func isConservativelyValidTOML(_ contents: String) -> Bool {
     guard !contents.contains("\"\"\""), !contents.contains("'''") else { return false }
     var arrayDepth = 0
@@ -235,7 +298,10 @@ struct CodexConfigurationPlanner {
     var tableInstanceIdentifier = ""
     var nextArrayTableInstance = 0
     var assignmentPaths = Set<String>()
+    var assignmentsByScope: [String: [[String]]] = [:]
+    var assignedValuePaths: [[String]] = []
     var declaredTables = Set<String>()
+    var declaredTablePaths: [[String]] = []
     for rawLine in contents.components(separatedBy: .newlines) {
       let uncommentedLine = removingComment(from: rawLine)
       guard hasOnlyValidBasicStringEscapes(in: uncommentedLine) else { return false }
@@ -249,6 +315,9 @@ struct CodexConfigurationPlanner {
         let start = line.index(line.startIndex, offsetBy: offset)
         let end = line.index(line.endIndex, offsetBy: -offset)
         guard let parsedTablePath = parseKeyPath(String(line[start..<end])) else { return false }
+        guard !assignedValuePaths.contains(where: { parsedTablePath.starts(with: $0) }) else {
+          return false
+        }
         tablePath = parsedTablePath
         if isArray {
           nextArrayTableInstance += 1
@@ -257,6 +326,7 @@ struct CodexConfigurationPlanner {
           tableInstanceIdentifier = ""
           guard declaredTables.insert(pathIdentifier(tablePath)).inserted else { return false }
         }
+        declaredTablePaths.append(tablePath)
         continue
       }
       if arrayDepth == 0 && inlineTableDepth == 0 {
@@ -267,7 +337,18 @@ struct CodexConfigurationPlanner {
         guard let keyPath = parseKeyPath(key), isConservativelyValidValue(value) else {
           return false
         }
-        let assignmentIdentifier = pathIdentifier(tablePath + keyPath) + tableInstanceIdentifier
+        let fullPath = tablePath + keyPath
+        guard !declaredTablePaths.contains(where: { $0.starts(with: fullPath) }) else {
+          return false
+        }
+        let scopeIdentifier = pathIdentifier(tablePath) + tableInstanceIdentifier
+        let scopedAssignments = assignmentsByScope[scopeIdentifier, default: []]
+        guard !scopedAssignments.contains(where: {
+          fullPath.starts(with: $0) || $0.starts(with: fullPath)
+        }) else { return false }
+        assignmentsByScope[scopeIdentifier, default: []].append(fullPath)
+        assignedValuePaths.append(fullPath)
+        let assignmentIdentifier = pathIdentifier(fullPath) + tableInstanceIdentifier
         guard assignmentPaths.insert(assignmentIdentifier).inserted else { return false }
       }
       var quote: Character?

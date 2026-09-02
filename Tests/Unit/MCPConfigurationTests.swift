@@ -88,6 +88,50 @@ final class MCPConfigurationTests: XCTestCase {
     XCTAssertNil(plan.after)
   }
 
+  func testCodexPlannerRejectsInvalidBareKeys() throws {
+    for before in ["retry count = 2\n", "[invalid table]\nvalue = 1\n"] {
+      let plan = try CodexConfigurationPlanner().plan(
+        configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+        helperURL: helperURL,
+        existingContents: before
+      )
+
+      XCTAssertEqual(plan.disposition, .manual)
+      XCTAssertEqual(plan.validation, .invalid)
+      XCTAssertNil(plan.after)
+    }
+  }
+
+  func testCodexPlannerRejectsValueAndTablePathConflicts() throws {
+    for before in [
+      "tool = 1\n[tool]\nvalue = 2\n",
+      "tool.name = \"value\"\n[tool.name]\nvalue = 2\n",
+    ] {
+      let plan = try CodexConfigurationPlanner().plan(
+        configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+        helperURL: helperURL,
+        existingContents: before
+      )
+
+      XCTAssertEqual(plan.disposition, .manual)
+      XCTAssertEqual(plan.validation, .invalid)
+      XCTAssertNil(plan.after)
+    }
+  }
+
+  func testCodexPlannerAcceptsAndCanonicalizesQuotedKeys() throws {
+    let before = #""retry\u005fcount" = 2"# + "\n"
+
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .installable)
+    XCTAssertEqual(plan.validation, .valid)
+  }
+
   func testCodexPlannerRejectsEquivalentDottedKeyDeclaration() throws {
     let before = """
       mcp_servers.mac_coffee = { command = "/usr/local/bin/existing" }

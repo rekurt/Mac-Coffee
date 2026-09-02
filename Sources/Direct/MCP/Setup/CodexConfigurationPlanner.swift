@@ -315,7 +315,9 @@ struct CodexConfigurationPlanner {
         let start = line.index(line.startIndex, offsetBy: offset)
         let end = line.index(line.endIndex, offsetBy: -offset)
         guard let parsedTablePath = parseKeyPath(String(line[start..<end])) else { return false }
-        guard !assignedValuePaths.contains(where: { parsedTablePath.starts(with: $0) }) else {
+        guard !assignedValuePaths.contains(where: {
+          parsedTablePath.starts(with: $0) || $0.starts(with: parsedTablePath)
+        }) else {
           return false
         }
         tablePath = parsedTablePath

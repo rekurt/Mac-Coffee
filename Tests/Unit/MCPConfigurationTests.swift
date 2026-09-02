@@ -106,6 +106,7 @@ final class MCPConfigurationTests: XCTestCase {
     for before in [
       "tool = 1\n[tool]\nvalue = 2\n",
       "tool.name = \"value\"\n[tool.name]\nvalue = 2\n",
+      "fruit.apple.color = \"red\"\n[fruit.apple]\nkind = \"gala\"\n",
     ] {
       let plan = try CodexConfigurationPlanner().plan(
         configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),

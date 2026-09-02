@@ -64,7 +64,7 @@ public final class MCPControlService: MCPControlServicing {
         }
 
         let result = perform(command)
-        if let requestID = command.requestID {
+        if let requestID = command.requestID, case .success = result {
             requestCache.insert(
                 result,
                 clientIdentifier: client.identifier,

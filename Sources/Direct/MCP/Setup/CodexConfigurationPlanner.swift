@@ -227,7 +227,9 @@ struct CodexConfigurationPlanner {
     var arrayDepth = 0
     var inlineTableDepth = 0
     for rawLine in contents.components(separatedBy: .newlines) {
-      let line = removingComment(from: rawLine).trimmingCharacters(in: .whitespaces)
+      let uncommentedLine = removingComment(from: rawLine)
+      guard hasOnlyValidBasicStringEscapes(in: uncommentedLine) else { return false }
+      let line = uncommentedLine.trimmingCharacters(in: .whitespaces)
       if line.isEmpty { continue }
       if line.hasPrefix("[") && arrayDepth == 0 && inlineTableDepth == 0 {
         let isTable = (line.hasPrefix("[[") && line.hasSuffix("]]"))
@@ -270,6 +272,58 @@ struct CodexConfigurationPlanner {
       if quote != nil || escaped || inlineTableDepth != 0 { return false }
     }
     return arrayDepth == 0 && inlineTableDepth == 0
+  }
+
+  private static func hasOnlyValidBasicStringEscapes(in value: String) -> Bool {
+    var quote: Character?
+    var index = value.startIndex
+
+    while index < value.endIndex {
+      let character = value[index]
+      if quote == "'" {
+        if character == "'" { quote = nil }
+        index = value.index(after: index)
+        continue
+      }
+      if quote != "\"" {
+        if character == "\"" || character == "'" { quote = character }
+        index = value.index(after: index)
+        continue
+      }
+      if character == "\"" {
+        quote = nil
+        index = value.index(after: index)
+        continue
+      }
+      guard character == "\\" else {
+        index = value.index(after: index)
+        continue
+      }
+
+      let escapeIndex = value.index(after: index)
+      guard escapeIndex < value.endIndex else { return false }
+      let escape = value[escapeIndex]
+      if ["b", "t", "n", "f", "r", "\"", "\\"].contains(escape) {
+        index = value.index(after: escapeIndex)
+        continue
+      }
+      guard escape == "u" || escape == "U" else { return false }
+
+      let digitCount = escape == "u" ? 4 : 8
+      var cursor = value.index(after: escapeIndex)
+      var digits = ""
+      for _ in 0 ..< digitCount {
+        guard cursor < value.endIndex, value[cursor].isHexDigit else { return false }
+        digits.append(value[cursor])
+        cursor = value.index(after: cursor)
+      }
+      guard let scalarValue = UInt32(digits, radix: 16),
+        Unicode.Scalar(scalarValue) != nil
+      else { return false }
+      index = cursor
+    }
+
+    return true
   }
 
   private static func isConservativelyValidValue(_ value: String) -> Bool {

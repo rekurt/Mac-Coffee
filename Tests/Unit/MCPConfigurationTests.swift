@@ -127,6 +127,33 @@ final class MCPConfigurationTests: XCTestCase {
     XCTAssertNil(plan.after)
   }
 
+  func testCodexPlannerRejectsInvalidBasicStringEscapes() throws {
+    for value in [#""\q""#, #""\u12G4""#, #""\u123""#, #""\U00110000""#] {
+      let plan = try CodexConfigurationPlanner().plan(
+        configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+        helperURL: helperURL,
+        existingContents: "path = \(value)\n"
+      )
+
+      XCTAssertEqual(plan.disposition, .manual, "Accepted invalid escape: \(value)")
+      XCTAssertEqual(plan.validation, .invalid)
+      XCTAssertNil(plan.after)
+    }
+  }
+
+  func testCodexPlannerAcceptsValidBasicStringEscapes() throws {
+    let before = #"path = "tab\tquote\"slash\\unicode\u2764long\U0001F600""# + "\n"
+
+    let plan = try CodexConfigurationPlanner().plan(
+      configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+      helperURL: helperURL,
+      existingContents: before
+    )
+
+    XCTAssertEqual(plan.disposition, .installable)
+    XCTAssertEqual(plan.validation, .valid)
+  }
+
   func testCodexPlannerRejectsUnterminatedInlineTable() throws {
     let before = "client = { command = \"foo\"\n"
 

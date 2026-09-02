@@ -99,7 +99,7 @@ final class MCPRuntimeBehaviorTests: XCTestCase {
         XCTAssertTrue(harness.activity.entries[1].replayed)
     }
 
-    func testDuplicateFailedRequestReturnsOriginalErrorWithoutRetryingSideEffects() {
+    func testDuplicateFailedRequestRetriesUntilItSucceeds() throws {
         let harness = MCPRuntimeHarness()
         harness.power.failNextTransition = true
         let command = MCPCommand.setSession(
@@ -111,12 +111,11 @@ final class MCPRuntimeBehaviorTests: XCTestCase {
         assertError(.assertionFailed) {
             _ = try harness.service.execute(command, client: harness.client)
         }
-        assertError(.assertionFailed) {
-            _ = try harness.service.execute(command, client: harness.client)
-        }
+        let retry = try harness.service.execute(command, client: harness.client)
 
-        XCTAssertEqual(harness.power.transitions, [.display])
-        XCTAssertTrue(harness.activity.entries.last?.replayed == true)
+        XCTAssertEqual(retry.data.mode, .display)
+        XCTAssertEqual(harness.power.transitions, [.display, .display])
+        XCTAssertFalse(harness.activity.entries.last?.replayed == true)
     }
 
     func testSameRequestIDFromAnotherClientIsNotAReplay() throws {

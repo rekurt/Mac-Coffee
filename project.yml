@@ -142,6 +142,9 @@ targets:
           - MCPSettingsViewModel.swift
           - Setup
       - Sources/MCPHelper/XPC
+      - Sources/MCPHelper/MCPHelperRuntime.swift
+      - Sources/MCPHelper/Security
+      - Sources/Direct/Security/SecurityClientIdentityVerifier.swift
       - Sources/MCPBrokerShared
       - path: Sources/MCPBroker
         excludes:

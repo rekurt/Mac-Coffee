@@ -188,6 +188,20 @@ final class MCPConfigurationTests: XCTestCase {
     XCTAssertEqual(plan.validation, .valid)
   }
 
+  func testCodexPlannerFallsBackForUnvalidatedStructuredValues() throws {
+    for value in ["[1,,2]", "{ command = }", "[1, 2]", "{ command = \"foo\" }"] {
+      let plan = try CodexConfigurationPlanner().plan(
+        configurationURL: URL(fileURLWithPath: "/tmp/config.toml"),
+        helperURL: helperURL,
+        existingContents: "value = \(value)\n"
+      )
+
+      XCTAssertEqual(plan.disposition, .manual)
+      XCTAssertEqual(plan.validation, .invalid)
+      XCTAssertNil(plan.after)
+    }
+  }
+
   func testClaudePlannerMergesServerWithoutDroppingUnrelatedEntries() throws {
     let before = try fixture("claude-existing.json")
     let plan = try ClaudeConfigurationPlanner().plan(

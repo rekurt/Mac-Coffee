@@ -277,7 +277,7 @@ struct CodexConfigurationPlanner {
     if first == "\"" || first == "'" {
       return quotedValueConsumesEntireString(value, quote: first)
     }
-    if first == "[" || first == "{" { return true }
+    if first == "[" || first == "{" { return false }
     if value == "true" || value == "false" || value == "inf" || value == "nan" {
       return true
     }

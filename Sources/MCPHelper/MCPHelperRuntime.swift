@@ -4,10 +4,16 @@ actor MCPHelperRuntime {
   typealias ClientFactory = @Sendable () throws -> MCPXPCClient
   typealias AvailabilityProbe = @Sendable () async -> Bool
 
+  private struct ConnectionAttempt {
+    let identifier: UUID
+    let task: Task<MCPXPCClientAuthorization, Error>
+  }
+
   private let clientFactory: ClientFactory
   private let availabilityProbe: AvailabilityProbe
   private var client: MCPXPCClient?
   private var isConnected = false
+  private var connectionAttempt: ConnectionAttempt?
   private var statusSubscription: MCPXPCClientSubscription?
 
   init(
@@ -88,13 +94,40 @@ actor MCPHelperRuntime {
     }
     guard !isConnected else { return client }
 
-    switch try await client.connect() {
+    let attempt: ConnectionAttempt
+    if let connectionAttempt {
+      attempt = connectionAttempt
+    } else {
+      let created = ConnectionAttempt(
+        identifier: UUID(),
+        task: Task { try await client.connect() }
+      )
+      connectionAttempt = created
+      attempt = created
+    }
+
+    let authorization: MCPXPCClientAuthorization
+    do {
+      authorization = try await attempt.task.value
+    } catch {
+      clearConnectionAttempt(identifier: attempt.identifier)
+      throw error
+    }
+    clearConnectionAttempt(identifier: attempt.identifier)
+
+    switch authorization {
     case .authenticated:
       isConnected = true
       return client
     case .approvalRequired:
       isConnected = false
       throw MCPXPCClientError.clientUnpaired
+    }
+  }
+
+  private func clearConnectionAttempt(identifier: UUID) {
+    if connectionAttempt?.identifier == identifier {
+      connectionAttempt = nil
     }
   }
 

@@ -1,7 +1,13 @@
 import Foundation
 
 public enum MCPBrokerConstants {
-  public static let serviceName = "com.rekurt.maccoffee.mcp-broker"
+  public static let serviceName: String = {
+#if DEBUG
+    "com.rekurt.maccoffee.direct.debug.mcp-broker"
+#else
+    "com.rekurt.maccoffee.direct.mcp-broker"
+#endif
+  }()
 }
 
 public enum MCPBrokerErrorCode: Int, Sendable {

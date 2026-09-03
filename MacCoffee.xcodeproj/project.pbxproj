@@ -1718,7 +1718,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.rekurt.maccoffee.mcp-broker";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.rekurt.maccoffee.direct.mcp-broker";
+				"PRODUCT_BUNDLE_IDENTIFIER[config=Debug]" = "com.rekurt.maccoffee.direct.debug.mcp-broker";
 				PRODUCT_NAME = MacCoffeeMCPBroker;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -1910,7 +1911,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.rekurt.maccoffee.mcp-broker";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.rekurt.maccoffee.direct.mcp-broker";
+				"PRODUCT_BUNDLE_IDENTIFIER[config=Debug]" = "com.rekurt.maccoffee.direct.debug.mcp-broker";
 				PRODUCT_NAME = MacCoffeeMCPBroker;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;

@@ -62,6 +62,10 @@ direct_broker_binary="$direct_broker/Contents/MacOS/MacCoffeeMCPBroker"
   print -u2 "Direct bundle does not contain the MCP broker service."
   exit 65
 }
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$direct_broker/Contents/Info.plist")" == "com.rekurt.maccoffee.direct.mcp-broker" ]] || {
+  print -u2 "Direct bundle MCP broker is not registered in the Direct app service namespace."
+  exit 65
+}
 /usr/bin/lipo "$direct_helper" -verify_arch arm64 x86_64
 /usr/bin/lipo "$direct_broker_binary" -verify_arch arm64 x86_64
 /usr/bin/codesign --verify --strict --verbose=2 "$direct_helper"

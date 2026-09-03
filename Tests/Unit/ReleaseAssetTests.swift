@@ -185,6 +185,7 @@ final class ReleaseAssetTests: XCTestCase {
         )
         XCTAssertTrue(source.contains("Verify release tag matches product version"))
         XCTAssertTrue(source.contains("-scheme MacCoffeeTests"))
+        XCTAssertTrue(source.contains("-scheme MacCoffeeIntegrationTests"))
         XCTAssertTrue(source.contains("./scripts/verify-bundles.sh"))
         XCTAssertTrue(source.contains("git diff --exit-code -- MacCoffee.xcodeproj"))
         let generation = try XCTUnwrap(source.range(of: "xcodegen generate"))
@@ -194,6 +195,36 @@ final class ReleaseAssetTests: XCTestCase {
             source.distance(from: source.startIndex, to: tests.lowerBound),
             "The release must regenerate its project before compiling tests"
         )
+    }
+
+    func testContinuousIntegrationRunsTheMCPIntegrationSuite() throws {
+        let source = try text(
+            at: repositoryRoot.appendingPathComponent(".github/workflows/ci.yml")
+        )
+
+        XCTAssertTrue(source.contains("-scheme MacCoffeeTests"))
+        XCTAssertTrue(source.contains("-scheme MacCoffeeIntegrationTests"))
+    }
+
+    func testMCPBrokerUsesTheCanonicalProductVersion() throws {
+        let data = try Data(
+            contentsOf: repositoryRoot.appendingPathComponent("Resources/MCPBroker/Info.plist")
+        )
+        let plist = try XCTUnwrap(
+            PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+        )
+
+        XCTAssertEqual(plist["CFBundleShortVersionString"] as? String, "$(MARKETING_VERSION)")
+        XCTAssertEqual(plist["CFBundleVersion"] as? String, "$(CURRENT_PROJECT_VERSION)")
+
+        let project = try text(at: repositoryRoot.appendingPathComponent("project.yml"))
+        let brokerStart = try XCTUnwrap(project.range(of: "  MacCoffeeMCPBroker:"))
+        let helperStart = try XCTUnwrap(
+            project.range(of: "\n  MacCoffeeMCP:", range: brokerStart.upperBound..<project.endIndex)
+        )
+        let brokerTarget = String(project[brokerStart.lowerBound..<helperStart.lowerBound])
+        XCTAssertTrue(brokerTarget.contains("Debug: Config/Shared.xcconfig"))
+        XCTAssertTrue(brokerTarget.contains("Release: Config/Shared.xcconfig"))
     }
 
     func testMCPBuildConfigurationIsDirectOnly() throws {
@@ -276,6 +307,29 @@ final class ReleaseAssetTests: XCTestCase {
         )
         XCTAssertTrue(try symbols(in: directCore).contains("MCPControlService"), directCore.path)
         XCTAssertFalse(try symbols(in: appStoreCore).contains("MCP"), appStoreCore.path)
+    }
+
+    func testDirectMCPBrokerUsesTheDirectApplicationServiceNamespace() throws {
+        let productsDirectory = Bundle(for: Self.self).bundleURL.deletingLastPathComponent()
+        let directApp = productsDirectory.appendingPathComponent("Mac Coffee.app")
+        let brokerInfo = directApp.appendingPathComponent(
+            "Contents/XPCServices/MacCoffeeMCPBroker.xpc/Contents/Info.plist"
+        )
+        let appInfo = directApp.appendingPathComponent("Contents/Info.plist")
+        let appData = try Data(contentsOf: appInfo)
+        let appPlist = try XCTUnwrap(
+            PropertyListSerialization.propertyList(from: appData, format: nil) as? [String: Any]
+        )
+        let data = try Data(contentsOf: brokerInfo)
+        let plist = try XCTUnwrap(
+            PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+        )
+        let applicationIdentifier = try XCTUnwrap(appPlist["CFBundleIdentifier"] as? String)
+
+        XCTAssertEqual(
+            plist["CFBundleIdentifier"] as? String,
+            "\(applicationIdentifier).mcp-broker"
+        )
     }
 
     func testLegacyCleanupRestoresTheCompleteLegacyBatterySignature() throws {

@@ -167,9 +167,16 @@ targets:
       - Sources/MCPBrokerShared
     info:
       path: Resources/MCPBroker/Info.plist
+      properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+    configFiles:
+      Debug: Config/Shared.xcconfig
+      Release: Config/Shared.xcconfig
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.mcp-broker
+        PRODUCT_BUNDLE_IDENTIFIER: com.rekurt.maccoffee.direct.mcp-broker
+        PRODUCT_BUNDLE_IDENTIFIER[config=Debug]: com.rekurt.maccoffee.direct.debug.mcp-broker
         PRODUCT_NAME: MacCoffeeMCPBroker
         SKIP_INSTALL: YES
 

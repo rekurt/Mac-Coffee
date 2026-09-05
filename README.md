@@ -10,6 +10,8 @@ A native macOS menu bar app that prevents idle sleep.
 
 Mac Coffee uses process-owned IOKit power assertions. It does not install a privileged helper, change `pmset`, collect analytics, or use a backend. Assertions are released when a session ends or the app exits.
 
+[Project website](https://rekurt.github.io/Mac-Coffee/) · [All projects by rekurt](https://rekurt.github.io/projects/)
+
 ## Install
 
 Mac Coffee requires macOS 13 Ventura or later.

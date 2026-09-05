@@ -160,7 +160,7 @@ for (const metadata of [
 assert.ok(existsSync(join(siteRoot, "assets/og.png")), "Missing social card");
 
 const workflow = readFileSync(join(siteRoot, "../.github/workflows/pages.yml"), "utf8");
-for (const token of ["pages: write", "id-token: write", "actions/upload-pages-artifact", "path: site", "actions/deploy-pages"]) {
+for (const token of ["pages: write", "id-token: write", "actions/upload-pages-artifact", "path: _site", "project-site decorate", "project-site validate", "actions/deploy-pages"]) {
   assert.ok(workflow.includes(token), `Missing Pages workflow contract ${token}`);
 }
 console.log(`Validated ${ids.length} IDs and ${new Set(keys).size} translation keys.`);

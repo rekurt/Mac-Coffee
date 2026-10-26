@@ -185,6 +185,7 @@ targets:
     platform: macOS
     sources:
       - Sources/MCPHelper/main.swift
+      - Sources/MCPHelper/MCPCompatibilityTransport.swift
       - Sources/MCPHelper/MCPServerAdapter.swift
       - Sources/MCPHelper/MCPToolAdapter.swift
       - Sources/MCPHelper/MCPResourceAdapter.swift

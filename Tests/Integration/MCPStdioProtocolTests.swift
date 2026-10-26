@@ -4,6 +4,60 @@ import XCTest
 @testable import MacCoffeeCore
 
 final class MCPStdioProtocolTests: XCTestCase {
+  func testHelperInitializesWithExperimentalClientCapabilities() throws {
+    // MCP allows object-valued experimental capabilities, including Codex extensions.
+    for experimental in [
+      #"{"codex":{}}"#,
+      #"{"codex":{"nested":{"enabled":true},"versions":[1,2]},"legacy":"supported"}"#,
+    ] {
+      let result = try runHelper(
+        inputPhases: [
+          HelperInputPhase(
+            lines: [
+              #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{"experimental":\#(experimental),"roots":{"listChanged":true},"elicitation":{"form":{},"url":{}}},"clientInfo":{"name":"codex-mcp-client","version":"1.0"}}}"#
+            ],
+            expectedTotalResponseCount: 1
+          ),
+          HelperInputPhase(
+            lines: [
+              #"{"jsonrpc":"2.0","method":"notifications/initialized"}"#,
+              #"{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}"#,
+              #"{"jsonrpc":"2.0","id":3,"method":"resources/list","params":{}}"#,
+            ],
+            expectedTotalResponseCount: 3
+          ),
+        ]
+      )
+      XCTAssertEqual(result.terminationStatus, 0, result.stderr)
+      let messages = try result.stdoutLines.map(parseJSONObject)
+      let initialize = try message(withID: 1, in: messages)
+      XCTAssertNil(initialize["error"], "\(initialize)")
+      let negotiated = try dictionary(initialize["result"])
+      XCTAssertEqual(negotiated["protocolVersion"] as? String, "2025-11-25")
+      let capabilities = try dictionary(negotiated["capabilities"])
+      XCTAssertNil(capabilities["experimental"])
+      XCTAssertNotNil(try dictionary(try message(withID: 2, in: messages)["result"])["tools"])
+      XCTAssertNotNil(try dictionary(try message(withID: 3, in: messages)["result"])["resources"])
+    }
+  }
+
+  func testExperimentalCapabilitiesDoNotBypassInitializeValidation() throws {
+    let result = try runHelper(
+      inputPhases: [
+        HelperInputPhase(
+          lines: [
+            #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{"experimental":{"codex":{}}},"clientInfo":{"name":"codex-mcp-client"}}}"#
+          ],
+          expectedTotalResponseCount: 1
+        )
+      ]
+    )
+    XCTAssertEqual(result.terminationStatus, 0, result.stderr)
+    let response = try message(withID: 1, in: result.stdoutLines.map(parseJSONObject))
+    XCTAssertNil(response["result"])
+    XCTAssertNotNil(response["error"])
+  }
+
   func testHelperNegotiatesProtocolAndListsStableContract() throws {
     let result = try runHelper(
       inputPhases: [

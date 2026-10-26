@@ -2,7 +2,7 @@ import Darwin
 import MCP
 
 let server = await MCPServerAdapter.makeServer()
-let transport = StdioTransport()
+let transport = MCPCompatibilityTransport()
 
 do {
   try await server.start(transport: transport)
